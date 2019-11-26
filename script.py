@@ -20,7 +20,7 @@ for x in range(len(offer)):
     # fetching company name as company_info[0] -> needs reviewing
     #company_info = brief_offer.select('ul.cvo_module_offer_meta a')  
     company_name = brief_offer.find(itemprop='name').get_text()    
-    company_location = brief_offer.find(itemprop='jobLocation').get_text()   
+    job_location = brief_offer.find(itemprop='jobLocation').get_text()   
 
     # fetching salary range string, which needs further parsing to extract numbers
     salary_range = brief_offer.find('span').text    
@@ -36,7 +36,7 @@ for x in range(len(offer)):
     print('Position:', job_ad_position_name)
     
     print('Company name:', company_name)    
-    print('Company location:', company_location)
+    print('Job location:', job_location)
     #
     # print('Company location:', company_info[1].text)
     print('Salary range:', salary_range)
