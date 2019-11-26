@@ -6,6 +6,7 @@ exampleSoup = bs4.BeautifulSoup(exampleFile.read())
 #elems = exampleSoup.select('#joblist')
 offer = exampleSoup.select('div.offer_primary')
 count_of_offers = len(offer)
+# looping through the list of jobs shown in a current page (subsequent pages need further code):
 for x in range(len(offer)):
     #debug info
     print(x)
@@ -13,11 +14,19 @@ for x in range(len(offer)):
     #end debug info
     
     brief_offer = bs4.BeautifulSoup(str(offer[x]))
-
+    # fetching position name
     job_ad_position_name = brief_offer.find('a').text   
+
+    # fetching company name as company_info[0] and company address as company_info[1]
     company_info = brief_offer.select('ul.cvo_module_offer_meta a')   
+
+    # fetching salary range string, which needs further parsing to extract numbers
     salary_range = brief_offer.find('span').text    
+
+    # fetching href uri location for the full job ad
     job_ad_href = brief_offer.find('a').get('href')
+
+    # constructing a valid url for later retrieval of its contents
     job_ad_url = 'https:'+job_ad_href
     
     print(' ')
@@ -46,10 +55,15 @@ for x in range(len(offer)):
         job_ad_html = bs4.BeautifulSoup(job_ad_page_content.text, 'html.parser')
         job_ad_details = job_ad_html.select('div#page-main-content')
         print(job_ad_details)
-        offer_valid_dates = job_ad_html.select('span.application-date')
 
-        print(offer_valid_dates[0].text)
-        print(offer_valid_dates[1].text)
+        # Fetch job application start and end dates, will require further processing to save values as a date:
+        application_dates = job_ad_html.select('span.application-date')
+
+        # Fetch application start date:
+        print(application_dates[0].text)
+
+        # Fetch application end date:
+        print(application_dates[1].text)
  
     
 print(type(job_ad_html))
