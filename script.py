@@ -3,31 +3,20 @@ import requests, bs4
 
 
 
-def url_crawler(url_to_crawl):
+def job_ads_crawler(url_to_crawl):
 
     res = requests.get(url_to_crawl, headers=chrome_ua)
-    #print(res.text)
-    #quit()
-
-    #exampleFile = open('joblists.html')
-    #exampleSoup = bs4.BeautifulSoup(exampleFile.read())
+    
     whole_page = bs4.BeautifulSoup(res.text)
-    #elems = exampleSoup.select('#joblist')
     offer = whole_page.select('div.offer_primary')
     count_of_offers_in_page = len(offer)
     # looping through the list of jobs shown in a current page (subsequent pages need further code):
     for x in range (count_of_offers_in_page):
-    #for x in range (0,4,1):
-        #debug info
         print(x+1,'/',count_of_offers_in_page)
-        #print(len(offer))
-        #end debug info
-    
         brief_offer = bs4.BeautifulSoup(str(offer[x]))
         # fetching position name
         job_ad_position_name = brief_offer.find('a').text   
-        # fetching company name as company_info[0] -> needs reviewing
-        #company_info = brief_offer.select('ul.cvo_module_offer_meta a')  
+        # fetching company name
         company_name = brief_offer.find(itemprop='name').get_text()    
         job_location = brief_offer.find(itemprop='jobLocation').get_text()   
         # fetching salary range string, which needs further parsing to extract numbers
@@ -67,7 +56,6 @@ def url_crawler(url_to_crawl):
         # Search for li element inside ul containing text "Prašymus siųskite iki"
         for item in brief_offer.find('ul', class_='cvo_module_offer_meta offer_dates').find_all('li'):
             if "Prašymus siųskite iki" in item.text: 
-                #print('What we''ve found:', item.text)
                 # Extract timestamp from string such as "Prasymus siuskite iki 2019.11.30" and then replace dots with dashes to match job post date format:
                 valid_till = item.text.split()[-1].replace('.','-')
             else:
@@ -95,14 +83,10 @@ def url_crawler(url_to_crawl):
         print('-------End of job offer --------')
         print(' ')
 
-        # Printing ad full text for last ad in the list:
-        #if x == len(offer) - 1:
-
-        #url = job_ad_url
+        
         # Crawler is pretending to be Chrome browser on Windows:
-        # chrome_ua = {'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36'}
         job_ad_page_content = requests.get(job_ad_url, headers=chrome_ua)
-        # parse detailed job ad
+        # parse detailed job ad text
         job_ad_html = bs4.BeautifulSoup(job_ad_page_content.text, 'html.parser')
         # Assuming that a standard cvonline.lt page formatting is used with page-main-content div (otherwise detailed ad text won't be available for extraction)
         # So ads embedded from other sources won't be fetched
@@ -111,19 +95,18 @@ def url_crawler(url_to_crawl):
 
         print(extracted_job_ad_text)
 
-    # Check if there are any further ads in the next page, 
+    # Check if there are any further ads in the next page, or it is just a single page of results: 
     next_page_value = whole_page.find('li', class_='page_next').text
     print('Next Page value:', next_page_value)
-    # If we see a button with text "Toliau*", then it's a multi-page output and crawler needs to get to the next page:
-    
+    # If we see a button with text "Toliau*" (next), then it's a multi-page output and crawler needs to get to the next page:
     if 'Toliau' in next_page_value:
         print('Seeing more pages, will continue crawling on the next one...')
-        # Return 1 as a function's result if there's the next page of results:
+        # Set indicator to 1 if there's yet another page with results (a "Next" button):
         more_pages = 1
     else:
-        # Return 0 as a function's result if there's no indication of next page of results:
+        # Set zero if there's no "Next" button on the page:
         more_pages = 0
-    
+    # prepare a tupe to be returned from the function:
     feedback = (more_pages, count_of_offers_in_page)
     return feedback
     
@@ -140,7 +123,7 @@ chrome_ua = {'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.3
 # 7 days: "7d"
 # 14 days: "14d"
 # 28 days: "28d"
-timespan = '3d'
+timespan = '1d'
 
 # job_area
 # IT: "informacines-technologijos"
@@ -164,7 +147,7 @@ ads_total = 0
 while crawling_ongoing == 1:
     url = f"https://www.cvonline.lt/darbo-skelbimai/{timespan}/{job_area}/{region}?page={page_no}"
     print('url is:', url)
-    feedback_from_crawler = url_crawler(url)
+    feedback_from_crawler = job_ads_crawler(url)
     # If 1, crawling will go to the next page of results:
     crawling_ongoing = feedback_from_crawler[0]
     # Number of ads processed in previously crawled page:
