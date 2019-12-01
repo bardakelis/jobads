@@ -96,16 +96,22 @@ def job_ads_crawler(url_to_crawl):
         print(extracted_job_ad_text)
 
     # Check if there are any further ads in the next page, or it is just a single page of results: 
-    next_page_value = whole_page.find('li', class_='page_next').text
-    print('Next Page value:', next_page_value)
-    # If we see a button with text "Toliau*" (next), then it's a multi-page output and crawler needs to get to the next page:
-    if 'Toliau' in next_page_value:
-        print('Seeing more pages, will continue crawling on the next one...')
-        # Set indicator to 1 if there's yet another page with results (a "Next" button):
-        more_pages = 1
-    else:
-        # Set zero if there's no "Next" button on the page:
+    #next_page_value = whole_page.find('li', class_='page_next').text
+    next_page_tag = whole_page.find('li', class_='page_next')
+    # If there is no tag with class page_next (NoneType returned), this means that result fits on a single page:
+    if next_page_tag is None:
         more_pages = 0
+    else:
+        next_page_text = next_page_tag.text
+        print('Next Page value:', next_page_text)
+        # If we see a button with text "Toliau*" (next), then it's a multi-page output and crawler needs to get to the next page:
+        if 'Toliau' in next_page_text:
+            print('Seeing more pages, will continue crawling on the next one...')
+            # Set indicator to 1 if there's yet another page with results (a "Next" button):
+            more_pages = 1
+        else:
+            # Set zero if there's no "Next" button on the page:
+            more_pages = 0
     # prepare a tupe to be returned from the function:
     feedback = (more_pages, count_of_offers_in_page)
     return feedback
