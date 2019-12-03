@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-import requests, bs4
+import requests, bs4, logging
 
-
+# Define logging format:
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s -%(levelname)s - %(message)s')
 
 def job_ads_crawler(url_to_crawl):
 
@@ -163,5 +164,8 @@ while crawling_ongoing == 1:
 
     
 #
-print('Number of ad pages:', page_no)
-print('Number of ads retrieved:', ads_total)
+logging.debug('Some debugging details.')
+logging.info('Number of ad pages: %d', page_no)
+logging.info('Number of ads retrieved: %s', str(ads_total))
+#print('Number of ad pages:', page_no)
+#print('Number of ads retrieved:', ads_total)
