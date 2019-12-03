@@ -1,5 +1,33 @@
 #!/usr/bin/env python3
 import requests, bs4, logging
+#import base64
+#import io
+from io import BytesIO
+# packages needed for image to text conversions:
+from PIL import Image
+import sys
+import pyocr
+import pyocr.builders
+
+# init pyocr tools:
+tools = pyocr.get_available_tools()
+if len(tools) == 0:
+    print("No OCR tool found")
+    sys.exit(1)
+# The tools are returned in the recommended order of usage
+tool = tools[0]
+print("Will use tool '%s'" % (tool.get_name()))
+# Ex: Will use tool 'libtesseract'
+
+langs = tool.get_available_languages()
+print("Available languages: %s" % ", ".join(langs))
+lang = langs[0]
+print("Will use lang '%s'" % (lang))
+# Ex: Will use lang 'fra'
+# Note that languages are NOT sorted in any way. Please refer
+# to the system locale settings for the default language
+# to use.
+# End of pyocr config section
 
 # Define logging format:
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s -%(levelname)s - %(message)s')
@@ -8,13 +36,13 @@ def job_ads_crawler(url_to_crawl):
 
     res = requests.get(url_to_crawl, headers=chrome_ua)
     
-    whole_page = bs4.BeautifulSoup(res.text)
+    whole_page = bs4.BeautifulSoup(res.text, 'html.parser')
     offer = whole_page.select('div.offer_primary')
     count_of_offers_in_page = len(offer)
     # looping through the list of jobs shown in a current page (subsequent pages need further code):
     for x in range (count_of_offers_in_page):
         print(x+1,'/',count_of_offers_in_page)
-        brief_offer = bs4.BeautifulSoup(str(offer[x]))
+        brief_offer = bs4.BeautifulSoup(str(offer[x]),'html.parser')
         # fetching position name
         job_ad_position_name = brief_offer.find('a').text   
         # fetching company name
@@ -87,12 +115,42 @@ def job_ads_crawler(url_to_crawl):
         
         # Crawler is pretending to be Chrome browser on Windows:
         job_ad_page_content = requests.get(job_ad_url, headers=chrome_ua)
+        #job_ad_page_content = requests.get('https://www.cvonline.lt/darbo-skelbimas/cv-online-atrankos/pardavimu-vadovas-e-f4042308.html?plid=35924', headers=chrome_ua)
+        #job_ad_page_content = requests.get('https://www.cvonline.lt/job-ad/visma-lietuva-uab/paid-front-end-development-internship-in-vilnius-f4062428.html', headers=chrome_ua)
         # parse detailed job ad text
         job_ad_html = bs4.BeautifulSoup(job_ad_page_content.text, 'html.parser')
         # Assuming that a standard cvonline.lt page formatting is used with page-main-content div (otherwise detailed ad text won't be available for extraction)
         # So ads embedded from other sources won't be fetched
-        job_ad_details = str(job_ad_html.select('div#page-main-content'))     
-        extracted_job_ad_text = bs4.BeautifulSoup(job_ad_details, 'html.parser').get_text()
+        job_ad_details = job_ad_html.select('div#page-main-content') 
+        extracted_job_ad_text = bs4.BeautifulSoup(str(job_ad_details), 'html.parser').get_text()
+     
+        # ************** AD AS AN IMAGE *******************************************************
+        # Check if there is any image with ID=JobAdImage which means that job ad is embedded as a picture.
+        job_ad_image_tag = job_ad_html.find('img', {'id':'JobAdImage'})
+        # If picture exists, it has to be retrieved:
+        if job_ad_image_tag is not None:
+            # combine domain name with url path to get full URL:
+            job_ad_img_link = root_url + job_ad_image_tag['src']
+            # retrieve the image contents from the link:
+            job_ad_image = requests.get(job_ad_img_link).content
+            # save retrieved image bytes into a RAM buffer:
+            image_in_buffer = BytesIO(job_ad_image)
+            
+            if  'Job ad without a frame' in extracted_job_ad_text:
+                lang = 'eng'
+            elif 'Darbo skelbimas be rėmelio' in extracted_job_ad_text:
+                lang = 'lit'
+            # Use pyocr library that facilitates communication with tesseract library and convert image to text:
+            # https://gitlab.gnome.org/World/OpenPaperwork/pyocr
+            # selecing appropriate language for OCR by looking at expected text string in 2 langages (LT and EN):
+            
+            extracted_job_ad_text = tool.image_to_string(
+                Image.open(image_in_buffer),
+                lang=lang,
+                builder=pyocr.builders.TextBuilder()
+            )
+            extracted_job_ad_text = 'Extracted by OCR, language: '+lang+'\n'+extracted_job_ad_text
+        # ************** END OF AD AS AN IMAGE SECTION *********************************************
 
         print(extracted_job_ad_text)
 
@@ -118,6 +176,7 @@ def job_ads_crawler(url_to_crawl):
     return feedback
     
 
+root_url = 'https://www.cvonline.lt'
 # Crawler is pretending to be Chrome browser on Windows:
 chrome_ua = {'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36'}
 
@@ -152,7 +211,7 @@ page_no = 0
 ads_in_current_page = 0
 ads_total = 0
 while crawling_ongoing == 1:
-    url = f"https://www.cvonline.lt/darbo-skelbimai/{timespan}/{job_area}/{region}?page={page_no}"
+    url = f"{root_url}/darbo-skelbimai/{timespan}/{job_area}/{region}?page={page_no}"
     print('url is:', url)
     feedback_from_crawler = job_ads_crawler(url)
     # If 1, crawling will go to the next page of results:
