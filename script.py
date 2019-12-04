@@ -114,9 +114,12 @@ def job_ads_crawler(url_to_crawl):
 
         
         # Crawler is pretending to be Chrome browser on Windows:
-        job_ad_page_content = requests.get(job_ad_url, headers=chrome_ua)
+        #job_ad_page_content = requests.get(job_ad_url, headers=chrome_ua)
         #job_ad_page_content = requests.get('https://www.cvonline.lt/darbo-skelbimas/cv-online-atrankos/pardavimu-vadovas-e-f4042308.html?plid=35924', headers=chrome_ua)
         #job_ad_page_content = requests.get('https://www.cvonline.lt/job-ad/visma-lietuva-uab/paid-front-end-development-internship-in-vilnius-f4062428.html', headers=chrome_ua)
+        # testing iframe:
+        #https://www.cvonline.lt/job-ad/genius-sports-lt-uab/technical-support-and-implementation-officer-sports-products-f4055512.html
+        job_ad_page_content = requests.get('https://www.cvonline.lt/job-ad/genius-sports-lt-uab/technical-support-and-implementation-officer-sports-products-f4055512.html', headers=chrome_ua)
         # parse detailed job ad text
         job_ad_html = bs4.BeautifulSoup(job_ad_page_content.text, 'html.parser')
         # Assuming that a standard cvonline.lt page formatting is used with page-main-content div (otherwise detailed ad text won't be available for extraction)
@@ -152,7 +155,31 @@ def job_ads_crawler(url_to_crawl):
             extracted_job_ad_text = 'Extracted by OCR, language: '+lang+'\n'+extracted_job_ad_text
         # ************** END OF AD AS AN IMAGE SECTION *********************************************
 
+        # ************** AD AS IFRAME *******************************************************
+        # Check if iframe with ID JobAdFrame exists in the page:
+        job_ad_frame_tag = job_ad_html.find('iframe', {'id':'JobAdFrame'})
+        # If iframe exists, a url address needs to be obtained from it:
+        if job_ad_frame_tag is not None:
+            # combine domain name with url path to get full URL:
+            job_ad_frame_link = root_url + job_ad_frame_tag['src']
+            # retrieve the image contents from the link:
+            job_ad_frame = requests.get(job_ad_frame_link)
+            #print('Job ad frame contains:',str(job_ad_frame))
+            job_ad_from_frame = bs4.BeautifulSoup(job_ad_frame.text, 'html.parser')
+            # remove <script> tags from results
+            js_junk = job_ad_from_frame.find_all('script')
+            for match in js_junk:
+                match.decompose()
+            # remove <style> tags from results
+            css_junk = job_ad_from_frame.find_all('style')
+            for match in css_junk:
+                match.decompose()
+            job_ad_frame_page = job_ad_from_frame.find('body')
+            extracted_job_ad_text = job_ad_frame_page.get_text()
+
+        # ************** END OF AD AS IFRAME ************************************************
         print(extracted_job_ad_text)
+        quit()
 
     # Check if there are any further ads in the next page, or it is just a single page of results: 
     #next_page_value = whole_page.find('li', class_='page_next').text
