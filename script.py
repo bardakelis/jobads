@@ -1,15 +1,24 @@
 #!/usr/bin/env python3
-import requests, bs4, logging
+import requests, logging
 #import base64
 #import io
 from io import BytesIO
+from bs4 import BeautifulSoup
 # packages needed for image to text conversions:
 from PIL import Image
 import sys
 import pyocr
 import pyocr.builders
+# for removing empty lines from string:
+from os import linesep
+# selenium
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support import expected_conditions as EC 
+from selenium.webdriver.support.ui import WebDriverWait
 
-# init pyocr tools:
+
+####################### init pyocr tools: ##################################
 tools = pyocr.get_available_tools()
 if len(tools) == 0:
     print("No OCR tool found")
@@ -27,22 +36,69 @@ print("Will use lang '%s'" % (lang))
 # Note that languages are NOT sorted in any way. Please refer
 # to the system locale settings for the default language
 # to use.
-# End of pyocr config section
+##############################################################################
 
-# Define logging format:
+######################### Define logging format: #####################################
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s -%(levelname)s - %(message)s')
+######################################################################################
 
+######### Check if ad text extracted can be considered as valid ###############
+def ad_extraction_ok(ad_text):
+    # If ad text is longer than "min_ad_length", assume it is OK:
+    min_ad_length = 100
+    if len(ad_text) > min_ad_length:
+        print('Extracted ad text seems to be OK, more than ', min_ad_length)
+        return True
+    else:
+        return False
+############################################################### ###############
+
+########################### Selenium browser  ########################################
+def selenium_browser(url):
+    options = Options()
+    options.headless = True
+    browser = webdriver.Chrome("/usr/local/bin/chromedriver", chrome_options=options)
+    #tesonet ad:
+    #browser.get("https://www.cvonline.lt/darbo-skelbimas/tesonet/software-development-engineer-in-test-b2c-cyber-security-product-f4062788.html")
+    # rimi fish
+    browser.get(url)
+
+    # Wait for iframe with id=JobAdFrame to load and switch to it:
+    WebDriverWait(browser, 10).until(EC.frame_to_be_available_and_switch_to_it("JobAdFrame"))
+    #elem = browser.find_element_by_tag_name("html")
+    page_html = browser.page_source
+    # Stop web driver and cleanup:
+    browser.quit()
+
+    soup = BeautifulSoup(page_html, 'html.parser')
+    ########################################################
+    # Cleanup output:
+    # remove <script> tags from results
+    js_junk = soup.find_all('script')
+    for match in js_junk:
+        match.decompose()
+    # remove <style> tags from results
+    css_junk = soup.find_all('style')
+    for match in css_junk:
+        match.decompose()
+    job_ad_frame_page = soup.find('body')
+    job_ad_text = job_ad_frame_page.get_text()
+    return job_ad_text
+########################### End of selenium browser function ##################
+
+
+########### Define main crawler function - all crawling happens here: #################
 def job_ads_crawler(url_to_crawl):
 
-    res = requests.get(url_to_crawl, headers=chrome_ua)
+    res = requests.get(url_to_crawl, headers=user_agent)
     
-    whole_page = bs4.BeautifulSoup(res.text, 'html.parser')
+    whole_page = BeautifulSoup(res.text, 'html.parser')
     offer = whole_page.select('div.offer_primary')
     count_of_offers_in_page = len(offer)
     # looping through the list of jobs shown in a current page (subsequent pages need further code):
     for x in range (count_of_offers_in_page):
         print(x+1,'/',count_of_offers_in_page)
-        brief_offer = bs4.BeautifulSoup(str(offer[x]),'html.parser')
+        brief_offer = BeautifulSoup(str(offer[x]),'html.parser')
         # fetching position name
         job_ad_position_name = brief_offer.find('a').text   
         # fetching company name
@@ -114,23 +170,90 @@ def job_ads_crawler(url_to_crawl):
 
         
         # Crawler is pretending to be Chrome browser on Windows:
-        #job_ad_page_content = requests.get(job_ad_url, headers=chrome_ua)
-        #job_ad_page_content = requests.get('https://www.cvonline.lt/darbo-skelbimas/cv-online-atrankos/pardavimu-vadovas-e-f4042308.html?plid=35924', headers=chrome_ua)
-        #job_ad_page_content = requests.get('https://www.cvonline.lt/job-ad/visma-lietuva-uab/paid-front-end-development-internship-in-vilnius-f4062428.html', headers=chrome_ua)
+        #job_ad_page_content = requests.get(job_ad_url, headers=user_agent)
+        #
+        #url_for_testing = 'https://www.cvonline.lt/darbo-skelbimas/tesonet/software-development-engineer-in-test-b2c-cyber-security-product-f4062788.html'
+        url_for_testing = 'https://www.cvonline.lt/darbo-skelbimas/uab-rimi-lietuva/zuvies-pardavejas-a-f4058410.html'
+        job_ad_page_content = requests.get(url_for_testing, headers=user_agent)
+        #
+        #
+        #job_ad_page_content = requests.get('https://www.cvonline.lt/darbo-skelbimas/cv-online-atrankos/pardavimu-vadovas-e-f4042308.html?plid=35924', headers=user_agent)
+        #job_ad_page_content = requests.get('https://www.cvonline.lt/job-ad/visma-lietuva-uab/paid-front-end-development-internship-in-vilnius-f4062428.html', headers=user_agent)
+        
         # testing iframe:
-        #https://www.cvonline.lt/job-ad/genius-sports-lt-uab/technical-support-and-implementation-officer-sports-products-f4055512.html
-        job_ad_page_content = requests.get('https://www.cvonline.lt/job-ad/genius-sports-lt-uab/technical-support-and-implementation-officer-sports-products-f4055512.html', headers=chrome_ua)
+        #job_ad_page_content = requests.get('https://www.cvonline.lt/job-ad/genius-sports-lt-uab/technical-support-and-implementation-officer-sports-products-f4055512.html', headers=user_agent)
+
+        # Tesonet iframe with embedded javascript - will require selenium to be retrieved properly:
+        #job_ad_page_content = requests.get('https://www.cvonline.lt/darbo-skelbimas/tesonet/software-development-engineer-in-test-b2c-cyber-security-product-f4062788.html', headers=user_agent)
+
+        # testing image ocr:
+        
+        #job_ad_page_content = requests.get('https://www.cvonline.lt/job-ad/ey-ernst-young-baltic-uab/technical-architect-consultant-in-microsoft-dynamics-365-a4011020.html', headers=user_agent)
+        #job_ad_page_content = requests.get('https://www.cvonline.lt/job-ad/visma-lietuva-uab/paid-front-end-development-internship-in-vilnius-f4062428.html', headers=user_agent)
+        
+                
+        # selenium - zuvis:
+        #job_ad_page_content = requests.get('https://www.cvonline.lt/darbo-skelbimas/uab-rimi-lietuva/zuvies-pardavejas-a-f4058410.html', headers=user_agent)
+
+        # selenium - tesonet:
+        #job_ad_page_content = requests.get('https://www.cvonline.lt/darbo-skelbimas/tesonet/software-development-engineer-in-test-b2c-cyber-security-product-f4062788.html', headers=user_agent)
+        
+        ##################### Start reading the ad page and extract its contents if it is in page-main-content div, i.e.
+        ##################### plain text, "non-js", "non-iframe", "non-image" ad #############
         # parse detailed job ad text
-        job_ad_html = bs4.BeautifulSoup(job_ad_page_content.text, 'html.parser')
+        job_ad_html = BeautifulSoup(job_ad_page_content.text, 'html.parser')
         # Assuming that a standard cvonline.lt page formatting is used with page-main-content div (otherwise detailed ad text won't be available for extraction)
-        # So ads embedded from other sources won't be fetched
         job_ad_details = job_ad_html.select('div#page-main-content') 
-        extracted_job_ad_text = bs4.BeautifulSoup(str(job_ad_details), 'html.parser').get_text()
-     
+        extracted_job_ad_text = BeautifulSoup(str(job_ad_details), 'html.parser').get_text()
+        # At this point we have extracted text from the ad image, unless there was an embedded image or iframe.
+        # Since we are not sure if we got all we needed, we will check for embedded job ad images with id=JobAdImage and extract text from them if they exist:
+
+        # If we find iFrame with id "JobAdFrame",then we extract ad text from it as iframe must be in the page for a reason:
+        # ************** AD AS IFRAME *******************************************************
+        # Check if iframe with ID JobAdFrame exists in the page:
+        job_ad_frame_tag = job_ad_html.find('iframe', {'id':'JobAdFrame'})
+        # If iframe exists, a url address needs to be obtained from it:
+        if job_ad_frame_tag is not None:
+            # combine domain name with url path to get full URL:
+            job_ad_frame_link = root_url + job_ad_frame_tag['src']
+            # retrieve the image contents from the link:
+            job_ad_frame = requests.get(job_ad_frame_link)
+            #print('Job ad frame contains:',str(job_ad_frame))
+            job_ad_from_frame = BeautifulSoup(job_ad_frame.text, 'html.parser')
+            # remove <script> tags from results
+            js_junk = job_ad_from_frame.find_all('script')
+            for match in js_junk:
+                match.decompose()
+            # remove <style> tags from results
+            css_junk = job_ad_from_frame.find_all('style')
+            for match in css_junk:
+                match.decompose()
+            job_ad_frame_page = job_ad_from_frame.find('body')
+            extracted_job_ad_text = job_ad_frame_page.get_text()
+        # ************** END OF AD AS IFRAME ************************************************
+                        
+        # Check if we have enough content to assume we retrieved a full ad, if not, fall back to Selenium which can deal with iFrame and JS:
+        if ad_extraction_ok(extracted_job_ad_text) is False:
+            print("Extracted text seems to be short to be a valid ad, it's length is:", len(extracted_job_ad_text))
+            print('Engaging Selenium:')
+            #https://www.cvonline.lt/darbo-skelbimas/tesonet/software-development-engineer-in-test-b2c-cyber-security-product-f4062788.html
+            print('Looking at URL: ', url_for_testing)
+
+            extracted_job_ad_text = selenium_browser(url_for_testing)
+
+                
+
+        # At this point we have extracted text from an URL embedded into iframe also from  if it existed also if there was any text-based ad.
+
+
+        # ...............
+        # If there was no iframe, we will check for embedded job ad images with id=JobAdImage 
+        # and extract text from them if they exist by leveraging OCR:
+
         # ************** AD AS AN IMAGE *******************************************************
         # Check if there is any image with ID=JobAdImage which means that job ad is embedded as a picture.
         job_ad_image_tag = job_ad_html.find('img', {'id':'JobAdImage'})
-        # If picture exists, it has to be retrieved:
+        # If job ad image exists, it has to be retrieved to do OCR:
         if job_ad_image_tag is not None:
             # combine domain name with url path to get full URL:
             job_ad_img_link = root_url + job_ad_image_tag['src']
@@ -138,7 +261,7 @@ def job_ads_crawler(url_to_crawl):
             job_ad_image = requests.get(job_ad_img_link).content
             # save retrieved image bytes into a RAM buffer:
             image_in_buffer = BytesIO(job_ad_image)
-            
+            # Identifying what OCR language to use depending on the text string found in the page:
             if  'Job ad without a frame' in extracted_job_ad_text:
                 lang = 'eng'
             elif 'Darbo skelbimas be rėmelio' in extracted_job_ad_text:
@@ -155,30 +278,10 @@ def job_ads_crawler(url_to_crawl):
             extracted_job_ad_text = 'Extracted by OCR, language: '+lang+'\n'+extracted_job_ad_text
         # ************** END OF AD AS AN IMAGE SECTION *********************************************
 
-        # ************** AD AS IFRAME *******************************************************
-        # Check if iframe with ID JobAdFrame exists in the page:
-        job_ad_frame_tag = job_ad_html.find('iframe', {'id':'JobAdFrame'})
-        # If iframe exists, a url address needs to be obtained from it:
-        if job_ad_frame_tag is not None:
-            # combine domain name with url path to get full URL:
-            job_ad_frame_link = root_url + job_ad_frame_tag['src']
-            # retrieve the image contents from the link:
-            job_ad_frame = requests.get(job_ad_frame_link)
-            #print('Job ad frame contains:',str(job_ad_frame))
-            job_ad_from_frame = bs4.BeautifulSoup(job_ad_frame.text, 'html.parser')
-            # remove <script> tags from results
-            js_junk = job_ad_from_frame.find_all('script')
-            for match in js_junk:
-                match.decompose()
-            # remove <style> tags from results
-            css_junk = job_ad_from_frame.find_all('style')
-            for match in css_junk:
-                match.decompose()
-            job_ad_frame_page = job_ad_from_frame.find('body')
-            extracted_job_ad_text = job_ad_frame_page.get_text()
-
-        # ************** END OF AD AS IFRAME ************************************************
-        print(extracted_job_ad_text)
+        # Printing results obtained from page crawling by direct content crawl, iframe link or embedded image:
+        extracted_job_ad_text = linesep.join([s for s in extracted_job_ad_text.splitlines() if s])
+        print('Job tway math:',extracted_job_ad_text)
+        print('Job ad length: ',len(extracted_job_ad_text), 'Output type: ',type(extracted_job_ad_text))
         quit()
 
     # Check if there are any further ads in the next page, or it is just a single page of results: 
@@ -201,11 +304,13 @@ def job_ads_crawler(url_to_crawl):
     # prepare a tupe to be returned from the function:
     feedback = (more_pages, count_of_offers_in_page)
     return feedback
-    
+########################### End of main crawler function ############################
 
+    
+######################### Main code goes here: #################################
 root_url = 'https://www.cvonline.lt'
 # Crawler is pretending to be Chrome browser on Windows:
-chrome_ua = {'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36'}
+user_agent = {'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36'}
 
 # Options in the site:
     
@@ -255,3 +360,4 @@ logging.info('Number of ad pages: %d', page_no)
 logging.info('Number of ads retrieved: %s', str(ads_total))
 #print('Number of ad pages:', page_no)
 #print('Number of ads retrieved:', ads_total)
+######################### Main code end#################################
