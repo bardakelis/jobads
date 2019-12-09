@@ -17,6 +17,8 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support import expected_conditions as EC 
 from selenium.webdriver.support.ui import WebDriverWait
 
+#for text cleanup:
+import re
 
 ####################### init pyocr tools: ##################################
 tools = pyocr.get_available_tools()
@@ -172,8 +174,8 @@ def job_ads_crawler(url_to_crawl):
         # Crawler is pretending to be Chrome browser on Windows:
         #job_ad_page_content = requests.get(job_ad_url, headers=user_agent)
         #
-        #url_for_testing = 'https://www.cvonline.lt/darbo-skelbimas/tesonet/software-development-engineer-in-test-b2c-cyber-security-product-f4062788.html'
-        url_for_testing = 'https://www.cvonline.lt/darbo-skelbimas/uab-rimi-lietuva/zuvies-pardavejas-a-f4058410.html'
+        url_for_testing = 'https://www.cvonline.lt/darbo-skelbimas/tesonet/software-development-engineer-in-test-b2c-cyber-security-product-f4062788.html'
+        #url_for_testing = 'https://www.cvonline.lt/darbo-skelbimas/uab-rimi-lietuva/zuvies-pardavejas-a-f4058410.html'
         job_ad_page_content = requests.get(url_for_testing, headers=user_agent)
         #
         #
@@ -280,7 +282,11 @@ def job_ads_crawler(url_to_crawl):
 
         # Printing results obtained from page crawling by direct content crawl, iframe link or embedded image:
         extracted_job_ad_text = linesep.join([s for s in extracted_job_ad_text.splitlines() if s])
-        print('Job tway math:',extracted_job_ad_text)
+        #modified = "\n".join(extracted_job_ad_text.split('.'))
+        #modified = re.sub(' +', ' ', extracted_job_ad_text).replace('\n \n', '\n')
+        modified = re.sub(' +', ' ', extracted_job_ad_text)
+        print('Job tway math:',repr(modified))
+        #print('Job tway math:',modified)
         print('Job ad length: ',len(extracted_job_ad_text), 'Output type: ',type(extracted_job_ad_text))
         quit()
 
