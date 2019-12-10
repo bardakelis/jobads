@@ -49,7 +49,6 @@ def ad_extraction_ok(ad_text):
     # If ad text is longer than "min_ad_length", assume it is OK:
     min_ad_length = 100
     if len(ad_text) > min_ad_length:
-        print('Extracted ad text seems to be OK, more than ', min_ad_length)
         return True
     else:
         return False
@@ -151,6 +150,7 @@ def job_ads_crawler(url_to_crawl):
         job_ad_href = brief_offer.find('a').get('href')
         # constructing a valid url for later retrieval of its contents
         job_ad_url = 'https:'+job_ad_href
+        logging.info('Processing job ad at: %s',job_ad_url)
 
         # Printing the stuff out:
         print(' ')
@@ -174,10 +174,15 @@ def job_ads_crawler(url_to_crawl):
         # Crawler is pretending to be Chrome browser on Windows:
         #job_ad_page_content = requests.get(job_ad_url, headers=user_agent)
         #
-        url_for_testing = 'https://www.cvonline.lt/darbo-skelbimas/tesonet/software-development-engineer-in-test-b2c-cyber-security-product-f4062788.html'
-        #url_for_testing = 'https://www.cvonline.lt/darbo-skelbimas/uab-rimi-lietuva/zuvies-pardavejas-a-f4058410.html'
-        job_ad_page_content = requests.get(url_for_testing, headers=user_agent)
         #
+        job_ad_url = 'https://www.cvonline.lt/job-ad/visma-lietuva-uab/senior-devops-solution-manager-linux-f4064558.html'
+        #url_for_testing = 'https://www.cvonline.lt/darbo-skelbimas/tesonet/software-development-engineer-in-test-b2c-cyber-security-product-f4062788.html'
+        #url_for_testing = 'https://www.cvonline.lt/darbo-skelbimas/uab-rimi-lietuva/zuvies-pardavejas-a-f4058410.html'
+        #url_for_testing = 'https://www.cvonline.lt/job-ad/genius-sports-lt-uab/technical-support-and-implementation-officer-sports-products-f4055512.html'
+        #job_ad_page_content = requests.get(url_for_testing, headers=user_agent)
+        #
+        # Crawler is pretending to be Chrome browser on Windows:
+        job_ad_page_content = requests.get(job_ad_url, headers=user_agent)
         #
         #job_ad_page_content = requests.get('https://www.cvonline.lt/darbo-skelbimas/cv-online-atrankos/pardavimu-vadovas-e-f4042308.html?plid=35924', headers=user_agent)
         #job_ad_page_content = requests.get('https://www.cvonline.lt/job-ad/visma-lietuva-uab/paid-front-end-development-internship-in-vilnius-f4062428.html', headers=user_agent)
@@ -207,10 +212,12 @@ def job_ads_crawler(url_to_crawl):
         # Assuming that a standard cvonline.lt page formatting is used with page-main-content div (otherwise detailed ad text won't be available for extraction)
         job_ad_details = job_ad_html.select('div#page-main-content') 
         extracted_job_ad_text = BeautifulSoup(str(job_ad_details), 'html.parser').get_text()
+        extractor = 'BS4 from div#page-main-content'
+        ########## End of plain text, "non-js", "non-iframe", "non-image" ad extraction ######
         # At this point we have extracted text from the ad image, unless there was an embedded image or iframe.
         # Since we are not sure if we got all we needed, we will check for embedded job ad images with id=JobAdImage and extract text from them if they exist:
-
         # If we find iFrame with id "JobAdFrame",then we extract ad text from it as iframe must be in the page for a reason:
+        #
         # ************** AD AS IFRAME *******************************************************
         # Check if iframe with ID JobAdFrame exists in the page:
         job_ad_frame_tag = job_ad_html.find('iframe', {'id':'JobAdFrame'})
@@ -232,6 +239,7 @@ def job_ads_crawler(url_to_crawl):
                 match.decompose()
             job_ad_frame_page = job_ad_from_frame.find('body')
             extracted_job_ad_text = job_ad_frame_page.get_text()
+            extractor = 'BS4+iFrame>JobAdFrame'
         # ************** END OF AD AS IFRAME ************************************************
                         
         # Check if we have enough content to assume we retrieved a full ad, if not, fall back to Selenium which can deal with iFrame and JS:
@@ -242,6 +250,7 @@ def job_ads_crawler(url_to_crawl):
             print('Looking at URL: ', url_for_testing)
 
             extracted_job_ad_text = selenium_browser(url_for_testing)
+            extractor = 'Selenium'
 
                 
 
@@ -277,17 +286,24 @@ def job_ads_crawler(url_to_crawl):
                 lang=lang,
                 builder=pyocr.builders.TextBuilder()
             )
-            extracted_job_ad_text = 'Extracted by OCR, language: '+lang+'\n'+extracted_job_ad_text
+            #extracted_job_ad_text = 'Extracted by OCR, language: '+lang+'\n'+extracted_job_ad_text
+            extractor = f'BS4+OCR({str(lang)})'
         # ************** END OF AD AS AN IMAGE SECTION *********************************************
 
         # Printing results obtained from page crawling by direct content crawl, iframe link or embedded image:
         extracted_job_ad_text = linesep.join([s for s in extracted_job_ad_text.splitlines() if s])
-        #modified = "\n".join(extracted_job_ad_text.split('.'))
-        #modified = re.sub(' +', ' ', extracted_job_ad_text).replace('\n \n', '\n')
-        modified = re.sub(' +', ' ', extracted_job_ad_text)
-        print('Job tway math:',repr(modified))
+        ad_with_spaces_removed = re.sub(' +', ' ', extracted_job_ad_text)
+        extracted_job_ad_text = ad_with_spaces_removed
+
+        if ad_extraction_ok(extracted_job_ad_text) is False:
+            logging.warn('URL: %s | Ad length too short (%d bytes) | Extractor is: %s', job_ad_url, len(extracted_job_ad_text), extractor)
+        else:
+            logging.info('URL: %s | Ad length OK (%d bytes) | Extractor is: %s', job_ad_url, len(extracted_job_ad_text), extractor)
+            
+        #print('Job tway math:',repr(extracted_job_ad_text))
         #print('Job tway math:',modified)
-        print('Job ad length: ',len(extracted_job_ad_text), 'Output type: ',type(extracted_job_ad_text))
+        #print('Job ad length: ',len(extracted_job_ad_text), 'Output type: ',type(extracted_job_ad_text))
+        logging.debug('Job ad text: %s', repr(extracted_job_ad_text))
         quit()
 
     # Check if there are any further ads in the next page, or it is just a single page of results: 
@@ -350,7 +366,8 @@ ads_in_current_page = 0
 ads_total = 0
 while crawling_ongoing == 1:
     url = f"{root_url}/darbo-skelbimai/{timespan}/{job_area}/{region}?page={page_no}"
-    print('url is:', url)
+    #print('url is:', url)
+    #logging.info('Crawling thru ads found at %s', url)
     feedback_from_crawler = job_ads_crawler(url)
     # If 1, crawling will go to the next page of results:
     crawling_ongoing = feedback_from_crawler[0]
