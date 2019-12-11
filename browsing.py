@@ -7,16 +7,19 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support import expected_conditions as EC 
 from selenium.webdriver.support.ui import WebDriverWait
 
+
 options = Options()
 options.headless = True
+options.add_argument('user-agent=Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36')
 browser = webdriver.Chrome("/usr/local/bin/chromedriver", chrome_options=options)
 #tesonet ad:
 #browser.get("https://www.cvonline.lt/darbo-skelbimas/tesonet/software-development-engineer-in-test-b2c-cyber-security-product-f4062788.html")
 # rimi fish
-browser.get("https://www.cvonline.lt/darbo-skelbimas/uab-rimi-lietuva/zuvies-pardavejas-a-f4058410.html")
+#browser.get("https://www.cvonline.lt/darbo-skelbimas/uab-rimi-lietuva/zuvies-pardavejas-a-f4058410.html")
+browser.get("https://laselis.lt")
 
 # Wait for iframe with id=JobAdFrame to load and switch to it:
-WebDriverWait(browser, 10).until(EC.frame_to_be_available_and_switch_to_it("JobAdFrame"))
+#WebDriverWait(browser, 10).until(EC.frame_to_be_available_and_switch_to_it("JobAdFrame"))
 elem = browser.find_element_by_tag_name("html")
 page_html = browser.page_source
 # Stop web driver and cleanup:

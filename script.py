@@ -58,6 +58,7 @@ def ad_extraction_ok(ad_text):
 def selenium_browser(url):
     options = Options()
     options.headless = True
+    options.add_argument('user-agent=Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36')
     browser = webdriver.Chrome("/usr/local/bin/chromedriver", chrome_options=options)
     #tesonet ad:
     #browser.get("https://www.cvonline.lt/darbo-skelbimas/tesonet/software-development-engineer-in-test-b2c-cyber-security-product-f4062788.html")
@@ -150,37 +151,51 @@ def job_ads_crawler(url_to_crawl):
         job_ad_href = brief_offer.find('a').get('href')
         # constructing a valid url for later retrieval of its contents
         job_ad_url = 'https:'+job_ad_href
-        logging.info('Processing job ad at: %s',job_ad_url)
+        logging.info('--------------------------------------------------------------')
+        #logging.info('Processing job ad at: %s',job_ad_url)
 
         # Printing the stuff out:
-        print(' ')
-        print('-------Job offer as follows:--------')
-        print('Position:', job_ad_position_name)
-        print('Company name:', company_name)    
-        print('Job location:', job_location)
-        print('Salary range:', salary_range)
-        print('Salary from:', salary_from)
-        print('Salary to:', salary_to)
-        print('Salary currency:', salary_currency)
-        print('Pay interval:', pay_interval)
-        print('Salary amount type:', salary_amount_type)
-        print('Job URL:', job_ad_url)
-        print('Job post date:', date_posted)
-        print('Offer valid till:', valid_till)
-        print('-------End of job offer --------')
-        print(' ')
+        #print(' ')
+        #print('-------Job offer as follows:--------')
+        #print('Position:', job_ad_position_name)
+        #print('Company name:', company_name)    
+        #print('Job location:', job_location)
+        #print('Salary range:', salary_range)
+        #print('Salary from:', salary_from)
+        #print('Salary to:', salary_to)
+        #print('Salary currency:', salary_currency)
+        #print('Pay interval:', pay_interval)
+        #print('Salary amount type:', salary_amount_type)
+        #print('Job URL:', job_ad_url)
+        #print('Job post date:', date_posted)
+        #print('Offer valid till:', valid_till)
+        #print('-------End of job offer --------')
+        #print(' ')
+        logging.debug('Position: %s', job_ad_position_name)
+        logging.debug('Company name: %s', company_name)
+        logging.debug('Job location: %s', job_location)
+        logging.debug('Salary from: %s', salary_from)
+        logging.debug('Salary to: %s', salary_to)
+        logging.debug('Salary currency: %s', salary_currency)
+        logging.debug('Pay interval: %s', pay_interval)
+        logging.debug('Salary amount type: %s', salary_amount_type)
+        logging.debug('Job URL: %s', job_ad_url)
+        logging.debug('Job post date: %s', date_posted)
+        logging.debug('Offer valid till: %s', valid_till)
 
         
         # Crawler is pretending to be Chrome browser on Windows:
         #job_ad_page_content = requests.get(job_ad_url, headers=user_agent)
         #
         #
-        job_ad_url = 'https://www.cvonline.lt/job-ad/visma-lietuva-uab/senior-devops-solution-manager-linux-f4064558.html'
+        ##job_ad_url = 'https://www.cvonline.lt/job-ad/visma-lietuva-uab/senior-devops-solution-manager-linux-f4064558.html'
+
         #url_for_testing = 'https://www.cvonline.lt/darbo-skelbimas/tesonet/software-development-engineer-in-test-b2c-cyber-security-product-f4062788.html'
         #url_for_testing = 'https://www.cvonline.lt/darbo-skelbimas/uab-rimi-lietuva/zuvies-pardavejas-a-f4058410.html'
         #url_for_testing = 'https://www.cvonline.lt/job-ad/genius-sports-lt-uab/technical-support-and-implementation-officer-sports-products-f4055512.html'
         #job_ad_page_content = requests.get(url_for_testing, headers=user_agent)
         #
+
         # Crawler is pretending to be Chrome browser on Windows:
         job_ad_page_content = requests.get(job_ad_url, headers=user_agent)
         #
@@ -244,12 +259,11 @@ def job_ads_crawler(url_to_crawl):
                         
         # Check if we have enough content to assume we retrieved a full ad, if not, fall back to Selenium which can deal with iFrame and JS:
         if ad_extraction_ok(extracted_job_ad_text) is False:
-            print("Extracted text seems to be short to be a valid ad, it's length is:", len(extracted_job_ad_text))
-            print('Engaging Selenium:')
+            logging.warning("Extracted text is too short: %s bytes. Engaging Selenium...", len(extracted_job_ad_text))           
             #https://www.cvonline.lt/darbo-skelbimas/tesonet/software-development-engineer-in-test-b2c-cyber-security-product-f4062788.html
-            print('Looking at URL: ', url_for_testing)
+            print('Looking at URL: ', job_ad_url)
 
-            extracted_job_ad_text = selenium_browser(url_for_testing)
+            extracted_job_ad_text = selenium_browser(job_ad_url)
             extractor = 'Selenium'
 
                 
@@ -304,7 +318,7 @@ def job_ads_crawler(url_to_crawl):
         #print('Job tway math:',modified)
         #print('Job ad length: ',len(extracted_job_ad_text), 'Output type: ',type(extracted_job_ad_text))
         logging.debug('Job ad text: %s', repr(extracted_job_ad_text))
-        quit()
+        #quit()
 
     # Check if there are any further ads in the next page, or it is just a single page of results: 
     #next_page_value = whole_page.find('li', class_='page_next').text
@@ -314,10 +328,11 @@ def job_ads_crawler(url_to_crawl):
         more_pages = 0
     else:
         next_page_text = next_page_tag.text
-        print('Next Page value:', next_page_text)
+        #print('Next Page value:', next_page_text)
         # If we see a button with text "Toliau*" (next), then it's a multi-page output and crawler needs to get to the next page:
         if 'Toliau' in next_page_text:
             print('Seeing more pages, will continue crawling on the next one...')
+            logging.debug('Seeing more pages, will continue crawling on the next one...')
             # Set indicator to 1 if there's yet another page with results (a "Next" button):
             more_pages = 1
         else:
@@ -354,7 +369,7 @@ job_area = 'informacines-technologijos'
 region = 'vilniaus'
 
 
-# crawling_unfinished set to 1 to indicate that crawler is looping through pages 
+# "crawling_ongoing" variable set to 1 to indicate that crawler is looping through pages 
 # If multiple pages of job ads are returned, this value is set to 1 and only if 
 # last page of multiple pages is returned (or there was a single page in total)
 # it is set to 0 to exit crawling loop:
@@ -366,6 +381,7 @@ ads_in_current_page = 0
 ads_total = 0
 while crawling_ongoing == 1:
     url = f"{root_url}/darbo-skelbimai/{timespan}/{job_area}/{region}?page={page_no}"
+    #logging.info('Processing ad list at %s', url)
     #print('url is:', url)
     #logging.info('Crawling thru ads found at %s', url)
     feedback_from_crawler = job_ads_crawler(url)
@@ -375,12 +391,10 @@ while crawling_ongoing == 1:
     ads_in_current_page = feedback_from_crawler[1]
     ads_total += ads_in_current_page
     page_no += 1
-
-    
 #
-logging.debug('Some debugging details.')
-logging.info('Number of ad pages: %d', page_no)
-logging.info('Number of ads retrieved: %s', str(ads_total))
+#
+logging.info('Number of ad pages: %d, number of ads: %s', page_no, str(ads_total))
+#logging.info('Number of ads retrieved: %s', str(ads_total))
 #print('Number of ad pages:', page_no)
 #print('Number of ads retrieved:', ads_total)
 ######################### Main code end#################################
