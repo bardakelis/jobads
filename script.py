@@ -253,6 +253,10 @@ def job_ads_crawler(url_to_crawl):
             for match in css_junk:
                 match.decompose()
             job_ad_frame_page = job_ad_from_frame.find('body')
+            # do some checks to avoid errors when extracted_job_ad_text is NoneType, i.e. job ad empty as this one: 
+            # https://www.cvonline.lt/darbo-skelbimas/alisa-management-laboratory-uab/java-programuotojas-a-f4068182.html
+            #Exception has occurred: AttributeError
+            #'NoneType' object has no attribute 'get_text'
             extracted_job_ad_text = job_ad_frame_page.get_text()
             extractor = 'BS4+iFrame>JobAdFrame'
         # ************** END OF AD AS IFRAME ************************************************
