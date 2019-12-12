@@ -16,6 +16,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support import expected_conditions as EC 
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.common.exceptions import TimeoutException
 
 #for text cleanup:
 import re
@@ -41,7 +42,8 @@ print("Will use lang '%s'" % (lang))
 ##############################################################################
 
 ######################### Define logging format: #####################################
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s -%(levelname)s - %(message)s')
+#logging.basicConfig(level=logging.DEBUG, format='%(asctime)s -%(levelname)s - %(message)s')
+logging.basicConfig(level=logging.DEBUG, filename='ads.txt', filemode='w', format='%(asctime)s -%(levelname)s - %(message)s')
 ######################################################################################
 
 ######### Check if ad text extracted can be considered as valid ###############
@@ -63,10 +65,19 @@ def selenium_browser(url):
     #tesonet ad:
     #browser.get("https://www.cvonline.lt/darbo-skelbimas/tesonet/software-development-engineer-in-test-b2c-cyber-security-product-f4062788.html")
     # rimi fish
-    browser.get(url)
+
+    try:
+        browser.set_page_load_timeout(30)
+        browser.get(url)
+    except TimeoutException as ex:
+        logging.error("A TimeOut Exception has been thrown: " + str(ex))
+        browser.quit()
 
     # Wait for iframe with id=JobAdFrame to load and switch to it:
-    WebDriverWait(browser, 10).until(EC.frame_to_be_available_and_switch_to_it("JobAdFrame"))
+    try:
+        WebDriverWait(browser, 10).until(EC.frame_to_be_available_and_switch_to_it("JobAdFrame"))
+    except TimeoutException:
+        logging.warning("Selenium did not find a matching iFrame JobAdFrame. Will continue further...")
     #elem = browser.find_element_by_tag_name("html")
     page_html = browser.page_source
     # Stop web driver and cleanup:
@@ -257,7 +268,12 @@ def job_ads_crawler(url_to_crawl):
             # https://www.cvonline.lt/darbo-skelbimas/alisa-management-laboratory-uab/java-programuotojas-a-f4068182.html
             #Exception has occurred: AttributeError
             #'NoneType' object has no attribute 'get_text'
-            extracted_job_ad_text = job_ad_frame_page.get_text()
+            try:
+                extracted_job_ad_text = job_ad_frame_page.get_text()
+            except AttributeError:
+                logging.error('This ad is empty, sorry!')
+                extracted_job_ad_text = 'Sorry - empty!'
+            
             extractor = 'BS4+iFrame>JobAdFrame'
         # ************** END OF AD AS IFRAME ************************************************
                         
@@ -362,7 +378,7 @@ user_agent = {'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.
 # 7 days: "7d"
 # 14 days: "14d"
 # 28 days: "28d"
-timespan = '1d'
+timespan = '28d'
 
 # job_area
 # IT: "informacines-technologijos"
