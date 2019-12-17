@@ -20,6 +20,15 @@ from selenium.common.exceptions import TimeoutException
 
 #for text cleanup:
 import re
+#for MongoDB:
+import pymongo
+import dns # required for connecting with SRV
+import datetime
+
+# for querying MongoDB:
+from bson.objectid import ObjectId
+# for reading credentials from separate file:
+import yaml
 
 ####################### init pyocr tools: ##################################
 tools = pyocr.get_available_tools()
@@ -54,18 +63,32 @@ def ad_extraction_ok(ad_text):
         return True
     else:
         return False
-############################################################### ###############
-
+##############################################################################
+# MongoDB config:
+#
+# Get username/password from external file:
+conf = yaml.load(open('credentials.yml'))
+username = conf['user']['username']
+password = conf['user']['password']
+client = pymongo.MongoClient("mongodb+srv://"+username+":"+password+"@cluster0-znit8.mongodb.net/test?retryWrites=true&w=majority")
+# Using DB "mydb"
+db = client.bigdb
+# Using collection "job_ads"
+ads = db.job_ads
+################# Check if job ad already in collection ##############################
+def already_in_db(obj_id):
+    found = db.job_ads.find_one({'_id': obj_id})
+    if found is not None:
+        print('object already exists', obj_id)
+        return True
+######################################################################################
 ########################### Selenium browser  ########################################
 def selenium_browser(url):
     options = Options()
     options.headless = True
     options.add_argument('user-agent=Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36')
     browser = webdriver.Chrome("/usr/local/bin/chromedriver", chrome_options=options)
-    #tesonet ad:
-    #browser.get("https://www.cvonline.lt/darbo-skelbimas/tesonet/software-development-engineer-in-test-b2c-cyber-security-product-f4062788.html")
-    # rimi fish
-
+  
     try:
         browser.set_page_load_timeout(30)
         browser.get(url)
@@ -78,7 +101,7 @@ def selenium_browser(url):
         WebDriverWait(browser, 10).until(EC.frame_to_be_available_and_switch_to_it("JobAdFrame"))
     except TimeoutException:
         logging.warning("Selenium did not find a matching iFrame JobAdFrame. Will continue further...")
-    #elem = browser.find_element_by_tag_name("html")
+    
     page_html = browser.page_source
     # Stop web driver and cleanup:
     browser.quit()
@@ -162,26 +185,13 @@ def job_ads_crawler(url_to_crawl):
         job_ad_href = brief_offer.find('a').get('href')
         # constructing a valid url for later retrieval of its contents
         job_ad_url = 'https:'+job_ad_href
-        logging.info('--------------------------------------------------------------')
-        #logging.info('Processing job ad at: %s',job_ad_url)
+        # Check if this ad is already in DB, if so, skip extracting data from it and move to the next one:
+        if already_in_db(job_ad_url):
+            logging.warning('This ad already in the DB. Will be skipped, URL: %s', job_ad_url)
+            print('Ad already in DB, skipping...')
+            continue
 
-        # Printing the stuff out:
-        #print(' ')
-        #print('-------Job offer as follows:--------')
-        #print('Position:', job_ad_position_name)
-        #print('Company name:', company_name)    
-        #print('Job location:', job_location)
-        #print('Salary range:', salary_range)
-        #print('Salary from:', salary_from)
-        #print('Salary to:', salary_to)
-        #print('Salary currency:', salary_currency)
-        #print('Pay interval:', pay_interval)
-        #print('Salary amount type:', salary_amount_type)
-        #print('Job URL:', job_ad_url)
-        #print('Job post date:', date_posted)
-        #print('Offer valid till:', valid_till)
-        #print('-------End of job offer --------')
-        #print(' ')
+        logging.info('--------------------------------------------------------------')
         logging.debug('Position: %s', job_ad_position_name)
         logging.debug('Company name: %s', company_name)
         logging.debug('Job location: %s', job_location)
@@ -192,45 +202,13 @@ def job_ads_crawler(url_to_crawl):
         logging.debug('Salary amount type: %s', salary_amount_type)
         logging.debug('Job URL: %s', job_ad_url)
         logging.debug('Job post date: %s', date_posted)
-        logging.debug('Offer valid till: %s', valid_till)
+        logging.debug('Offer valid till: %s', valid_till)    
 
-        
         # Crawler is pretending to be Chrome browser on Windows:
-        #job_ad_page_content = requests.get(job_ad_url, headers=user_agent)
-        #
-        #
-        ##job_ad_url = 'https://www.cvonline.lt/job-ad/visma-lietuva-uab/senior-devops-solution-manager-linux-f4064558.html'
-
-        #url_for_testing = 'https://www.cvonline.lt/darbo-skelbimas/tesonet/software-development-engineer-in-test-b2c-cyber-security-product-f4062788.html'
-        #url_for_testing = 'https://www.cvonline.lt/darbo-skelbimas/uab-rimi-lietuva/zuvies-pardavejas-a-f4058410.html'
-        #url_for_testing = 'https://www.cvonline.lt/job-ad/genius-sports-lt-uab/technical-support-and-implementation-officer-sports-products-f4055512.html'
-        #job_ad_page_content = requests.get(url_for_testing, headers=user_agent)
-        #
-
+        
         # Crawler is pretending to be Chrome browser on Windows:
         job_ad_page_content = requests.get(job_ad_url, headers=user_agent)
-        #
-        #job_ad_page_content = requests.get('https://www.cvonline.lt/darbo-skelbimas/cv-online-atrankos/pardavimu-vadovas-e-f4042308.html?plid=35924', headers=user_agent)
-        #job_ad_page_content = requests.get('https://www.cvonline.lt/job-ad/visma-lietuva-uab/paid-front-end-development-internship-in-vilnius-f4062428.html', headers=user_agent)
-        
-        # testing iframe:
-        #job_ad_page_content = requests.get('https://www.cvonline.lt/job-ad/genius-sports-lt-uab/technical-support-and-implementation-officer-sports-products-f4055512.html', headers=user_agent)
-
-        # Tesonet iframe with embedded javascript - will require selenium to be retrieved properly:
-        #job_ad_page_content = requests.get('https://www.cvonline.lt/darbo-skelbimas/tesonet/software-development-engineer-in-test-b2c-cyber-security-product-f4062788.html', headers=user_agent)
-
-        # testing image ocr:
-        
-        #job_ad_page_content = requests.get('https://www.cvonline.lt/job-ad/ey-ernst-young-baltic-uab/technical-architect-consultant-in-microsoft-dynamics-365-a4011020.html', headers=user_agent)
-        #job_ad_page_content = requests.get('https://www.cvonline.lt/job-ad/visma-lietuva-uab/paid-front-end-development-internship-in-vilnius-f4062428.html', headers=user_agent)
-        
-                
-        # selenium - zuvis:
-        #job_ad_page_content = requests.get('https://www.cvonline.lt/darbo-skelbimas/uab-rimi-lietuva/zuvies-pardavejas-a-f4058410.html', headers=user_agent)
-
-        # selenium - tesonet:
-        #job_ad_page_content = requests.get('https://www.cvonline.lt/darbo-skelbimas/tesonet/software-development-engineer-in-test-b2c-cyber-security-product-f4062788.html', headers=user_agent)
-        
+    
         ##################### Start reading the ad page and extract its contents if it is in page-main-content div, i.e.
         ##################### plain text, "non-js", "non-iframe", "non-image" ad #############
         # parse detailed job ad text
@@ -238,7 +216,7 @@ def job_ads_crawler(url_to_crawl):
         # Assuming that a standard cvonline.lt page formatting is used with page-main-content div (otherwise detailed ad text won't be available for extraction)
         job_ad_details = job_ad_html.select('div#page-main-content') 
         extracted_job_ad_text = BeautifulSoup(str(job_ad_details), 'html.parser').get_text()
-        extractor = 'BS4 from div#page-main-content'
+        extractor = 'BS4:div#page-main-content'
         ########## End of plain text, "non-js", "non-iframe", "non-image" ad extraction ######
         # At this point we have extracted text from the ad image, unless there was an embedded image or iframe.
         # Since we are not sure if we got all we needed, we will check for embedded job ad images with id=JobAdImage and extract text from them if they exist:
@@ -274,24 +252,19 @@ def job_ads_crawler(url_to_crawl):
                 logging.error('This ad is empty, sorry!')
                 extracted_job_ad_text = 'Sorry - empty!'
             
-            extractor = 'BS4+iFrame>JobAdFrame'
+            extractor = 'BS4:iFrame'
         # ************** END OF AD AS IFRAME ************************************************
                         
         # Check if we have enough content to assume we retrieved a full ad, if not, fall back to Selenium which can deal with iFrame and JS:
         if ad_extraction_ok(extracted_job_ad_text) is False:
             logging.warning("Extracted text is too short: %s bytes. Engaging Selenium...", len(extracted_job_ad_text))           
-            #https://www.cvonline.lt/darbo-skelbimas/tesonet/software-development-engineer-in-test-b2c-cyber-security-product-f4062788.html
-            print('Looking at URL: ', job_ad_url)
+            print('Selenium to look at URL: ', job_ad_url)
 
             extracted_job_ad_text = selenium_browser(job_ad_url)
             extractor = 'Selenium'
 
-                
-
         # At this point we have extracted text from an URL embedded into iframe also from  if it existed also if there was any text-based ad.
 
-
-        # ...............
         # If there was no iframe, we will check for embedded job ad images with id=JobAdImage 
         # and extract text from them if they exist by leveraging OCR:
 
@@ -321,7 +294,7 @@ def job_ads_crawler(url_to_crawl):
                 builder=pyocr.builders.TextBuilder()
             )
             #extracted_job_ad_text = 'Extracted by OCR, language: '+lang+'\n'+extracted_job_ad_text
-            extractor = f'BS4+OCR({str(lang)})'
+            extractor = f'BS4:OCR({str(lang)})'
         # ************** END OF AD AS AN IMAGE SECTION *********************************************
 
         # Printing results obtained from page crawling by direct content crawl, iframe link or embedded image:
@@ -333,22 +306,47 @@ def job_ads_crawler(url_to_crawl):
             logging.warn('URL: %s | Ad length too short (%d bytes) | Extractor is: %s', job_ad_url, len(extracted_job_ad_text), extractor)
         else:
             logging.info('URL: %s | Ad length OK (%d bytes) | Extractor is: %s', job_ad_url, len(extracted_job_ad_text), extractor)
-            
-        #print('Job tway math:',repr(extracted_job_ad_text))
-        #print('Job tway math:',modified)
-        #print('Job ad length: ',len(extracted_job_ad_text), 'Output type: ',type(extracted_job_ad_text))
+                    
         logging.debug('Job ad text: %s', repr(extracted_job_ad_text))
-        #quit()
+
+        #################################### Writing extracted data to database: ###################
+        if salary_from != '':
+            salary_from = int(float(salary_from))
+        if salary_to != '':
+            salary_to = int(float(salary_to))
+
+        collected_info = {"_id": job_ad_url,
+            "job_ad_url": job_ad_url,
+            "position": job_ad_position_name,
+            "company_name": company_name,
+            "job_location": job_location,
+            "salary_range": salary_range,
+            "salary_from": salary_from,
+            "salary_to": salary_to,
+            "salary_currency": salary_currency,
+            "pay_interval": pay_interval,
+            "salary_amount_type": salary_amount_type,
+            "job_post_date": datetime.datetime.strptime(date_posted, '%Y-%m-%d'),
+            "offer_valid_till": datetime.datetime.strptime(valid_till, '%Y-%m-%d'),
+            "ad_text": extracted_job_ad_text,
+            "extracted_by": extractor,
+            "inserted_at": datetime.datetime.utcnow()
+            }
+        ads = db.job_ads
+        try:
+            job_ad_id = ads.insert_one(collected_info).inserted_id
+        except pymongo.errors.DuplicateKeyError:
+            print('This ad already in DB, skipping: ', job_ad_url)    
+            logging.warning('This ad already in the DB, URL: %s', job_ad_url)
+        #################################### End of writing to database ###############################
 
     # Check if there are any further ads in the next page, or it is just a single page of results: 
-    #next_page_value = whole_page.find('li', class_='page_next').text
     next_page_tag = whole_page.find('li', class_='page_next')
     # If there is no tag with class page_next (NoneType returned), this means that result fits on a single page:
     if next_page_tag is None:
         more_pages = 0
     else:
         next_page_text = next_page_tag.text
-        #print('Next Page value:', next_page_text)
         # If we see a button with text "Toliau*" (next), then it's a multi-page output and crawler needs to get to the next page:
         if 'Toliau' in next_page_text:
             print('Seeing more pages, will continue crawling on the next one...')
