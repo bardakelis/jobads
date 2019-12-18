@@ -78,8 +78,11 @@ ads = db.job_ads
 ################# Check if job ad already in collection ##############################
 def already_in_db(obj_id):
     found = db.job_ads.find_one({'_id': obj_id})
-    if found is not None:
-        print('object already exists', obj_id)
+    if found is None:
+        # Not in DB
+        return False
+    else:
+        # Is in DB
         return True
 ######################################################################################
 ########################### Selenium browser  ########################################
@@ -376,7 +379,7 @@ user_agent = {'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.
 # 7 days: "7d"
 # 14 days: "14d"
 # 28 days: "28d"
-timespan = '28d'
+timespan = '1d'
 
 # job_area
 # IT: "informacines-technologijos"
@@ -415,4 +418,18 @@ logging.info('Number of ad pages: %d, number of ads: %s', page_no, str(ads_total
 #logging.info('Number of ads retrieved: %s', str(ads_total))
 #print('Number of ad pages:', page_no)
 #print('Number of ads retrieved:', ads_total)
-######################### Main code end#################################
+
+# Return something from DB:
+#something = ads.find({ $and: [{ad_text: /Docker/}, {ad_text: /Kubernetes/}, {ad_text: /AWS/}, {ad_text: /Linux/}]}, {position:1, salary_from:1, salary_to:1} )
+#the_query = {'ad_text': {'$regex' : 'MongoDB', '$options' : 'i'}}
+#the_query = {'$and': [ {'ad_text': {'$regex' : 'MongoDB', '$options' : 'i'}}, {'ad_text': {'$regex' : 'Docker', '$options' : 'i'}}, {'ad_text': {'$regex' : 'linux', '$options' : 'i'}} ] }
+#the_query = {'$and': [ {'ad_text': {'$regex' : 'MongoDB', '$options' : 'i'}}, {'ad_text': {'$regex' : 'Docker', '$options' : 'i'}}, {'ad_text': {'$regex' : 'linux', '$options' : 'i'}} ] }
+#the_projection = {'position':1, 'salary_from':1, 'salary_to':1}
+#print('Query:', the_query)
+#something = ads.find(the_query+','+the_projection) 
+something = ads.find({'$and': [ {'ad_text': {'$regex' : 'MongoDB', '$options' : 'i'}}, {'ad_text': {'$regex' : 'Docker', '$options' : 'i'}}, {'ad_text': {'$regex' : 'linux', '$options' : 'i'}} ] }, {'position':1, 'salary_from':1, 'salary_to':1, '_id':0})
+print(list(something))
+
+
+
+######################### Main code end #################################
