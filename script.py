@@ -130,6 +130,7 @@ def selenium_browser(url):
 def job_ads_crawler(url_to_crawl):
 
     res = requests.get(url_to_crawl, headers=user_agent)
+    ads_inserted_total = 0
     
     whole_page = BeautifulSoup(res.text, 'html.parser')
     offer = whole_page.select('div.offer_primary')
@@ -338,6 +339,7 @@ def job_ads_crawler(url_to_crawl):
         ads = db.job_ads
         try:
             job_ad_id = ads.insert_one(collected_info).inserted_id
+            ads_inserted_total += 1
         except pymongo.errors.DuplicateKeyError:
             print('This ad already in DB, skipping: ', job_ad_url)    
             logging.warning('This ad already in the DB, URL: %s', job_ad_url)
@@ -360,7 +362,7 @@ def job_ads_crawler(url_to_crawl):
             # Set zero if there's no "Next" button on the page:
             more_pages = 0
     # prepare a tupe to be returned from the function:
-    feedback = (more_pages, count_of_offers_in_page)
+    feedback = (more_pages, count_of_offers_in_page, ads_inserted_total)
     return feedback
 ########################### End of main crawler function ############################
 
@@ -379,7 +381,7 @@ user_agent = {'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.
 # 7 days: "7d"
 # 14 days: "14d"
 # 28 days: "28d"
-timespan = '1d'
+timespan = '28d'
 
 # job_area
 # IT: "informacines-technologijos"
@@ -400,6 +402,7 @@ page_no = 0
 # initializing total ad counter:
 ads_in_current_page = 0
 ads_total = 0
+ads_inserted = 0
 while crawling_ongoing == 1:
     url = f"{root_url}/darbo-skelbimai/{timespan}/{job_area}/{region}?page={page_no}"
     #logging.info('Processing ad list at %s', url)
@@ -411,10 +414,12 @@ while crawling_ongoing == 1:
     # Number of ads processed in previously crawled page:
     ads_in_current_page = feedback_from_crawler[1]
     ads_total += ads_in_current_page
+    ads_inserted += feedback_from_crawler[2]
     page_no += 1
 #
 #
 logging.info('Number of ad pages: %d, number of ads: %s', page_no, str(ads_total))
+logging.info('Number of ads inserted: %s', str(ads_inserted))
 #logging.info('Number of ads retrieved: %s', str(ads_total))
 #print('Number of ad pages:', page_no)
 #print('Number of ads retrieved:', ads_total)
@@ -429,7 +434,7 @@ logging.info('Number of ad pages: %d, number of ads: %s', page_no, str(ads_total
 #something = ads.find(the_query+','+the_projection) 
 something = ads.find({'$and': [ {'ad_text': {'$regex' : 'MongoDB', '$options' : 'i'}}, {'ad_text': {'$regex' : 'Docker', '$options' : 'i'}}, {'ad_text': {'$regex' : 'linux', '$options' : 'i'}} ] }, {'position':1, 'salary_from':1, 'salary_to':1, '_id':0})
 print(list(something))
-
+#db.job_ads.find({$text: {$search: "linux"}}, {score: {$meta: "textScore"}}).sort({score:{$meta:"textScore"}})
 
 
 ######################### Main code end #################################
