@@ -9,8 +9,9 @@ from PIL import Image
 import sys
 import pyocr
 import pyocr.builders
+import os
 # for removing empty lines from string:
-from os import linesep
+from os import linesep, walk
 # selenium
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -125,6 +126,31 @@ def selenium_browser(url):
     return job_ad_text
 ########################### End of selenium browser function ##################
 
+########################### Count technology keywords from DB: ##################
+def count_keywords_from_db(file_with_keywords):
+    with open(file_with_keywords) as file:
+        # Create emtpy dictionary to store stats:
+        keyword_stats = {}
+        categories = file.readlines()
+        for keyword in categories: 
+            # Compose keyword and wrap around with quotes for exact match in MongoDB
+            technology = '"""'+ keyword.rstrip()+'"""'
+            # Send a query to MongoDB:
+            matched_count = ads.find({"$text": {"$search": technology }}).count()
+            # Write number of ads where keyword was encountered (only non-zero values):
+            if matched_count > 0:
+                keyword_stats[keyword.rstrip()] = matched_count
+        sorted_keyword_stats = {}
+        # Sort dictionary from top keywords to lowest number:
+        for k in sorted(keyword_stats, key=keyword_stats.get, reverse=True):
+            sorted_keyword_stats[k] = keyword_stats[k]
+    #print('**********', file_with_keywords + ' **********')
+    #print(sorted_keyword_stats)
+    #print("********************")
+    #print(keyword_stats)
+    #print("Done!")
+    return sorted_keyword_stats
+###################### End of count technology keywords from DB ##################
 
 ########### Define main crawler function - all crawling happens here: #################
 def job_ads_crawler(url_to_crawl):
@@ -381,7 +407,7 @@ user_agent = {'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.
 # 7 days: "7d"
 # 14 days: "14d"
 # 28 days: "28d"
-timespan = '28d'
+timespan = '1d'
 
 # job_area
 # IT: "informacines-technologijos"
@@ -397,6 +423,7 @@ region = 'vilniaus'
 # last page of multiple pages is returned (or there was a single page in total)
 # it is set to 0 to exit crawling loop:
 crawling_ongoing = 1
+#crawling_ongoing = 0
 # page_no is page number to request 1st and subsequent pages of job ads in the web site
 page_no = 0
 # initializing total ad counter:
@@ -432,9 +459,20 @@ logging.info('Number of ads inserted: %s', str(ads_inserted))
 #the_projection = {'position':1, 'salary_from':1, 'salary_to':1}
 #print('Query:', the_query)
 #something = ads.find(the_query+','+the_projection) 
-something = ads.find({'$and': [ {'ad_text': {'$regex' : 'MongoDB', '$options' : 'i'}}, {'ad_text': {'$regex' : 'Docker', '$options' : 'i'}}, {'ad_text': {'$regex' : 'linux', '$options' : 'i'}} ] }, {'position':1, 'salary_from':1, 'salary_to':1, '_id':0})
-print(list(something))
-#db.job_ads.find({$text: {$search: "linux"}}, {score: {$meta: "textScore"}}).sort({score:{$meta:"textScore"}})
-
+#something = ads.find({'$and': [ {'ad_text': {'$regex' : 'MongoDB', '$options' : 'i'}}, {'ad_text': {'$regex' : 'Docker', '$options' : 'i'}}, {'ad_text': {'$regex' : 'linux', '$options' : 'i'}} ] }, {'position':1, 'salary_from':1, 'salary_to':1, '_id':0})
+basepath = 'categories/'
+for entry in os.listdir(basepath):
+    file_with_path = os.path.join(basepath, entry)
+    if os.path.isfile(file_with_path):
+        #print(file_with_path)
+        technology = entry.replace('_', ' ')
+        # Calculate keyword stats based on keywords listed in particular file:
+        top_tech = count_keywords_from_db(file_with_path)
+        print('************************************************************')
+        print(technology)
+        print('************************************************************')
+        print(top_tech)
+#for f in walk('categories/'):
+ #   print('File name found:', f)
 
 ######################### Main code end #################################
