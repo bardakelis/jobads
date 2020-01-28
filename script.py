@@ -132,13 +132,16 @@ def count_keywords_from_db(file_with_keywords):
         # Create emtpy dictionary to store stats:
         keyword_stats = {}
         categories = file.readlines()
-        for keyword in categories: 
-            # Compose keyword and wrap around with quotes for exact match in MongoDB
-            technology = '"""'+ keyword.rstrip()+'"""'
-            # Send a query to MongoDB:
-            matched_count = ads.find({"$text": {"$search": technology }}).count()
-            # Write number of ads where keyword was encountered (only non-zero values):
-            if matched_count > 0:
+        for keyword in categories:
+            # if keyword is not an empty line 
+            if keyword.strip():
+                # Compose keyword and wrap around with quotes for exact match in MongoDB
+                technology = '"""'+ keyword.rstrip()+'"""'
+                # Send a query to MongoDB:
+                matched_count = ads.find({"$text": {"$search": technology }}).count()
+                # Write number of ads where keyword was encountered (only non-zero values):
+                #if matched_count > 0:
+                #    keyword_stats[keyword.rstrip()] = matched_count
                 keyword_stats[keyword.rstrip()] = matched_count
         sorted_keyword_stats = {}
         # Sort dictionary from top keywords to lowest number:
@@ -460,7 +463,10 @@ logging.info('Number of ads inserted: %s', str(ads_inserted))
 #print('Query:', the_query)
 #something = ads.find(the_query+','+the_projection) 
 #something = ads.find({'$and': [ {'ad_text': {'$regex' : 'MongoDB', '$options' : 'i'}}, {'ad_text': {'$regex' : 'Docker', '$options' : 'i'}}, {'ad_text': {'$regex' : 'linux', '$options' : 'i'}} ] }, {'position':1, 'salary_from':1, 'salary_to':1, '_id':0})
+# Print dictionary of keywords and number of matched documents, take keyword group name from file name:
 basepath = 'categories/'
+# this is the nested dictionary where we will be storing tech keyword matches for all technology types (OS, DBs, languages etc.):
+container_with_stats = {}
 for entry in os.listdir(basepath):
     file_with_path = os.path.join(basepath, entry)
     if os.path.isfile(file_with_path):
@@ -471,8 +477,64 @@ for entry in os.listdir(basepath):
         print('************************************************************')
         print(technology)
         print('************************************************************')
+        # replace dot (.) if found in a technology name with and underscore (_) to satisfy MongoDB requirement not to create key names containing a dot:
+        for key in top_tech:
+            if "." in key:
+                print('Value with dot: ', key)
+                new_key = key.replace('.','_')
+                top_tech[new_key]=top_tech[key]
+                del top_tech[key]
+                print('old key: ', key, 'new key: ', new_key)
+
+        # dot replaced
+
         print(top_tech)
+        container_with_stats[technology] = top_tech
 #for f in walk('categories/'):
  #   print('File name found:', f)
+print('*************************Entonces:***********************************')
+print(container_with_stats)
+# testing insertion of multidimensional dictionary
+todays_timestamp = datetime.datetime.today().strftime('%Y-%m-%d')
+container_with_stats['_id'] = todays_timestamp
+tech_stats = db.top_tech_stats_daily
+try:
+    matched_count = tech_stats.insert_one(container_with_stats)
+except pymongo.errors.DuplicateKeyError:
+    print('Top technologies for date {} already in db!'.format(todays_timestamp))    
+    logging.warning('Top technologies for date %s already in db!', todays_timestamp)
+quit()
+# end of testing insertion of multidimensional dictionary
+
+for tech_group, tech in container_with_stats.items():
+    print('tech_group: ', tech_group)
+    print('tech: ', tech)
+    print('*********')
+    tech_stats = db.top_tech_stats_daily
+    # replace dot (.) if found in a technology name with and underscore (_) to satisfy MongoDB requirement not to create key names containing a dot:
+    #for key in tech:
+    #    if "." in key:
+    #        print('Value with dot: ', key)
+    #        new_key = key.replace('.','_')
+    #        tech[new_key]=tech[key]
+    #        del tech[key]
+    #        print('old key: ', key, 'new key: ', new_key)
+    matched_count = tech_stats.insert_one(tech)
+    
+
+##############################################################################
+# MongoDB config again to use different collection for writing analysis results:
+#
+# Get username/password from external file:
+#conf = yaml.load(open('credentials.yml'))
+#username = conf['user']['username']
+#password = conf['user']['password']
+#client = pymongo.MongoClient("mongodb+srv://"+username+":"+password+"@cluster0-znit8.mongodb.net/test?retryWrites=true&w=majority")
+# Using DB "mydb"
+#db = client.bigdb
+# Using collection "job_ads"
+
+#tech_stats = db.top_tech_stats_daily
+#matched_count = tech_stats.insert_one(container_with_stats)
 
 ######################### Main code end #################################
