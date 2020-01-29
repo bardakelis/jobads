@@ -125,7 +125,21 @@ def selenium_browser(url):
     job_ad_text = job_ad_frame_page.get_text()
     return job_ad_text
 ########################### End of selenium browser function ##################
-
+########################### Sort a dictionary items by value in descending order: ######################
+def sort_dictionary_by_values_desc(unsorted_dict):
+    #
+    #sorted_keyword_stats = {}
+        # Sort dictionary from top keywords to lowest number:
+        #for k in sorted(keyword_stats, key=keyword_stats.get, reverse=True):
+        #    sorted_keyword_stats[k] = keyword_stats[k]
+    #return sorted_keyword_stats
+    #
+    sorted_dict = {}
+    # Sort dictionary from top keywords to lowest number:
+    for k in sorted(unsorted_dict, key=unsorted_dict.get, reverse=True):
+        sorted_dict[k] = unsorted_dict[k]
+    return sorted_dict
+########################### Sorting completed ##########################################################
 ########################### Count technology keywords from DB: ##################
 def count_keywords_from_db(file_with_keywords):
     with open(file_with_keywords) as file:
@@ -140,11 +154,16 @@ def count_keywords_from_db(file_with_keywords):
                 # Send a query to MongoDB:
                 matched_count = ads.find({"$text": {"$search": technology }}).count()
                 keyword_stats[keyword.rstrip()] = matched_count
-        sorted_keyword_stats = {}
+        print('keyword_stats that are producing error when sorting:')
+        print(keyword_stats)
+        sorted_keywords_dict = sort_dictionary_by_values_desc(keyword_stats)
+        #sorted_keyword_stats = {}
         # Sort dictionary from top keywords to lowest number:
-        for k in sorted(keyword_stats, key=keyword_stats.get, reverse=True):
-            sorted_keyword_stats[k] = keyword_stats[k]
-    return sorted_keyword_stats
+        #for k in sorted(keyword_stats, key=keyword_stats.get, reverse=True):
+        #    sorted_keyword_stats[k] = keyword_stats[k]
+    #return sorted_keyword_stats
+    return sorted_keywords_dict
+
 ###################### End of count technology keywords from DB ##################
 
 ########### Define main crawler function - all crawling happens here: #################
@@ -401,7 +420,41 @@ def dots_to_underscore_in_keys(dict):
                 dict[new_key]=dict[key]
                 del dict[key]
 
-        # dot replaced
+########################### End of sanitize non-nested dictionary-keys for MongoDB #####################
+########################### Convert nested BSON from MongoDB to nested dict: ############################
+# Function removes _id as an item and replaces __ to . in key names 
+# because the opposite was done upon inserting data into MongoDB.
+def nested_bson_2_nested_dict(bson_from_mongo):
+    # remove _id from bson because it is no longer needed in dictionary
+    print('bson from mongo:--------------------------------------')
+    print(bson_from_mongo)
+    del bson_from_mongo['_id']
+    #2delete
+    #    for k1, v1 in nested_dict.items():
+#        if "__" in k1:
+#            print('Value with double underscore: ', k1)
+#            new_k1 = k1.replace('__','.')
+#            nested_dict[new_k1] = nested_dict[k1]
+#            del nested_dict[k1]
+# conversion done
+    #2delete till here
+    # convert "__" back to "." (as MongoDB id not like dots in key names hence dots were replaced with double undersconre when writing to DB:
+    #for group_name, nested_dict in bson_from_mongo.items():   
+    #for nested_dict in bson_from_mongo.items():   
+    for nested_dict in bson_from_mongo.values():   
+        # now go through nested dict values and replace double underscore with a dot as originally was intended (MongoDB restriction to store keys containing dots): 
+        #for k1, v1 in nested_dict.items():
+        for key in nested_dict:
+            if "__" in key:
+                new_key = key.replace('__','.')
+                nested_dict[new_key] = nested_dict[key]
+                del nested_dict[key]
+        print('||||||||||||||||||Sorted stuff should be this:|||||||||||||||||||||||||||||||||||||||||')
+        print(nested_dict)
+    bson_from_mongo = sort_dictionary_by_values_desc(nested_dict)
+        
+# conversion done
+########################### End of convert nested BSON from MongoDB to nested dict#######################
     
 ######################### Main code goes here: #################################
 root_url = 'https://www.cvonline.lt'
@@ -417,7 +470,7 @@ user_agent = {'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.
 # 7 days: "7d"
 # 14 days: "14d"
 # 28 days: "28d"
-timespan = '28d'
+timespan = '1d'
 
 # job_area
 # IT: "informacines-technologijos"
@@ -525,21 +578,23 @@ print('db insert result is: ', replace_result.acknowledged)
 
 taken_from_db = tech_stats.find_one({'_id': todays_timestamp})
 # delete _id from the dictionary as not to mess up nested dictionary processing:
-del taken_from_db['_id']
+#del taken_from_db['_id']
 
 print("That's what was found in the DB for today: ", taken_from_db)
 
+nested_bson_2_nested_dict(taken_from_db)
+
 # convert "__" back to ".":
-for group_name, nested_dict in taken_from_db.items():   
-    print('******************************')
-    print(nested_dict, type(nested_dict))
+#for group_name, nested_dict in taken_from_db.items():   
+#    print('******************************')
+#    print(nested_dict)
     # now go through nested dict values and replace double underscore with a dot as originally was intended (MongoDB restriction to store keys containing dots): 
-    for k1, v1 in nested_dict.items():
-        if "__" in k1:
-            print('Value with double underscore: ', k1)
-            new_k1 = k1.replace('__','.')
-            nested_dict[new_k1] = nested_dict[k1]
-            del nested_dict[k1]
+#    for k1, v1 in nested_dict.items():
+#        if "__" in k1:
+#            print('Value with double underscore: ', k1)
+#            new_k1 = k1.replace('__','.')
+#            nested_dict[new_k1] = nested_dict[k1]
+#            del nested_dict[k1]
 # conversion done
 # list dictionary contents:
 for key in taken_from_db:
