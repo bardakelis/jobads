@@ -139,19 +139,11 @@ def count_keywords_from_db(file_with_keywords):
                 technology = '"""'+ keyword.rstrip()+'"""'
                 # Send a query to MongoDB:
                 matched_count = ads.find({"$text": {"$search": technology }}).count()
-                # Write number of ads where keyword was encountered (only non-zero values):
-                #if matched_count > 0:
-                #    keyword_stats[keyword.rstrip()] = matched_count
                 keyword_stats[keyword.rstrip()] = matched_count
         sorted_keyword_stats = {}
         # Sort dictionary from top keywords to lowest number:
         for k in sorted(keyword_stats, key=keyword_stats.get, reverse=True):
             sorted_keyword_stats[k] = keyword_stats[k]
-    #print('**********', file_with_keywords + ' **********')
-    #print(sorted_keyword_stats)
-    #print("********************")
-    #print(keyword_stats)
-    #print("Done!")
     return sorted_keyword_stats
 ###################### End of count technology keywords from DB ##################
 
@@ -367,8 +359,12 @@ def job_ads_crawler(url_to_crawl):
             }
         ads = db.job_ads
         try:
-            job_ad_id = ads.insert_one(collected_info).inserted_id
-            ads_inserted_total += 1
+            result = ads.insert_one(collected_info)
+            if result.acknowledged is True:
+                ads_inserted_total += 1
+                logging.debug('Ad added into MongoDB. ID: %s', job_ad_url)
+            else:
+                logging.error('Failed to add an ad into MongoDB! ID: %s', job_ad_url)
         except pymongo.errors.DuplicateKeyError:
             print('This ad already in DB, skipping: ', job_ad_url)    
             logging.warning('This ad already in the DB, URL: %s', job_ad_url)
@@ -395,6 +391,17 @@ def job_ads_crawler(url_to_crawl):
     return feedback
 ########################### End of main crawler function ############################
 
+########################### Sanitize non-nested dictionary-keys for MongoDB ############################
+# Function replaces "." characters found in keys with double undescore"__" so that MongoDB/PyMongo does not complain
+def dots_to_underscore_in_keys(dict):
+    for key in dict:
+            if "." in key:
+                print('Value with dot: ', key)
+                new_key = key.replace('.','__')
+                dict[new_key]=dict[key]
+                del dict[key]
+
+        # dot replaced
     
 ######################### Main code goes here: #################################
 root_url = 'https://www.cvonline.lt'
@@ -410,7 +417,7 @@ user_agent = {'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.
 # 7 days: "7d"
 # 14 days: "14d"
 # 28 days: "28d"
-timespan = '1d'
+timespan = '28d'
 
 # job_area
 # IT: "informacines-technologijos"
@@ -418,7 +425,7 @@ job_area = 'informacines-technologijos'
 
 # region:
 # Vilnius: vilniaus
-region = 'vilniaus'
+#region = 'vilniaus'
 
 
 # "crawling_ongoing" variable set to 1 to indicate that crawler is looping through pages 
@@ -434,10 +441,8 @@ ads_in_current_page = 0
 ads_total = 0
 ads_inserted = 0
 while crawling_ongoing == 1:
-    url = f"{root_url}/darbo-skelbimai/{timespan}/{job_area}/{region}?page={page_no}"
-    #logging.info('Processing ad list at %s', url)
-    #print('url is:', url)
-    #logging.info('Crawling thru ads found at %s', url)
+ #   url = f"{root_url}/darbo-skelbimai/{timespan}/{job_area}/{region}?page={page_no}"
+    url = f"{root_url}/darbo-skelbimai/{timespan}/{job_area}?page={page_no}"
     feedback_from_crawler = job_ads_crawler(url)
     # If 1, crawling will go to the next page of results:
     crawling_ongoing = feedback_from_crawler[0]
@@ -450,9 +455,6 @@ while crawling_ongoing == 1:
 #
 logging.info('Number of ad pages: %d, number of ads: %s', page_no, str(ads_total))
 logging.info('Number of ads inserted: %s', str(ads_inserted))
-#logging.info('Number of ads retrieved: %s', str(ads_total))
-#print('Number of ad pages:', page_no)
-#print('Number of ads retrieved:', ads_total)
 
 # Return something from DB:
 #something = ads.find({ $and: [{ad_text: /Docker/}, {ad_text: /Kubernetes/}, {ad_text: /AWS/}, {ad_text: /Linux/}]}, {position:1, salary_from:1, salary_to:1} )
@@ -463,6 +465,8 @@ logging.info('Number of ads inserted: %s', str(ads_inserted))
 #print('Query:', the_query)
 #something = ads.find(the_query+','+the_projection) 
 #something = ads.find({'$and': [ {'ad_text': {'$regex' : 'MongoDB', '$options' : 'i'}}, {'ad_text': {'$regex' : 'Docker', '$options' : 'i'}}, {'ad_text': {'$regex' : 'linux', '$options' : 'i'}} ] }, {'position':1, 'salary_from':1, 'salary_to':1, '_id':0})
+
+
 # Print dictionary of keywords and number of matched documents, take keyword group name from file name:
 basepath = 'categories/'
 # this is the nested dictionary where we will be storing tech keyword matches for all technology types (OS, DBs, languages etc.):
@@ -470,71 +474,77 @@ container_with_stats = {}
 for entry in os.listdir(basepath):
     file_with_path = os.path.join(basepath, entry)
     if os.path.isfile(file_with_path):
-        #print(file_with_path)
+        # get technology group name by reading file name and replacing underscore with spaces, so that e.g. "Web_technologies" will be converted into "Web technologies"
         technology = entry.replace('_', ' ')
-        # Calculate keyword stats based on keywords listed in particular file:
+        # Calculate keyword stats based on keywords listed in particular file.
+        # Function searches MongoDB for matching keywords and counts number of documents matched.
         top_tech = count_keywords_from_db(file_with_path)
-        print('************************************************************')
-        print(technology)
-        print('************************************************************')
-        # replace dot (.) if found in a technology name with and underscore (_) to satisfy MongoDB requirement not to create key names containing a dot:
-        for key in top_tech:
-            if "." in key:
-                print('Value with dot: ', key)
-                new_key = key.replace('.','_')
-                top_tech[new_key]=top_tech[key]
-                del top_tech[key]
-                print('old key: ', key, 'new key: ', new_key)
+        
+        # replace dot (.) if found in a technology name with and double underscore (__) to satisfy MongoDB requirement not to create key names containing a dot:
+        #for key in top_tech:
+        #    if "." in key:
+        #       print('Value with dot: ', key)
+        #        new_key = key.replace('.','__')
+        #        top_tech[new_key]=top_tech[key]
+        #        del top_tech[key]
+        #        print('old key: ', key, 'new key: ', new_key)
 
         # dot replaced
-
+        dots_to_underscore_in_keys(top_tech)
+        print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
         print(top_tech)
+        # create a nested dictionary containing all technology groups with nested technology keyword counts to represent most popular keywords:
         container_with_stats[technology] = top_tech
-#for f in walk('categories/'):
- #   print('File name found:', f)
-print('*************************Entonces:***********************************')
-print(container_with_stats)
-# testing insertion of multidimensional dictionary
+
+# get todays date:
 todays_timestamp = datetime.datetime.today().strftime('%Y-%m-%d')
+# add a _id with a value of today's date in format 2020-01-20 to be ready for insertion into MongoDB:
 container_with_stats['_id'] = todays_timestamp
+# define db and collection as tech_stats:
 tech_stats = db.top_tech_stats_daily
+# write keyword statistics results back to MongoDB so that we don't have to store it in a dictionary but have a persistent storage instead:
 try:
-    matched_count = tech_stats.insert_one(container_with_stats)
+    insert_result = tech_stats.insert_one(container_with_stats)
+    if insert_result.acknowledged is True:
+        logging.info('Keyword search results have been inserted into DB successfully!')
+    else:
+        logging.error('Keyword search results insertion failed!')
 except pymongo.errors.DuplicateKeyError:
     print('Top technologies for date {} already in db!'.format(todays_timestamp))    
     logging.warning('Top technologies for date %s already in db!', todays_timestamp)
-quit()
-# end of testing insertion of multidimensional dictionary
+    replace_result = tech_stats.replace_one({'_id': todays_timestamp}, container_with_stats)
+    if replace_result.matched_count > 0 :
+        logging.info('Existing keyword search results have been updated in DB successfully!')
+    else:
+        logging.error('Failed to update keyword search results in DB!')
 
-for tech_group, tech in container_with_stats.items():
-    print('tech_group: ', tech_group)
-    print('tech: ', tech)
-    print('*********')
-    tech_stats = db.top_tech_stats_daily
-    # replace dot (.) if found in a technology name with and underscore (_) to satisfy MongoDB requirement not to create key names containing a dot:
-    #for key in tech:
-    #    if "." in key:
-    #        print('Value with dot: ', key)
-    #        new_key = key.replace('.','_')
-    #        tech[new_key]=tech[key]
-    #        del tech[key]
-    #        print('old key: ', key, 'new key: ', new_key)
-    matched_count = tech_stats.insert_one(tech)
-    
 
-##############################################################################
-# MongoDB config again to use different collection for writing analysis results:
-#
-# Get username/password from external file:
-#conf = yaml.load(open('credentials.yml'))
-#username = conf['user']['username']
-#password = conf['user']['password']
-#client = pymongo.MongoClient("mongodb+srv://"+username+":"+password+"@cluster0-znit8.mongodb.net/test?retryWrites=true&w=majority")
-# Using DB "mydb"
-#db = client.bigdb
-# Using collection "job_ads"
 
-#tech_stats = db.top_tech_stats_daily
-#matched_count = tech_stats.insert_one(container_with_stats)
+print('//////////////////////////////')
+print('db insert result is: ', replace_result.acknowledged)
+
+taken_from_db = tech_stats.find_one({'_id': todays_timestamp})
+# delete _id from the dictionary as not to mess up nested dictionary processing:
+del taken_from_db['_id']
+
+print("That's what was found in the DB for today: ", taken_from_db)
+
+# convert "__" back to ".":
+for group_name, nested_dict in taken_from_db.items():   
+    print('******************************')
+    print(nested_dict, type(nested_dict))
+    # now go through nested dict values and replace double underscore with a dot as originally was intended (MongoDB restriction to store keys containing dots): 
+    for k1, v1 in nested_dict.items():
+        if "__" in k1:
+            print('Value with double underscore: ', k1)
+            new_k1 = k1.replace('__','.')
+            nested_dict[new_k1] = nested_dict[k1]
+            del nested_dict[k1]
+# conversion done
+# list dictionary contents:
+for key in taken_from_db:
+    print('Key :', key)
+    print('value: ', taken_from_db[key])
+
 
 ######################### Main code end #################################
