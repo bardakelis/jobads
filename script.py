@@ -415,7 +415,6 @@ def job_ads_crawler(url_to_crawl):
 def dots_to_underscore_in_keys(dict):
     for key in dict:
             if "." in key:
-                print('Value with dot: ', key)
                 new_key = key.replace('.','__')
                 dict[new_key]=dict[key]
                 del dict[key]
@@ -429,31 +428,19 @@ def nested_bson_2_nested_dict(bson_from_mongo):
     print('bson from mongo:--------------------------------------')
     print(bson_from_mongo)
     del bson_from_mongo['_id']
-    #2delete
-    #    for k1, v1 in nested_dict.items():
-#        if "__" in k1:
-#            print('Value with double underscore: ', k1)
-#            new_k1 = k1.replace('__','.')
-#            nested_dict[new_k1] = nested_dict[k1]
-#            del nested_dict[k1]
-# conversion done
-    #2delete till here
     # convert "__" back to "." (as MongoDB id not like dots in key names hence dots were replaced with double undersconre when writing to DB:
-    #for group_name, nested_dict in bson_from_mongo.items():   
-    #for nested_dict in bson_from_mongo.items():   
-    for nested_dict in bson_from_mongo.values():   
+    for tech_grp, nested_dict in bson_from_mongo.items():   
         # now go through nested dict values and replace double underscore with a dot as originally was intended (MongoDB restriction to store keys containing dots): 
-        #for k1, v1 in nested_dict.items():
         for key in nested_dict:
             if "__" in key:
                 new_key = key.replace('__','.')
                 nested_dict[new_key] = nested_dict[key]
                 del nested_dict[key]
-        print('||||||||||||||||||Sorted stuff should be this:|||||||||||||||||||||||||||||||||||||||||')
-        print(nested_dict)
-    bson_from_mongo = sort_dictionary_by_values_desc(nested_dict)
+        # sort nested dictionary by count so that biggest count gets higher position in the dict:
+        nested_dict = sort_dictionary_by_values_desc(nested_dict)
         
-# conversion done
+        bson_from_mongo[tech_grp] = nested_dict
+    return bson_from_mongo
 ########################### End of convert nested BSON from MongoDB to nested dict#######################
     
 ######################### Main code goes here: #################################
@@ -470,7 +457,7 @@ user_agent = {'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.
 # 7 days: "7d"
 # 14 days: "14d"
 # 28 days: "28d"
-timespan = '1d'
+timespan = '28d'
 
 # job_area
 # IT: "informacines-technologijos"
@@ -544,8 +531,8 @@ for entry in os.listdir(basepath):
 
         # dot replaced
         dots_to_underscore_in_keys(top_tech)
-        print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-        print(top_tech)
+        #print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+        #print(top_tech)
         # create a nested dictionary containing all technology groups with nested technology keyword counts to represent most popular keywords:
         container_with_stats[technology] = top_tech
 
@@ -572,34 +559,16 @@ except pymongo.errors.DuplicateKeyError:
         logging.error('Failed to update keyword search results in DB!')
 
 
-
-print('//////////////////////////////')
-print('db insert result is: ', replace_result.acknowledged)
-
 taken_from_db = tech_stats.find_one({'_id': todays_timestamp})
-# delete _id from the dictionary as not to mess up nested dictionary processing:
-#del taken_from_db['_id']
 
-print("That's what was found in the DB for today: ", taken_from_db)
+#print("That's what was found in the DB for today: ", taken_from_db)
 
-nested_bson_2_nested_dict(taken_from_db)
+dictionarized_keyword_stats = nested_bson_2_nested_dict(taken_from_db)
 
-# convert "__" back to ".":
-#for group_name, nested_dict in taken_from_db.items():   
-#    print('******************************')
-#    print(nested_dict)
-    # now go through nested dict values and replace double underscore with a dot as originally was intended (MongoDB restriction to store keys containing dots): 
-#    for k1, v1 in nested_dict.items():
-#        if "__" in k1:
-#            print('Value with double underscore: ', k1)
-#            new_k1 = k1.replace('__','.')
-#            nested_dict[new_k1] = nested_dict[k1]
-#            del nested_dict[k1]
-# conversion done
 # list dictionary contents:
-for key in taken_from_db:
+for key in dictionarized_keyword_stats:
     print('Key :', key)
-    print('value: ', taken_from_db[key])
+    print('value: ', dictionarized_keyword_stats[key])
 
 
 ######################### Main code end #################################
