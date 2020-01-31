@@ -31,6 +31,13 @@ from bson.objectid import ObjectId
 # for reading credentials from separate file:
 import yaml
 
+# for wordcloud:
+from wordcloud import (WordCloud, get_single_color_func)
+import matplotlib.pyplot as plt
+# Import classes from separate file
+from keywordcloud import SimpleGroupedColorFunc, GroupedColorFunc
+
+
 ####################### init pyocr tools: ##################################
 tools = pyocr.get_available_tools()
 if len(tools) == 0:
@@ -154,8 +161,6 @@ def count_keywords_from_db(file_with_keywords):
                 # Send a query to MongoDB:
                 matched_count = ads.find({"$text": {"$search": technology }}).count()
                 keyword_stats[keyword.rstrip()] = matched_count
-        print('keyword_stats that are producing error when sorting:')
-        print(keyword_stats)
         sorted_keywords_dict = sort_dictionary_by_values_desc(keyword_stats)
         #sorted_keyword_stats = {}
         # Sort dictionary from top keywords to lowest number:
@@ -425,8 +430,8 @@ def dots_to_underscore_in_keys(dict):
 # because the opposite was done upon inserting data into MongoDB.
 def nested_bson_2_nested_dict(bson_from_mongo):
     # remove _id from bson because it is no longer needed in dictionary
-    print('bson from mongo:--------------------------------------')
-    print(bson_from_mongo)
+    #print('bson from mongo:--------------------------------------')
+    #print(bson_from_mongo)
     del bson_from_mongo['_id']
     # convert "__" back to "." (as MongoDB id not like dots in key names hence dots were replaced with double undersconre when writing to DB:
     for tech_grp, nested_dict in bson_from_mongo.items():   
@@ -442,6 +447,42 @@ def nested_bson_2_nested_dict(bson_from_mongo):
         bson_from_mongo[tech_grp] = nested_dict
     return bson_from_mongo
 ########################### End of convert nested BSON from MongoDB to nested dict#######################
+########################### Produce a keyword cloud ##########################################################
+def produce_keyword_cloud(keyword_dict):
+    #dict = {'Linux': 109, 'Docker': 106, 'Windows': 66, 'AWS': 62, 'Kubernetes': 54, 'iOS': 48, 'Android': 43, 'Azure': 42, 'Terraform': 14, 'S3': 9, 'Google Cloud': 9, 'Microsoft Azure': 8, 'EC2': 7, 'Amazon Web Services': 6, 'MacOS': 5, 'Raspberry Pi': 4, 'Google Cloud Platform': 2, 'CloudFormation': 1, 'Slack': 1, 'WordPress': 1, 'Heroku': 1, 'IBM Cloud': 1, 'Oracle': 65, 'MySQL': 54, 'PostgreSQL': 31, 'Redis': 22, 'Elasticsearch': 21, 'MongoDB': 20, 'Microsoft SQL Server': 10, 'Cassandra': 9, 'MariaDB': 6, 'Firebase': 4, 'Java': 148, 'JavaScript': 128, 'PHP': 104, 'Python': 95, 'CSS': 74, 'HTML': 71, 'C#': 65, 'Go': 43, 'C++': 31, 'Bash': 24, 'PowerShell': 21, 'TypeScript': 21, 'Scala': 18, 'Ruby': 16, 'Swift': 13, 'Kotlin': 9, 'VBA': 7, 'Shell': 6, 'Objective-C': 3, 'Assembly': 2, 'Rust': 2, 'Clojure': 1, 'Spring': 61, 'Angular': 37, 'Laravel': 32, 'jQuery': 23, 'ASP.NET': 12, 'React.js': 10, 'Vue.js': 10, 'Drupal': 9, 'Express': 8, 'Django': 2, '.NET': 76, 'Ansible': 26, 'Node.js': 19, 'Hadoop': 18, 'Puppet': 17, 'Chef': 17, 'React Native': 16, '.NET Core': 10, 'Cordova': 1, 'Xamarin': 1}
+    # Since the text is small collocations are turned off and text is lower-cased
+    wc = WordCloud(min_font_size=14, max_font_size=100, background_color='white',width=800, height=400, mode='RGB').generate_from_frequencies(keyword_dict)
+
+    platforms = {'Linux': 111, 'Docker': 107, 'Windows': 68, 'AWS': 62, 'Kubernetes': 54, 'iOS': 49, 'Android': 43, 'Azure': 42, 'Terraform': 14, 'S3': 9, 'Google Cloud': 9, 'Microsoft Azure': 8, 'EC2': 7, 'Amazon Web Services': 6, 'MacOS': 5, 'Raspberry Pi': 4, 'Google Cloud Platform': 2, 'CloudFormation': 1, 'Slack': 1, 'WordPress': 1, 'Heroku': 1, 'IBM Cloud': 1}
+    databases = {'Oracle': 65, 'MySQL': 57, 'PostgreSQL': 31, 'Redis': 22, 'Elasticsearch': 21, 'MongoDB': 20, 'Microsoft SQL Server': 11, 'Cassandra': 9, 'MariaDB': 6, 'Firebase': 4}
+    languages = {'Java': 152, 'JavaScript': 131, 'PHP': 106, 'Python': 98, 'CSS': 75, 'HTML': 72, 'C#': 65, 'Go': 43, 'C++': 33, 'Bash': 24, 'PowerShell': 21, 'TypeScript': 21, 'Scala': 20, 'Ruby': 16, 'Swift': 14, 'Kotlin': 9, 'VBA': 7, 'Shell': 6, 'Objective-C': 3, 'Assembly': 2, 'Rust': 2, 'Clojure': 1}
+    frameworks = {'Spring': 63, 'Angular': 37, 'Laravel': 33, 'jQuery': 24, 'React.js': 12, 'ASP.NET': 12, 'Vue.js': 10, 'Drupal': 10, 'Express': 8, 'Django': 2}
+    other = {'.NET': 76, 'Ansible': 26, 'Node.js': 19, 'Hadoop': 19, 'Puppet': 17, 'Chef': 17, 'React Native': 16, '.NET Core': 10, 'Cordova': 1, 'Xamarin': 1}
+
+    color2words = {
+        'red': list(platforms.keys()),
+        'blue': list(databases.keys()),
+        'green': list(languages.keys()),
+        'orange': list(frameworks.keys()),
+        'black': list(other.keys())
+    }
+    #print(color2words)
+    # Words that are not in any of the color_to_words values
+    # will be colored with a grey single color function
+    default_color = 'grey'
+    # Create a color function with single tone
+    # grouped_color_func = SimpleGroupedColorFunc(color_to_words, default_color)
+    grouped_color_func = SimpleGroupedColorFunc(color2words, default_color)
+
+    # Apply our color function
+    wc.recolor(color_func=grouped_color_func)
+
+    # Plot
+    plt.figure()
+    plt.imshow(wc, interpolation="bilinear")
+    plt.axis("off")
+    plt.show()
+########################### End fo keyword cloud production ##################################################
     
 ######################### Main code goes here: #################################
 root_url = 'https://www.cvonline.lt'
@@ -457,7 +498,7 @@ user_agent = {'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.
 # 7 days: "7d"
 # 14 days: "14d"
 # 28 days: "28d"
-timespan = '28d'
+timespan = '1d'
 
 # job_area
 # IT: "informacines-technologijos"
@@ -569,6 +610,12 @@ dictionarized_keyword_stats = nested_bson_2_nested_dict(taken_from_db)
 for key in dictionarized_keyword_stats:
     print('Key :', key)
     print('value: ', dictionarized_keyword_stats[key])
+    produce_keyword_cloud(dictionarized_keyword_stats[key])
+
+
+############################################################################################
+# Now we are going to produce some keyword clouds here:
+#produce_keyword_cloud(dictionarized_keyword_stats[key])
 
 
 ######################### Main code end #################################
