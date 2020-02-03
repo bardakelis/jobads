@@ -451,21 +451,27 @@ def nested_bson_2_nested_dict(bson_from_mongo):
 def produce_keyword_cloud(keyword_dict):
     #dict = {'Linux': 109, 'Docker': 106, 'Windows': 66, 'AWS': 62, 'Kubernetes': 54, 'iOS': 48, 'Android': 43, 'Azure': 42, 'Terraform': 14, 'S3': 9, 'Google Cloud': 9, 'Microsoft Azure': 8, 'EC2': 7, 'Amazon Web Services': 6, 'MacOS': 5, 'Raspberry Pi': 4, 'Google Cloud Platform': 2, 'CloudFormation': 1, 'Slack': 1, 'WordPress': 1, 'Heroku': 1, 'IBM Cloud': 1, 'Oracle': 65, 'MySQL': 54, 'PostgreSQL': 31, 'Redis': 22, 'Elasticsearch': 21, 'MongoDB': 20, 'Microsoft SQL Server': 10, 'Cassandra': 9, 'MariaDB': 6, 'Firebase': 4, 'Java': 148, 'JavaScript': 128, 'PHP': 104, 'Python': 95, 'CSS': 74, 'HTML': 71, 'C#': 65, 'Go': 43, 'C++': 31, 'Bash': 24, 'PowerShell': 21, 'TypeScript': 21, 'Scala': 18, 'Ruby': 16, 'Swift': 13, 'Kotlin': 9, 'VBA': 7, 'Shell': 6, 'Objective-C': 3, 'Assembly': 2, 'Rust': 2, 'Clojure': 1, 'Spring': 61, 'Angular': 37, 'Laravel': 32, 'jQuery': 23, 'ASP.NET': 12, 'React.js': 10, 'Vue.js': 10, 'Drupal': 9, 'Express': 8, 'Django': 2, '.NET': 76, 'Ansible': 26, 'Node.js': 19, 'Hadoop': 18, 'Puppet': 17, 'Chef': 17, 'React Native': 16, '.NET Core': 10, 'Cordova': 1, 'Xamarin': 1}
     # Since the text is small collocations are turned off and text is lower-cased
-    wc = WordCloud(min_font_size=14, max_font_size=100, background_color='white',width=800, height=400, mode='RGB').generate_from_frequencies(keyword_dict)
-
-    platforms = {'Linux': 111, 'Docker': 107, 'Windows': 68, 'AWS': 62, 'Kubernetes': 54, 'iOS': 49, 'Android': 43, 'Azure': 42, 'Terraform': 14, 'S3': 9, 'Google Cloud': 9, 'Microsoft Azure': 8, 'EC2': 7, 'Amazon Web Services': 6, 'MacOS': 5, 'Raspberry Pi': 4, 'Google Cloud Platform': 2, 'CloudFormation': 1, 'Slack': 1, 'WordPress': 1, 'Heroku': 1, 'IBM Cloud': 1}
-    databases = {'Oracle': 65, 'MySQL': 57, 'PostgreSQL': 31, 'Redis': 22, 'Elasticsearch': 21, 'MongoDB': 20, 'Microsoft SQL Server': 11, 'Cassandra': 9, 'MariaDB': 6, 'Firebase': 4}
-    languages = {'Java': 152, 'JavaScript': 131, 'PHP': 106, 'Python': 98, 'CSS': 75, 'HTML': 72, 'C#': 65, 'Go': 43, 'C++': 33, 'Bash': 24, 'PowerShell': 21, 'TypeScript': 21, 'Scala': 20, 'Ruby': 16, 'Swift': 14, 'Kotlin': 9, 'VBA': 7, 'Shell': 6, 'Objective-C': 3, 'Assembly': 2, 'Rust': 2, 'Clojure': 1}
-    frameworks = {'Spring': 63, 'Angular': 37, 'Laravel': 33, 'jQuery': 24, 'React.js': 12, 'ASP.NET': 12, 'Vue.js': 10, 'Drupal': 10, 'Express': 8, 'Django': 2}
-    other = {'.NET': 76, 'Ansible': 26, 'Node.js': 19, 'Hadoop': 19, 'Puppet': 17, 'Chef': 17, 'React Native': 16, '.NET Core': 10, 'Cordova': 1, 'Xamarin': 1}
-
+    #wc = WordCloud(min_font_size=14, max_font_size=100, background_color='white',width=800, height=400, mode='RGB').generate_from_frequencies(keyword_dict)
+    wc = WordCloud(font_path='/home/fogelis/.local/share/fonts/Classic Robot.otf', prefer_horizontal=1,  max_words=300, background_color='white',width=800, height=400, mode='RGB').generate_from_frequencies(keyword_dict)
+    #wc = WordCloud(font_path='unispace.ttf',prefer_horizontal=1, min_font_size=14, max_font_size=100, background_color='white',width=800, height=400, mode='RGB').generate_from_frequencies(keyword_dict)
+    #wc = WordCloud(font_path='RationalInteger.ttf',prefer_horizontal=1, min_font_size=14, max_font_size=100, background_color='white',width=800, height=400, mode='RGB').generate_from_frequencies(keyword_dict)
+    
+   
     color2words = {
-        'red': list(platforms.keys()),
-        'blue': list(databases.keys()),
-        'green': list(languages.keys()),
-        'orange': list(frameworks.keys()),
-        'black': list(other.keys())
+        'darkgray': list(buzzwords_kwds.keys()),
+        'mediumvioletred': list(databases_kwds.keys()),
+        'navy': list(infosec_kwds.keys()),
+        'brown': list(networking_kwds.keys()),
+        'darkgreen': list(other_frameworks_tools_kwds.keys()),
+        'red': list(platforms_kwds.keys()),
+        'dodgerblue': list(programming_scripting_languages_kwds.keys()),
+        'limegreen': list(tools_kwds.keys()),
+        'firebrick': list(web_frameworks_kwds.keys())
+        # more colors here: https://matplotlib.org/2.0.2/_images/named_colors.png
+        
     }
+
+    
     #print(color2words)
     # Words that are not in any of the color_to_words values
     # will be colored with a grey single color function
@@ -610,7 +616,44 @@ dictionarized_keyword_stats = nested_bson_2_nested_dict(taken_from_db)
 for key in dictionarized_keyword_stats:
     print('Key :', key)
     print('value: ', dictionarized_keyword_stats[key])
-    produce_keyword_cloud(dictionarized_keyword_stats[key])
+    if key == 'Buzzwords':
+        buzzwords_kwds = dictionarized_keyword_stats[key]
+    if key == 'Databases':
+        databases_kwds = dictionarized_keyword_stats[key]
+    if key == 'InfoSec':
+        infosec_kwds = dictionarized_keyword_stats[key]
+    if key == 'Networking':
+        networking_kwds = dictionarized_keyword_stats[key]
+    if key == 'Other Frameworks and tools':
+        other_frameworks_tools_kwds = dictionarized_keyword_stats[key]
+    if key == 'Platforms':
+        platforms_kwds = dictionarized_keyword_stats[key]
+    if key == 'Programming and Scripting Languages':
+        programming_scripting_languages_kwds = dictionarized_keyword_stats[key]
+    if key == 'Tools':
+        tools_kwds = dictionarized_keyword_stats[key]
+    if key == 'Web Frameworks':
+        web_frameworks_kwds = dictionarized_keyword_stats[key]
+
+    
+    #produce_keyword_cloud(dictionarized_keyword_stats[key])
+print('Buzzwords: ', buzzwords_kwds)
+print('DBs: ', databases_kwds)
+print('InfoSec: ', infosec_kwds)
+print('Networking: ', networking_kwds)
+print('Other framweworks/tools: ', other_frameworks_tools_kwds)
+print('Platforms: ', platforms_kwds)
+print('Programming and Scripting Languages: ', programming_scripting_languages_kwds)
+print('Tools: ', tools_kwds)
+print('Web Frameworks: ', web_frameworks_kwds)
+
+#all_kwds = {**buzzwords_kwds, **databases_kwds, **infosec_kwds, **networking_kwds, **other_frameworks_tools_kwds, **platforms_kwds, 
+#            **programming_scripting_languages_kwds, **tools_kwds, **web_frameworks_kwds}
+all_kwds = {**databases_kwds, **infosec_kwds, **networking_kwds, **other_frameworks_tools_kwds, **platforms_kwds, 
+            **programming_scripting_languages_kwds, **tools_kwds, **web_frameworks_kwds}
+
+produce_keyword_cloud(all_kwds)
+
 
 
 ############################################################################################
