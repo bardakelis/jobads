@@ -1,42 +1,44 @@
 #!/usr/bin/env python3
-import requests, logging
+import datetime
+import logging
+import os
+#for text cleanup:
+import re
+import sys
 #import base64
 #import io
 from io import BytesIO
-from bs4 import BeautifulSoup
-# packages needed for image to text conversions:
-from PIL import Image
-import sys
-import pyocr
-import pyocr.builders
-import os
 # for removing empty lines from string:
 from os import linesep, walk
-# selenium
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support import expected_conditions as EC 
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.common.exceptions import TimeoutException
 
-#for text cleanup:
-import re
+import dns  # required for connecting with SRV
+import matplotlib.pyplot as plt
+import numpy as np
 #for MongoDB:
 import pymongo
-import dns # required for connecting with SRV
-import datetime
-
-# for querying MongoDB:
-from bson.objectid import ObjectId
+import pyocr
+import pyocr.builders
+import requests
 # for reading credentials from separate file:
 import yaml
-
+from bs4 import BeautifulSoup
+# for querying MongoDB:
+from bson.objectid import ObjectId
+# below 2 needed for watermarked text on image:
+# packages needed for image to text conversions:
+from PIL import Image, ImageDraw, ImageFont
+# selenium
+from selenium import webdriver
+from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 # for wordcloud:
-from wordcloud import (WordCloud, get_single_color_func)
-import matplotlib.pyplot as plt
-# Import classes from separate file
-from keywordcloud import SimpleGroupedColorFunc, GroupedColorFunc
+from wordcloud import WordCloud, get_single_color_func
 
+# also need "pip install pillow" so that matplotlib can save files as jpg (https://stackoverflow.com/questions/8827016/matplotlib-savefig-in-jpeg-format)
+# Import classes from separate file
+from keywordcloud import GroupedColorFunc, SimpleGroupedColorFunc
 
 ####################### init pyocr tools: ##################################
 tools = pyocr.get_available_tools()
@@ -75,7 +77,7 @@ def ad_extraction_ok(ad_text):
 # MongoDB config:
 #
 # Get username/password from external file:
-conf = yaml.load(open('credentials.yml'))
+conf = yaml.load(open('/home/fogelis/proj/cvish/credentials.yml'))
 username = conf['user']['username']
 password = conf['user']['password']
 client = pymongo.MongoClient("mongodb+srv://"+username+":"+password+"@cluster0-znit8.mongodb.net/test?retryWrites=true&w=majority")
@@ -447,30 +449,34 @@ def nested_bson_2_nested_dict(bson_from_mongo):
         bson_from_mongo[tech_grp] = nested_dict
     return bson_from_mongo
 ########################### End of convert nested BSON from MongoDB to nested dict#######################
+
 ########################### Produce a keyword cloud ##########################################################
-def produce_keyword_cloud(keyword_dict):
+def produce_keyword_cloud(keyword_dict, img_file_to_save, jpg_quality):
     #dict = {'Linux': 109, 'Docker': 106, 'Windows': 66, 'AWS': 62, 'Kubernetes': 54, 'iOS': 48, 'Android': 43, 'Azure': 42, 'Terraform': 14, 'S3': 9, 'Google Cloud': 9, 'Microsoft Azure': 8, 'EC2': 7, 'Amazon Web Services': 6, 'MacOS': 5, 'Raspberry Pi': 4, 'Google Cloud Platform': 2, 'CloudFormation': 1, 'Slack': 1, 'WordPress': 1, 'Heroku': 1, 'IBM Cloud': 1, 'Oracle': 65, 'MySQL': 54, 'PostgreSQL': 31, 'Redis': 22, 'Elasticsearch': 21, 'MongoDB': 20, 'Microsoft SQL Server': 10, 'Cassandra': 9, 'MariaDB': 6, 'Firebase': 4, 'Java': 148, 'JavaScript': 128, 'PHP': 104, 'Python': 95, 'CSS': 74, 'HTML': 71, 'C#': 65, 'Go': 43, 'C++': 31, 'Bash': 24, 'PowerShell': 21, 'TypeScript': 21, 'Scala': 18, 'Ruby': 16, 'Swift': 13, 'Kotlin': 9, 'VBA': 7, 'Shell': 6, 'Objective-C': 3, 'Assembly': 2, 'Rust': 2, 'Clojure': 1, 'Spring': 61, 'Angular': 37, 'Laravel': 32, 'jQuery': 23, 'ASP.NET': 12, 'React.js': 10, 'Vue.js': 10, 'Drupal': 9, 'Express': 8, 'Django': 2, '.NET': 76, 'Ansible': 26, 'Node.js': 19, 'Hadoop': 18, 'Puppet': 17, 'Chef': 17, 'React Native': 16, '.NET Core': 10, 'Cordova': 1, 'Xamarin': 1}
     # Since the text is small collocations are turned off and text is lower-cased
     #wc = WordCloud(min_font_size=14, max_font_size=100, background_color='white',width=800, height=400, mode='RGB').generate_from_frequencies(keyword_dict)
-    wc = WordCloud(font_path='/home/fogelis/.local/share/fonts/Classic Robot.otf', prefer_horizontal=1,  max_words=300, background_color='white',width=800, height=400, mode='RGB').generate_from_frequencies(keyword_dict)
+    #wc = WordCloud(font_path='/home/fogelis/.local/share/fonts/Classic Robot.otf', prefer_horizontal=1,  max_words=300, background_color='white',width=700, height=700, mode='RGB').generate_from_frequencies(keyword_dict)
+    wc = WordCloud(font_path='/home/fogelis/.local/share/fonts/Inter-Medium.ttf', prefer_horizontal=1,  max_words=300, background_color='white',width=700, height=700, mode='RGB').generate_from_frequencies(keyword_dict)
+    # for transparent background:
+    #wc = WordCloud(font_path='/home/fogelis/.local/share/fonts/Inter-Medium.ttf', prefer_horizontal=1,  max_words=300, background_color=None, width=700, height=700, mode='RGBA').generate_from_frequencies(keyword_dict)
+
     #wc = WordCloud(font_path='unispace.ttf',prefer_horizontal=1, min_font_size=14, max_font_size=100, background_color='white',width=800, height=400, mode='RGB').generate_from_frequencies(keyword_dict)
     #wc = WordCloud(font_path='RationalInteger.ttf',prefer_horizontal=1, min_font_size=14, max_font_size=100, background_color='white',width=800, height=400, mode='RGB').generate_from_frequencies(keyword_dict)
     
    
     color2words = {
-        'darkgray': list(buzzwords_kwds.keys()),
+        'magenta': list(buzzwords_kwds.keys()),
         'mediumvioletred': list(databases_kwds.keys()),
         'navy': list(infosec_kwds.keys()),
         'brown': list(networking_kwds.keys()),
         'darkgreen': list(other_frameworks_tools_kwds.keys()),
-        'red': list(platforms_kwds.keys()),
+        'teal': list(platforms_kwds.keys()),
         'dodgerblue': list(programming_scripting_languages_kwds.keys()),
         'limegreen': list(tools_kwds.keys()),
         'firebrick': list(web_frameworks_kwds.keys())
         # more colors here: https://matplotlib.org/2.0.2/_images/named_colors.png
         
     }
-
     
     #print(color2words)
     # Words that are not in any of the color_to_words values
@@ -482,14 +488,31 @@ def produce_keyword_cloud(keyword_dict):
 
     # Apply our color function
     wc.recolor(color_func=grouped_color_func)
+    #wc.to_file('debesiukas.png')
 
     # Plot
-    plt.figure()
+    #plt.figure()
+    # resize image plotted: figsize=(8,8)  means 800x800 pixels
+    plt.figure( figsize=(8,8), facecolor='k')
     plt.imshow(wc, interpolation="bilinear")
     plt.axis("off")
-    plt.show()
-########################### End fo keyword cloud production ##################################################
+    # reducing padding of the image to minimum - more effective use of space:
+    plt.tight_layout(pad=2)
+    # saving large image:
+    plt.savefig(img_file_to_save+'_tmp.jpg', quality=100)
     
+
+    base_image = Image.open(img_file_to_save+'_tmp.jpg')
+    base_image.show()
+    base_image.save(img_file_to_save+'@2x.jpg', 'jpeg', quality=jpg_quality)
+    # define pixels of smaller image:
+    x = 600
+    y = 600
+    base_image = base_image.resize((x, y), Image.ANTIALIAS)
+    base_image.save(img_file_to_save+'.jpg', 'jpeg', quality=jpg_quality)
+    
+########################### End fo keyword cloud production ##################################################
+   
 ######################### Main code goes here: #################################
 root_url = 'https://www.cvonline.lt'
 # Crawler is pretending to be Chrome browser on Windows:
@@ -555,7 +578,7 @@ logging.info('Number of ads inserted: %s', str(ads_inserted))
 
 
 # Print dictionary of keywords and number of matched documents, take keyword group name from file name:
-basepath = 'categories/'
+basepath = '/home/fogelis/proj/cvish/categories/'
 # this is the nested dictionary where we will be storing tech keyword matches for all technology types (OS, DBs, languages etc.):
 container_with_stats = {}
 for entry in os.listdir(basepath):
@@ -612,6 +635,8 @@ taken_from_db = tech_stats.find_one({'_id': todays_timestamp})
 
 dictionarized_keyword_stats = nested_bson_2_nested_dict(taken_from_db)
 
+
+
 # list dictionary contents:
 for key in dictionarized_keyword_stats:
     print('Key :', key)
@@ -652,9 +677,20 @@ print('Web Frameworks: ', web_frameworks_kwds)
 all_kwds = {**databases_kwds, **infosec_kwds, **networking_kwds, **other_frameworks_tools_kwds, **platforms_kwds, 
             **programming_scripting_languages_kwds, **tools_kwds, **web_frameworks_kwds}
 
-produce_keyword_cloud(all_kwds)
+path_to_kwd_images = 'keyword_cloud/'
 
-
+# Generate keyword cloud images for all keyword groups:
+# Format: dictionary with keyword:count pairs, path and file name, jpg image quality
+produce_keyword_cloud(all_kwds, path_to_kwd_images+'all_kwds', 95)
+produce_keyword_cloud(buzzwords_kwds, path_to_kwd_images+'buzzwords_kwds', 85)
+produce_keyword_cloud(databases_kwds, path_to_kwd_images+'databases_kwds', 85)
+produce_keyword_cloud(infosec_kwds, path_to_kwd_images+'infosec_kwds', 85)
+produce_keyword_cloud(networking_kwds, path_to_kwd_images+'networking_kwds', 85)
+produce_keyword_cloud(other_frameworks_tools_kwds, path_to_kwd_images+'other_frameworks_tools_kwds', 85)
+produce_keyword_cloud(platforms_kwds, path_to_kwd_images+'platforms_kwds', 85)
+produce_keyword_cloud(programming_scripting_languages_kwds, path_to_kwd_images+'programming_scripting_languages_kwds', 85)
+produce_keyword_cloud(tools_kwds, path_to_kwd_images+'tools_kwds', 85)
+produce_keyword_cloud(web_frameworks_kwds, path_to_kwd_images+'web_frameworks_kwds', 85)
 
 ############################################################################################
 # Now we are going to produce some keyword clouds here:
