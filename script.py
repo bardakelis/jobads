@@ -83,7 +83,7 @@ def ad_extraction_ok(ad_text):
 # MongoDB config:
 #
 # Get username/password from external file:
-conf = yaml.load(open('/home/fogelis/proj/cvish/credentials.yml'))
+conf = yaml.load(open('/home/fogelis/proj/cvish/credentials.yml'), Loader=yaml.FullLoader)
 username = conf['user']['username']
 password = conf['user']['password']
 client = pymongo.MongoClient("mongodb+srv://"+username+":"+password+"@cluster0-znit8.mongodb.net/test?retryWrites=true&w=majority")
@@ -519,8 +519,9 @@ def nested_bson_2_nested_dict(bson_from_mongo):
 # {'top1': {'Java': {'avgSalaryLow': 2372.0815450643777, 'avgSalaryHigh': 4324.44, 'countOfAdsWithSalary': 235, 'avgTextScoreForKwdWithSalary': 1.0133493859218217, 'countOfAdsContainingKeyword': 264, 'totalAdsInDBForPeriod': 1775}}, 
 # 'top2': {'JavaScript': {'avgSalaryLow': 2322.8064516129034, 'avgSalaryHigh': 4213.4177215189875, 'countOfAdsWithSalary': 220, 'avgTextScoreForKwdWithSalary': 0.6064530290581829, 'countOfAdsContainingKeyword': 241, 'totalAdsInDBForPeriod': 1775}}, 
 # 'top3': {'Linux': {'avgSalaryLow': 2323.883435582822, 'avgSalaryHigh': 3880.089430894309, 'countOfAdsWithSalary': 165, 'avgTextScoreForKwdWithSalary': 0.5932222391963913, 'countOfAdsContainingKeyword': 205, 'totalAdsInDBForPeriod': 1775}}
-def make_top_list_dict(sorted_nested_dict, top_size):
+def make_top_list_dict(sorted_nested_dict, kwd_group_name, top_size=10):
     kwds_for_web = {}
+    kwds_for_web_with_grp_name = {}
     num_pos = 1
     for k, v in sorted_nested_dict.items():
         kwds_for_web[f'top{num_pos}'] = {}
@@ -528,7 +529,12 @@ def make_top_list_dict(sorted_nested_dict, top_size):
         num_pos += 1
         if num_pos > top_size:
             break
-    return kwds_for_web
+    # This dict will contain group name, e.g. "Platforms" and other technologies will nested under it. 
+    # This will help group data in a single YAML file as technologies and their stats will be listed 
+    # under top1, top2, top"n", so we need somehow distinguish to what section those technologies belong
+    # e.g. whether top1 technology belongs to "all_top_keywords" or to a more specific group "Platforms" or "Databases"
+    kwds_for_web_with_grp_name[kwd_group_name] = kwds_for_web
+    return kwds_for_web_with_grp_name
 ################################### End of making top list dictionary for usage in a web page ######################################################################
 
 ############################ Extract only technology name and count from nested dict ###########################
@@ -773,10 +779,22 @@ all_kwds = sort_dictionary_by_values_desc(all_kwds)
 #get_keyword_and_count(all_kwds)
 
 #dict_for_yaml = make_top_list_dict(all_kwds, 5)
-# write YAML file to disk:
-with open('all_nice_data.yaml', 'w') as yaml_file:
 
-    yaml.dump(make_top_list_dict(platforms_kwds, 20), yaml_file, default_flow_style=False, sort_keys=False)
+# write YAML file to disk:
+# opening for writing, truncating old file if exists:
+with open('all_nice_data.yaml', 'w') as yaml_file:
+    yaml.dump(make_top_list_dict(all_kwds, 'TopKeywordsOverall', 10), yaml_file, default_flow_style=False, sort_keys=False)
+    yaml.dump(make_top_list_dict(platforms_kwds, 'Platforms', 5), yaml_file, default_flow_style=False, sort_keys=False)
+    yaml.dump(make_top_list_dict(programming_scripting_languages_kwds, 'ProgrammingScriptingLanguages', 5), yaml_file, default_flow_style=False, sort_keys=False)
+    yaml.dump(make_top_list_dict(databases_kwds, 'Databases', 5), yaml_file, default_flow_style=False, sort_keys=False)
+    yaml.dump(make_top_list_dict(web_frameworks_kwds, 'WebFrameworks', 5), yaml_file, default_flow_style=False, sort_keys=False)
+    yaml.dump(make_top_list_dict(other_frameworks_tools_kwds, 'OtherFrameworksTools', 5), yaml_file, default_flow_style=False, sort_keys=False)
+    yaml.dump(make_top_list_dict(tools_kwds, 'Tools', 5), yaml_file, default_flow_style=False, sort_keys=False)
+    yaml.dump(make_top_list_dict(infosec_kwds, 'InfoSec', 5), yaml_file, default_flow_style=False, sort_keys=False)
+    yaml.dump(make_top_list_dict(networking_kwds, 'Networking', 5), yaml_file, default_flow_style=False, sort_keys=False)
+    yaml.dump(make_top_list_dict(buzzwords_kwds, 'Buzzwords', 5), yaml_file, default_flow_style=False, sort_keys=False)
+    
+
 
 #print(yaml.dump(dict_for_yaml, default_flow_style=False))
 #print('PLATORMS: ')
