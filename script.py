@@ -5,6 +5,10 @@ import os
 #for text cleanup:
 import re
 import sys
+# for yaml parsing
+# need at least versio 5.1 to support no-reordering of dictionary items
+# pip3 install PyYAML
+import yaml
 #import base64
 #import io
 from io import BytesIO
@@ -22,6 +26,8 @@ import requests
 # for reading credentials from separate file:
 import yaml
 from bs4 import BeautifulSoup
+# for orderedDict:
+import collections
 # for querying MongoDB:
 from bson.objectid import ObjectId
 # below 2 needed for watermarked text on image:
@@ -134,41 +140,92 @@ def selenium_browser(url):
     job_ad_text = job_ad_frame_page.get_text()
     return job_ad_text
 ########################### End of selenium browser function ##################
-########################### Sort a dictionary items by value in descending order: ######################
+########################### Sort nested dictionary items by value in descending order: ######################
 def sort_dictionary_by_values_desc(unsorted_dict):
-    #
-    #sorted_keyword_stats = {}
-        # Sort dictionary from top keywords to lowest number:
-        #for k in sorted(keyword_stats, key=keyword_stats.get, reverse=True):
-        #    sorted_keyword_stats[k] = keyword_stats[k]
-    #return sorted_keyword_stats
-    #
+    #sorted_dict = collections.OrderedDict()
     sorted_dict = {}
     # Sort dictionary from top keywords to lowest number:
-    for k in sorted(unsorted_dict, key=unsorted_dict.get, reverse=True):
+    # https://dzone.com/articles/python-201-how-sort-dictionary
+    for k in sorted(unsorted_dict.keys(), key=lambda y: (unsorted_dict[y]['countOfAdsContainingKeyword']), reverse=True):
         sorted_dict[k] = unsorted_dict[k]
     return sorted_dict
 ########################### Sorting completed ##########################################################
 ########################### Count technology keywords from DB: ##################
 def count_keywords_from_db(file_with_keywords):
+    # Fetch records not older than (currently we have a dummy old date here to fetch all historical records):
+    ref_date = datetime.datetime(2010, 11, 1)
+    # Obtain total number of ads in the database, by only looking at date when an ad was posted:
+    total_ads_per_period = ads.find({"job_post_date":{"$gt": ref_date} }).count()
+
     with open(file_with_keywords) as file:
         # Create emtpy dictionary to store stats:
         keyword_stats = {}
         categories = file.readlines()
+        # e.g. for 'Linux' in Platforms or for 'C++' in Programming_languages:
         for keyword in categories:
             # if keyword is not an empty line 
             if keyword.strip():
-                # Compose keyword and wrap around with quotes for exact match in MongoDB
-                technology = '"""'+ keyword.rstrip()+'"""'
+                
+                # Strip spaces from the end of the keyword:                
+                technology = keyword.rstrip()
+                
                 # Send a query to MongoDB:
-                matched_count = ads.find({"$text": {"$search": technology }}).count()
-                keyword_stats[keyword.rstrip()] = matched_count
+                countOfAdsContainingKeyword = ads.find({"$text": {"$search": f'""\"{technology}\"""' }, "job_post_date":{"$gt": ref_date} }).count()
+                # declare temporary storage dictinary for count matches, we will add it to a larger dictionary for each technology individually
+                documents_matched = {}
+                documents_matched['countOfAdsContainingKeyword'] = countOfAdsContainingKeyword # this is a count of docs with keywords we are looking for
+                documents_matched['totalAdsInDBForPeriod'] = total_ads_per_period # this is a count of all docs/ads per the same period, so that it helps calculate percentage if we want later                
+                # constucting a query to MongoDB:               
+                pipeline = [
+                    { "$match": 
+                        {
+                            "$and": 
+                            [
+                                {"$text" : { "$search": f'""\"{technology}\"""' }  },
+                                {"pay_interval" : { "$eq": 'monthly' }},
+                                {"salary_amount_type" : { "$eq": 'gross' }},
+                                {"job_post_date": {"$gt": ref_date}}
+                            ] 
+                        }
+                    },
+                    { 
+                        "$group": 
+                        {
+                            "_id": "null", 
+                            "avgSalaryLow": { "$avg": "$salary_from"},
+                            "avgSalaryHigh": { "$avg": "$salary_to"}, 
+                            "countOfAdsWithSalary": {"$sum":1}, 
+                            "avgTextScoreForKwdWithSalary": {"$avg": {"$meta": "textScore"}}
+                        },
+                    },
+                    { 
+                        "$project": 
+                        { 
+                            "_id": 0, 
+                            'avgSalaryLow':1,
+                            'avgSalaryHigh':1,
+                            'countOfAdsWithSalary':1,
+                            'avgTextScoreForKwdWithSalary':1
+                        }
+                    }
+                    ]
+
+                
+                # lets define a dictionary to hold output from db, later we will merge it with documents_matched dict and produce final keyword_stats dict:
+                scores = {}
+                # getting a cursor from MongoDB
+                cursor = ads.aggregate(pipeline)
+                # to get actual data from the cursor we have to iterate thru items in the cursor (one item, that will come out as a dictionary):
+                for data in cursor:
+                    scores = data
+            
+                # joining 2 dictionaries into one single one:
+                keyword_stats[technology] = {**scores, **documents_matched}
+
+       
+        #sorted_keywords_dict = collections.orderedDict()
         sorted_keywords_dict = sort_dictionary_by_values_desc(keyword_stats)
-        #sorted_keyword_stats = {}
-        # Sort dictionary from top keywords to lowest number:
-        #for k in sorted(keyword_stats, key=keyword_stats.get, reverse=True):
-        #    sorted_keyword_stats[k] = keyword_stats[k]
-    #return sorted_keyword_stats
+       
     return sorted_keywords_dict
 
 ###################### End of count technology keywords from DB ##################
@@ -445,10 +502,44 @@ def nested_bson_2_nested_dict(bson_from_mongo):
                 del nested_dict[key]
         # sort nested dictionary by count so that biggest count gets higher position in the dict:
         nested_dict = sort_dictionary_by_values_desc(nested_dict)
-        
         bson_from_mongo[tech_grp] = nested_dict
     return bson_from_mongo
 ########################### End of convert nested BSON from MongoDB to nested dict#######################
+################################### Make top list dictionary for usage in a web page ##########################################################################
+# 
+# Constructing dictionary for use on a web page containing top1, top2, top3 as keys, 
+# so that data is better structured by using top1 in a web page instead of e.g. "Java":
+# Input something like:
+# 'SNMP': {'avgSalaryLow': 2177.5, 'avgSalaryHigh': 2650.0, 'countOfAdsWithSalary': 2, 'avgTextScoreForKwdWithSalary': 0.5015849811108432, 'countOfAdsContainingKeyword': 2, 'totalAdsInDBForPeriod': 1775}, 
+# 'Pandas': {'avgSalaryLow': 2200.0, 'avgSalaryHigh': 3300.0, 'countOfAdsWithSalary': 2, 'avgTextScoreForKwdWithSalary': 0.5011765292111441, 'countOfAdsContainingKeyword': 2, 'totalAdsInDBForPeriod': 1775}, 
+# 'Cordova': {'avgSalaryLow': 2064.0, 'avgSalaryHigh': 4375.0, 'countOfAdsWithSalary': 2, 'avgTextScoreForKwdWithSalary': 0.5015516829792313, 'countOfAdsContainingKeyword': 2, 'totalAdsInDBForPeriod': 1775}, 
+# 'Xamarin': {'avgSalaryLow': 2314.0, 'avgSalaryHigh': 4070.0, 'countOfAdsWithSalary': 2, 'avgTextScoreForKwdWithSalary': 0.5015690275413895, 'countOfAdsContainingKeyword': 2, 'totalAdsInDBForPeriod': 1775}
+
+# Output something like (tech names don't match above input just because of bad example, ignore them and look at "topx" which gets added for each top technology):
+# {'top1': {'Java': {'avgSalaryLow': 2372.0815450643777, 'avgSalaryHigh': 4324.44, 'countOfAdsWithSalary': 235, 'avgTextScoreForKwdWithSalary': 1.0133493859218217, 'countOfAdsContainingKeyword': 264, 'totalAdsInDBForPeriod': 1775}}, 
+# 'top2': {'JavaScript': {'avgSalaryLow': 2322.8064516129034, 'avgSalaryHigh': 4213.4177215189875, 'countOfAdsWithSalary': 220, 'avgTextScoreForKwdWithSalary': 0.6064530290581829, 'countOfAdsContainingKeyword': 241, 'totalAdsInDBForPeriod': 1775}}, 
+# 'top3': {'Linux': {'avgSalaryLow': 2323.883435582822, 'avgSalaryHigh': 3880.089430894309, 'countOfAdsWithSalary': 165, 'avgTextScoreForKwdWithSalary': 0.5932222391963913, 'countOfAdsContainingKeyword': 205, 'totalAdsInDBForPeriod': 1775}}
+def make_top_list_dict(sorted_nested_dict, top_size):
+    kwds_for_web = {}
+    num_pos = 1
+    for k, v in sorted_nested_dict.items():
+        kwds_for_web[f'top{num_pos}'] = {}
+        kwds_for_web[f'top{num_pos}'][k] = v
+        num_pos += 1
+        if num_pos > top_size:
+            break
+    return kwds_for_web
+################################### End of making top list dictionary for usage in a web page ######################################################################
+
+############################ Extract only technology name and count from nested dict ###########################
+# CONSTRUCTING DICTIONARIES FOR WORDCLOUD
+# constructing dictionary suitable for wordcloud, i.e. "technology:count"
+def get_keyword_and_count(nested_dict):
+    kwds_with_count = {}
+    for k, v in nested_dict.items():
+        kwds_with_count[k] = v['countOfAdsContainingKeyword']
+    return kwds_with_count
+############################ End of extract only technology name and count from nested dict ###################
 
 ########################### Produce a keyword cloud ##########################################################
 def produce_keyword_cloud(keyword_dict, img_file_to_save, jpg_quality):
@@ -672,25 +763,41 @@ print('Programming and Scripting Languages: ', programming_scripting_languages_k
 print('Tools: ', tools_kwds)
 print('Web Frameworks: ', web_frameworks_kwds)
 
-#all_kwds = {**buzzwords_kwds, **databases_kwds, **infosec_kwds, **networking_kwds, **other_frameworks_tools_kwds, **platforms_kwds, 
-#            **programming_scripting_languages_kwds, **tools_kwds, **web_frameworks_kwds}
+
 all_kwds = {**databases_kwds, **infosec_kwds, **networking_kwds, **other_frameworks_tools_kwds, **platforms_kwds, 
             **programming_scripting_languages_kwds, **tools_kwds, **web_frameworks_kwds}
+# sort keywords by keyword count:
+all_kwds = sort_dictionary_by_values_desc(all_kwds)
+# to amend:
+
+#get_keyword_and_count(all_kwds)
+
+#dict_for_yaml = make_top_list_dict(all_kwds, 5)
+# write YAML file to disk:
+with open('all_nice_data.yaml', 'w') as yaml_file:
+
+    yaml.dump(make_top_list_dict(platforms_kwds, 20), yaml_file, default_flow_style=False, sort_keys=False)
+
+#print(yaml.dump(dict_for_yaml, default_flow_style=False))
+#print('PLATORMS: ')
+#print(yaml.dump(make_top_list_dict(platforms_kwds, 20), yaml_file, default_flow_style=False, sort_keys=False))
+
+
 
 path_to_kwd_images = 'keyword_cloud/'
 
 # Generate keyword cloud images for all keyword groups:
 # Format: dictionary with keyword:count pairs, path and file name, jpg image quality
-produce_keyword_cloud(all_kwds, path_to_kwd_images+'all_kwds', 95)
-produce_keyword_cloud(buzzwords_kwds, path_to_kwd_images+'buzzwords_kwds', 85)
-produce_keyword_cloud(databases_kwds, path_to_kwd_images+'databases_kwds', 85)
-produce_keyword_cloud(infosec_kwds, path_to_kwd_images+'infosec_kwds', 85)
-produce_keyword_cloud(networking_kwds, path_to_kwd_images+'networking_kwds', 85)
-produce_keyword_cloud(other_frameworks_tools_kwds, path_to_kwd_images+'other_frameworks_tools_kwds', 85)
-produce_keyword_cloud(platforms_kwds, path_to_kwd_images+'platforms_kwds', 85)
-produce_keyword_cloud(programming_scripting_languages_kwds, path_to_kwd_images+'programming_scripting_languages_kwds', 85)
-produce_keyword_cloud(tools_kwds, path_to_kwd_images+'tools_kwds', 85)
-produce_keyword_cloud(web_frameworks_kwds, path_to_kwd_images+'web_frameworks_kwds', 85)
+produce_keyword_cloud(get_keyword_and_count(all_kwds), path_to_kwd_images+'all_kwds', 95)
+produce_keyword_cloud(get_keyword_and_count(buzzwords_kwds), path_to_kwd_images+'buzzwords_kwds', 85)
+produce_keyword_cloud(get_keyword_and_count(databases_kwds), path_to_kwd_images+'databases_kwds', 85)
+produce_keyword_cloud(get_keyword_and_count(infosec_kwds), path_to_kwd_images+'infosec_kwds', 85)
+produce_keyword_cloud(get_keyword_and_count(networking_kwds), path_to_kwd_images+'networking_kwds', 85)
+produce_keyword_cloud(get_keyword_and_count(other_frameworks_tools_kwds), path_to_kwd_images+'other_frameworks_tools_kwds', 85)
+produce_keyword_cloud(get_keyword_and_count(platforms_kwds), path_to_kwd_images+'platforms_kwds', 85)
+produce_keyword_cloud(get_keyword_and_count(programming_scripting_languages_kwds), path_to_kwd_images+'programming_scripting_languages_kwds', 85)
+produce_keyword_cloud(get_keyword_and_count(tools_kwds), path_to_kwd_images+'tools_kwds', 85)
+produce_keyword_cloud(get_keyword_and_count(web_frameworks_kwds), path_to_kwd_images+'web_frameworks_kwds', 85)
 
 ############################################################################################
 # Now we are going to produce some keyword clouds here:
