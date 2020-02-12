@@ -83,7 +83,7 @@ def ad_extraction_ok(ad_text):
 # MongoDB config:
 #
 # Get username/password from external file:
-conf = yaml.load(open('/home/fogelis/proj/cvish/credentials.yml'), Loader=yaml.FullLoader)
+conf = yaml.load(open('credentials.yml'), Loader=yaml.FullLoader)
 username = conf['user']['username']
 password = conf['user']['password']
 client = pymongo.MongoClient("mongodb+srv://"+username+":"+password+"@cluster0-znit8.mongodb.net/test?retryWrites=true&w=majority")
@@ -515,21 +515,29 @@ def nested_bson_2_nested_dict(bson_from_mongo):
 # 'Cordova': {'avgSalaryLow': 2064.0, 'avgSalaryHigh': 4375.0, 'countOfAdsWithSalary': 2, 'avgTextScoreForKwdWithSalary': 0.5015516829792313, 'countOfAdsContainingKeyword': 2, 'totalAdsInDBForPeriod': 1775}, 
 # 'Xamarin': {'avgSalaryLow': 2314.0, 'avgSalaryHigh': 4070.0, 'countOfAdsWithSalary': 2, 'avgTextScoreForKwdWithSalary': 0.5015690275413895, 'countOfAdsContainingKeyword': 2, 'totalAdsInDBForPeriod': 1775}
 
-# Output something like (tech names don't match above input just because of bad example, ignore them and look at "topx" which gets added for each top technology):
-# {'top1': {'Java': {'avgSalaryLow': 2372.0815450643777, 'avgSalaryHigh': 4324.44, 'countOfAdsWithSalary': 235, 'avgTextScoreForKwdWithSalary': 1.0133493859218217, 'countOfAdsContainingKeyword': 264, 'totalAdsInDBForPeriod': 1775}}, 
-# 'top2': {'JavaScript': {'avgSalaryLow': 2322.8064516129034, 'avgSalaryHigh': 4213.4177215189875, 'countOfAdsWithSalary': 220, 'avgTextScoreForKwdWithSalary': 0.6064530290581829, 'countOfAdsContainingKeyword': 241, 'totalAdsInDBForPeriod': 1775}}, 
-# 'top3': {'Linux': {'avgSalaryLow': 2323.883435582822, 'avgSalaryHigh': 3880.089430894309, 'countOfAdsWithSalary': 165, 'avgTextScoreForKwdWithSalary': 0.5932222391963913, 'countOfAdsContainingKeyword': 205, 'totalAdsInDBForPeriod': 1775}}
+# Output something like (tech names don't match above input just because of bad example
+# {top1: {'name': 'SNMP','avgSalaryLow': 2177.5, 'avgSalaryHigh': 2650.0, 'countOfAdsWithSalary': 2, 'avgTextScoreForKwdWithSalary': 0.5015849811108432, 'countOfAdsContainingKeyword': 2, 'totalAdsInDBForPeriod': 1775}} 
+# {top2: {'name': 'Pandas','avgSalaryLow': 2200.0, 'avgSalaryHigh': 3300.0, 'countOfAdsWithSalary': 2, 'avgTextScoreForKwdWithSalary': 0.5011765292111441, 'countOfAdsContainingKeyword': 2, 'totalAdsInDBForPeriod': 1775}} 
+# {top3: {'name': 'Cordova', 'avgSalaryLow': 2064.0, 'avgSalaryHigh': 4375.0, 'countOfAdsWithSalary': 2, 'avgTextScoreForKwdWithSalary': 0.5015516829792313, 'countOfAdsContainingKeyword': 2, 'totalAdsInDBForPeriod': 1775}} 
+# {top4: {'name':'Xamarin', 'avgSalaryLow': 2314.0, 'avgSalaryHigh': 4070.0, 'countOfAdsWithSalary': 2, 'avgTextScoreForKwdWithSalary': 0.5015690275413895, 'countOfAdsContainingKeyword': 2, 'totalAdsInDBForPeriod': 1775}}
 def make_top_list_dict(sorted_nested_dict, kwd_group_name, top_size=10):
     kwds_for_web = {}
     kwds_for_web_with_grp_name = {}
     num_pos = 1
     for k, v in sorted_nested_dict.items():
-        kwds_for_web[f'top{num_pos}'] = {}
-        kwds_for_web[f'top{num_pos}'][k] = v
+        
+        tech_name = {}
+        data_for_tech = {}
+        tech_name['name'] = k # creating dictionary holding tech name, e.g. {'name':'java'}
+        data_for_tech = v # creating dictionary holding actual data , such as {'avgSalaryLow': 2314.0,...}
+        merged_dict = dict(**tech_name, **data_for_tech) # merging it to be like {'name':'java', avgSalaryLow': 2314.0,...}
+        
+        kwds_for_web[f'top{num_pos}'] = {} # creating nested dictionary to hold merged_dict data
+        kwds_for_web[f'top{num_pos}'] = merged_dict # this becomes top1, top2...topn as: {top1: {'name':'java', avgSalaryLow': 2314.0,...}}
         num_pos += 1
         if num_pos > top_size:
             break
-    # This dict will contain group name, e.g. "Platforms" and other technologies will nested under it. 
+    
     # This will help group data in a single YAML file as technologies and their stats will be listed 
     # under top1, top2, top"n", so we need somehow distinguish to what section those technologies belong
     # e.g. whether top1 technology belongs to "all_top_keywords" or to a more specific group "Platforms" or "Databases"
@@ -553,7 +561,7 @@ def produce_keyword_cloud(keyword_dict, img_file_to_save, jpg_quality):
     # Since the text is small collocations are turned off and text is lower-cased
     #wc = WordCloud(min_font_size=14, max_font_size=100, background_color='white',width=800, height=400, mode='RGB').generate_from_frequencies(keyword_dict)
     #wc = WordCloud(font_path='/home/fogelis/.local/share/fonts/Classic Robot.otf', prefer_horizontal=1,  max_words=300, background_color='white',width=700, height=700, mode='RGB').generate_from_frequencies(keyword_dict)
-    wc = WordCloud(font_path='/home/fogelis/.local/share/fonts/Inter-Medium.ttf', prefer_horizontal=1,  max_words=300, background_color='white',width=700, height=700, mode='RGB').generate_from_frequencies(keyword_dict)
+    wc = WordCloud(font_path='Inter-Medium.ttf', prefer_horizontal=1,  max_words=300, background_color='white',width=700, height=700, mode='RGB').generate_from_frequencies(keyword_dict)
     # for transparent background:
     #wc = WordCloud(font_path='/home/fogelis/.local/share/fonts/Inter-Medium.ttf', prefer_horizontal=1,  max_words=300, background_color=None, width=700, height=700, mode='RGBA').generate_from_frequencies(keyword_dict)
 
@@ -675,7 +683,7 @@ logging.info('Number of ads inserted: %s', str(ads_inserted))
 
 
 # Print dictionary of keywords and number of matched documents, take keyword group name from file name:
-basepath = '/home/fogelis/proj/cvish/categories/'
+basepath = 'categories/'
 # this is the nested dictionary where we will be storing tech keyword matches for all technology types (OS, DBs, languages etc.):
 container_with_stats = {}
 for entry in os.listdir(basepath):
