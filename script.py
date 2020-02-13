@@ -146,7 +146,7 @@ def sort_dictionary_by_values_desc(unsorted_dict):
     sorted_dict = {}
     # Sort dictionary from top keywords to lowest number:
     # https://dzone.com/articles/python-201-how-sort-dictionary
-    for k in sorted(unsorted_dict.keys(), key=lambda y: (unsorted_dict[y]['countOfAdsContainingKeyword']), reverse=True):
+    for k in sorted(unsorted_dict.keys(), key=lambda y: (unsorted_dict[y]['adsWithKwd']), reverse=True):
         sorted_dict[k] = unsorted_dict[k]
     return sorted_dict
 ########################### Sorting completed ##########################################################
@@ -170,11 +170,11 @@ def count_keywords_from_db(file_with_keywords):
                 technology = keyword.rstrip()
                 
                 # Send a query to MongoDB:
-                countOfAdsContainingKeyword = ads.find({"$text": {"$search": f'""\"{technology}\"""' }, "job_post_date":{"$gt": ref_date} }).count()
+                adsWithKwd = ads.find({"$text": {"$search": f'""\"{technology}\"""' }, "job_post_date":{"$gt": ref_date} }).count()
                 # declare temporary storage dictinary for count matches, we will add it to a larger dictionary for each technology individually
                 documents_matched = {}
-                documents_matched['countOfAdsContainingKeyword'] = countOfAdsContainingKeyword # this is a count of docs with keywords we are looking for
-                documents_matched['totalAdsInDBForPeriod'] = total_ads_per_period # this is a count of all docs/ads per the same period, so that it helps calculate percentage if we want later                
+                documents_matched['adsWithKwd'] = adsWithKwd # this is a count of docs with keywords we are looking for
+                documents_matched['adsInDBforPeriod'] = total_ads_per_period # this is a count of all docs/ads per the same period, so that it helps calculate percentage if we want later                
                 # constucting a query to MongoDB:               
                 pipeline = [
                     { "$match": 
@@ -194,8 +194,8 @@ def count_keywords_from_db(file_with_keywords):
                             "_id": "null", 
                             "avgSalaryLow": { "$avg": "$salary_from"},
                             "avgSalaryHigh": { "$avg": "$salary_to"}, 
-                            "countOfAdsWithSalary": {"$sum":1}, 
-                            "avgTextScoreForKwdWithSalary": {"$avg": {"$meta": "textScore"}}
+                            "adsWithKwdSalary": {"$sum":1}, 
+                            "avgTxtScoreKwdSalary": {"$avg": {"$meta": "textScore"}}
                         },
                     },
                     { 
@@ -204,8 +204,8 @@ def count_keywords_from_db(file_with_keywords):
                             "_id": 0, 
                             'avgSalaryLow':1,
                             'avgSalaryHigh':1,
-                            'countOfAdsWithSalary':1,
-                            'avgTextScoreForKwdWithSalary':1
+                            'adsWithKwdSalary':1,
+                            'avgTxtScoreKwdSalary':1
                         }
                     }
                     ]
@@ -510,16 +510,16 @@ def nested_bson_2_nested_dict(bson_from_mongo):
 # Constructing dictionary for use on a web page containing top1, top2, top3 as keys, 
 # so that data is better structured by using top1 in a web page instead of e.g. "Java":
 # Input something like:
-# 'SNMP': {'avgSalaryLow': 2177.5, 'avgSalaryHigh': 2650.0, 'countOfAdsWithSalary': 2, 'avgTextScoreForKwdWithSalary': 0.5015849811108432, 'countOfAdsContainingKeyword': 2, 'totalAdsInDBForPeriod': 1775}, 
-# 'Pandas': {'avgSalaryLow': 2200.0, 'avgSalaryHigh': 3300.0, 'countOfAdsWithSalary': 2, 'avgTextScoreForKwdWithSalary': 0.5011765292111441, 'countOfAdsContainingKeyword': 2, 'totalAdsInDBForPeriod': 1775}, 
-# 'Cordova': {'avgSalaryLow': 2064.0, 'avgSalaryHigh': 4375.0, 'countOfAdsWithSalary': 2, 'avgTextScoreForKwdWithSalary': 0.5015516829792313, 'countOfAdsContainingKeyword': 2, 'totalAdsInDBForPeriod': 1775}, 
-# 'Xamarin': {'avgSalaryLow': 2314.0, 'avgSalaryHigh': 4070.0, 'countOfAdsWithSalary': 2, 'avgTextScoreForKwdWithSalary': 0.5015690275413895, 'countOfAdsContainingKeyword': 2, 'totalAdsInDBForPeriod': 1775}
+# 'SNMP': {'avgSalaryLow': 2177.5, 'avgSalaryHigh': 2650.0, 'adsWithKwdSalary': 2, 'avgTxtScoreKwdSalary': 0.5015849811108432, 'adsWithKwd': 2, 'adsInDBforPeriod': 1775}, 
+# 'Pandas': {'avgSalaryLow': 2200.0, 'avgSalaryHigh': 3300.0, 'adsWithKwdSalary': 2, 'avgTxtScoreKwdSalary': 0.5011765292111441, 'adsWithKwd': 2, 'adsInDBforPeriod': 1775}, 
+# 'Cordova': {'avgSalaryLow': 2064.0, 'avgSalaryHigh': 4375.0, 'adsWithKwdSalary': 2, 'avgTxtScoreKwdSalary': 0.5015516829792313, 'adsWithKwd': 2, 'adsInDBforPeriod': 1775}, 
+# 'Xamarin': {'avgSalaryLow': 2314.0, 'avgSalaryHigh': 4070.0, 'adsWithKwdSalary': 2, 'avgTxtScoreKwdSalary': 0.5015690275413895, 'adsWithKwd': 2, 'adsInDBforPeriod': 1775}
 
 # Output something like (tech names don't match above input just because of bad example
-# {top1: {'name': 'SNMP','avgSalaryLow': 2177.5, 'avgSalaryHigh': 2650.0, 'countOfAdsWithSalary': 2, 'avgTextScoreForKwdWithSalary': 0.5015849811108432, 'countOfAdsContainingKeyword': 2, 'totalAdsInDBForPeriod': 1775}} 
-# {top2: {'name': 'Pandas','avgSalaryLow': 2200.0, 'avgSalaryHigh': 3300.0, 'countOfAdsWithSalary': 2, 'avgTextScoreForKwdWithSalary': 0.5011765292111441, 'countOfAdsContainingKeyword': 2, 'totalAdsInDBForPeriod': 1775}} 
-# {top3: {'name': 'Cordova', 'avgSalaryLow': 2064.0, 'avgSalaryHigh': 4375.0, 'countOfAdsWithSalary': 2, 'avgTextScoreForKwdWithSalary': 0.5015516829792313, 'countOfAdsContainingKeyword': 2, 'totalAdsInDBForPeriod': 1775}} 
-# {top4: {'name':'Xamarin', 'avgSalaryLow': 2314.0, 'avgSalaryHigh': 4070.0, 'countOfAdsWithSalary': 2, 'avgTextScoreForKwdWithSalary': 0.5015690275413895, 'countOfAdsContainingKeyword': 2, 'totalAdsInDBForPeriod': 1775}}
+# {top1: {'name': 'SNMP','avgSalaryLow': 2177.5, 'avgSalaryHigh': 2650.0, 'adsWithKwdSalary': 2, 'avgTxtScoreKwdSalary': 0.5015849811108432, 'adsWithKwd': 2, 'adsInDBforPeriod': 1775}} 
+# {top2: {'name': 'Pandas','avgSalaryLow': 2200.0, 'avgSalaryHigh': 3300.0, 'adsWithKwdSalary': 2, 'avgTxtScoreKwdSalary': 0.5011765292111441, 'adsWithKwd': 2, 'adsInDBforPeriod': 1775}} 
+# {top3: {'name': 'Cordova', 'avgSalaryLow': 2064.0, 'avgSalaryHigh': 4375.0, 'adsWithKwdSalary': 2, 'avgTxtScoreKwdSalary': 0.5015516829792313, 'adsWithKwd': 2, 'adsInDBforPeriod': 1775}} 
+# {top4: {'name':'Xamarin', 'avgSalaryLow': 2314.0, 'avgSalaryHigh': 4070.0, 'adsWithKwdSalary': 2, 'avgTxtScoreKwdSalary': 0.5015690275413895, 'adsWithKwd': 2, 'adsInDBforPeriod': 1775}}
 def make_top_list_dict(sorted_nested_dict, kwd_group_name, top_size=10):
     kwds_for_web = {}
     kwds_for_web_with_grp_name = {}
@@ -551,7 +551,7 @@ def make_top_list_dict(sorted_nested_dict, kwd_group_name, top_size=10):
 def get_keyword_and_count(nested_dict):
     kwds_with_count = {}
     for k, v in nested_dict.items():
-        kwds_with_count[k] = v['countOfAdsContainingKeyword']
+        kwds_with_count[k] = v['adsWithKwd']
     return kwds_with_count
 ############################ End of extract only technology name and count from nested dict ###################
 
@@ -787,20 +787,24 @@ all_kwds = sort_dictionary_by_values_desc(all_kwds)
 #get_keyword_and_count(all_kwds)
 
 #dict_for_yaml = make_top_list_dict(all_kwds, 5)
+# create dictionary holding today's date:
+timestamp = {}
+timestamp['date'] = todays_timestamp
 
 # write YAML file to disk:
 # opening for writing, truncating old file if exists:
-with open('all_nice_data.yaml', 'w') as yaml_file:
-    yaml.dump(make_top_list_dict(all_kwds, 'TopKeywordsOverall', 10), yaml_file, default_flow_style=False, sort_keys=False)
-    yaml.dump(make_top_list_dict(platforms_kwds, 'Platforms', 5), yaml_file, default_flow_style=False, sort_keys=False)
-    yaml.dump(make_top_list_dict(programming_scripting_languages_kwds, 'ProgrammingScriptingLanguages', 5), yaml_file, default_flow_style=False, sort_keys=False)
-    yaml.dump(make_top_list_dict(databases_kwds, 'Databases', 5), yaml_file, default_flow_style=False, sort_keys=False)
-    yaml.dump(make_top_list_dict(web_frameworks_kwds, 'WebFrameworks', 5), yaml_file, default_flow_style=False, sort_keys=False)
-    yaml.dump(make_top_list_dict(other_frameworks_tools_kwds, 'OtherFrameworksTools', 5), yaml_file, default_flow_style=False, sort_keys=False)
-    yaml.dump(make_top_list_dict(tools_kwds, 'Tools', 5), yaml_file, default_flow_style=False, sort_keys=False)
-    yaml.dump(make_top_list_dict(infosec_kwds, 'InfoSec', 5), yaml_file, default_flow_style=False, sort_keys=False)
-    yaml.dump(make_top_list_dict(networking_kwds, 'Networking', 5), yaml_file, default_flow_style=False, sort_keys=False)
-    yaml.dump(make_top_list_dict(buzzwords_kwds, 'Buzzwords', 5), yaml_file, default_flow_style=False, sort_keys=False)
+with open('toptech.yaml', 'w') as yaml_file:
+    yaml.dump(timestamp, yaml_file, default_flow_style=False, sort_keys=False)
+    yaml.dump(make_top_list_dict(all_kwds, 'allTopKwds', 10), yaml_file, default_flow_style=False, sort_keys=False)
+    yaml.dump(make_top_list_dict(platforms_kwds, 'Platforms', 10), yaml_file, default_flow_style=False, sort_keys=False)
+    yaml.dump(make_top_list_dict(programming_scripting_languages_kwds, 'ProgrammingScriptingLanguages', 10), yaml_file, default_flow_style=False, sort_keys=False)
+    yaml.dump(make_top_list_dict(databases_kwds, 'Databases', 10), yaml_file, default_flow_style=False, sort_keys=False)
+    yaml.dump(make_top_list_dict(web_frameworks_kwds, 'WebFrameworks', 10), yaml_file, default_flow_style=False, sort_keys=False)
+    yaml.dump(make_top_list_dict(other_frameworks_tools_kwds, 'OtherFrameworksTools', 10), yaml_file, default_flow_style=False, sort_keys=False)
+    yaml.dump(make_top_list_dict(tools_kwds, 'Tools', 10), yaml_file, default_flow_style=False, sort_keys=False)
+    yaml.dump(make_top_list_dict(infosec_kwds, 'InfoSec', 10), yaml_file, default_flow_style=False, sort_keys=False)
+    yaml.dump(make_top_list_dict(networking_kwds, 'Networking', 10), yaml_file, default_flow_style=False, sort_keys=False)
+    yaml.dump(make_top_list_dict(buzzwords_kwds, 'Buzzwords', 10), yaml_file, default_flow_style=False, sort_keys=False)
     
 
 
