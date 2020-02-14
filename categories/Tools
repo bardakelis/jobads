@@ -4,7 +4,7 @@ Graphite
 Git
 Jenkins
 JIRA
-SLack
+Slack
 Zoom
 Clarizen
 Asana
@@ -20,6 +20,7 @@ Chef
 Ansible
 SaltStack
 Terraform
+CloudFormation
 Vagrant
 Jenkins
 Travis CI
@@ -38,6 +39,16 @@ Sensu
 New Relic
 Datadog
 ELK
-Elasticsearch
 Logstash
 Kibana
+Office 365
+Wireshark
+tcpdump
+Visual Studio Code
+PyCharm
+Atom
+Visual Studio
+curl
+sublime
+ssh
+PHPMyAdmin

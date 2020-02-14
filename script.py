@@ -175,7 +175,7 @@ def count_keywords_from_db(file_with_keywords):
                 documents_matched = {}
                 documents_matched['adsWithKwd'] = adsWithKwd # this is a count of docs with keywords we are looking for
                 documents_matched['adsInDBforPeriod'] = total_ads_per_period # this is a count of all docs/ads per the same period, so that it helps calculate percentage if we want later                
-                # constucting a query to MongoDB:               
+                # constucting a query to MongoDB that retrieves all statistics such as salary, keyword count etc:               
                 pipeline = [
                     { "$match": 
                         {

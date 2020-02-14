@@ -2,26 +2,32 @@ Linux
 Windows
 Docker
 Android
+Solaris
+Windows Server
 AWS
 Amazon Web Services
-Terraform
 EC2
 S3
-CloudFormation
 MacOS
-Slack
 Raspberry Pi
-WordPress
 iOS
 Google Cloud
-Google Cloud Platform
 GCP
 Azure
-Microsoft Azure
 Arduino
 Heroku
 Kubernetes
 Openshift
 IBM Cloud
 Watson
-
+VMWare
+ESXi
+KVM
+Hyper-V
+VirtualBox
+Proxmox
+Nutanix
+XEN
+XenServer
+Citrix
+vSphere

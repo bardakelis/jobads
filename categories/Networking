@@ -6,6 +6,7 @@ Arista
 Huawei
 Routing
 Switching
+Firewall
 BGP
 Load balancers
 Load balancing
@@ -16,7 +17,50 @@ ACI
 Linksys
 TCP
 IP
+IPv4
+IPv6
 SNMP
 UDP
 CCIE
 CCNP
+IPSec
+VPN
+VLAN
+Cisco ASA
+Wireless
+NAT
+Cisco IOS
+DHCP
+ARP
+Spanning Tree
+Junos
+VoIP
+ICMP
+EIGRP
+Fortigate
+Juniper SRX
+Cisco Nexus
+HSRP
+GRE
+IGMP
+Wireless LAN controllers
+WLC
+VRRP
+MPLS
+VXLAN
+TACACS
+iperf
+Arista
+Aruba Networks
+Proxy
+Proxies
+Palo Alto
+Aironet
+Avaya
+BYOD
+LTE
+4G
+5G
+Software Defined Network
+
+

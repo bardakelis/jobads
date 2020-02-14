@@ -1,13 +1,178 @@
+PenTest
+Penetration Testing
 IPS
 IDS
 Kali
-Kali Linux
 Nessus
 SIEM
 Splunk
 Metasploit
 John the Ripper
 Cain and Abel
-Wireshark
-Tcpdump
 Snort
+SSL
+TLS
+OpenSSL
+nmap
+Bitdefender
+ESET
+F-Secure
+Symantec
+Kaspersky
+Trend Micro
+Webroot
+Avast
+McAfee
+Panda
+AttackIQ FireDrill
+Aqua
+Avanan
+Awake Security Platform
+Barracuda Sentinel
+Bitglass
+Blue Hexagon
+CrowdStrike Falcon
+CybeReady
+Cynet 360
+Fidelis Deception
+FireMon
+GreatHorn
+JASK Autonomous Security Operations Center
+LogRhythm
+Morphisec
+NeuVector
+Nyotron Paranoid
+Perimeter 81
+Power LogOn
+SlashNext
+XM Cyber HaXM
+Balbix
+BluVector
+Bricata
+Cloud Defender
+CyCognito
+Cofense Triage
+Contrast Security
+Corelight
+Digital Guardian
+enSilo
+ForeScout
+Forum Sentry
+InSpec 2.0
+Intellicta Platform
+Insight Engines
+Mantix4
+Ping Identity 
+RiskIQ Digital Footprint
+Seceon Open Threat Management Platform
+SentinelOne
+Senzing
+Solebit
+StackRox
+Threat Stack
+Vectra Cognito
+Acalvio ShadowPlex
+Attivo
+Barracuda Web Application Firewall
+Bay Dynamics Risk Fabric
+Bitdefender HVI
+CAWS 
+Crossbow
+Cyphon
+GreatHorn
+GuardiCore Centra
+InfoZen
+Kenna Security
+Lacework
+Minerva
+Promisec
+RedSeal
+SecBI
+Sqrrl
+ThreatConnect
+vArmour
+Waratek
+XebiaLabs
+OWASP TOP 10
+SANS TOP 25
+CWE TOP 25
+windbg
+x64dbg
+Burp
+OWASP ZAP
+GIAC
+GSEC
+GCFW
+GISO
+CISA
+CISSP
+CSSLP
+ISSAP
+ISSEP
+ISSMP
+SSCP
+CCSP
+CAP
+CIPP
+CIPM
+CIPT
+GSEC
+GCIH
+GCFA
+GPEN
+GCIA
+GWAPT
+GCFE
+GSLC
+GREM
+GISF
+GCED
+GICSP
+GSNA
+GMON
+GCWN
+GNFA
+GXPN
+GICSP
+GPPA
+GCCC
+GMOB
+GAWN
+GCUX
+GCTI
+GPYC
+GWEB
+GSSP-JAVA
+GSTRT
+GLEG
+GASF
+GCDA
+GDAT
+GCPM
+GSSP-.NET
+GDSA
+GSE
+GCIP
+GEVA
+GCSA
+GOSI
+SAMLv2
+OpenID Connect
+PKI
+PWK
+Penetration Testing with Kali Linux
+OSCP
+Offensive Security Certified Professional
+CEH
+Certified Ethical Hacker
+Fortify
+Checkmarx
+Qualys
+Core Impact
+PTES
+Penetration Testing Execution Standard
+OSSTMM
+Open Source Security Testing Methodology Manual
+CREST
+Cloud Security
+PCI DSS
