@@ -561,7 +561,7 @@ def produce_keyword_cloud(keyword_dict, img_file_to_save, jpg_quality):
     # Since the text is small collocations are turned off and text is lower-cased
     #wc = WordCloud(min_font_size=14, max_font_size=100, background_color='white',width=800, height=400, mode='RGB').generate_from_frequencies(keyword_dict)
     #wc = WordCloud(font_path='/home/fogelis/.local/share/fonts/Classic Robot.otf', prefer_horizontal=1,  max_words=300, background_color='white',width=700, height=700, mode='RGB').generate_from_frequencies(keyword_dict)
-    wc = WordCloud(font_path='Inter-Medium.ttf', prefer_horizontal=1,  max_words=300, background_color='white',width=700, height=700, mode='RGB').generate_from_frequencies(keyword_dict)
+    wc = WordCloud(font_path='fonts/Inter-Medium.ttf', prefer_horizontal=1,  max_words=300, background_color='white',width=700, height=700, mode='RGB').generate_from_frequencies(keyword_dict)
     # for transparent background:
     #wc = WordCloud(font_path='/home/fogelis/.local/share/fonts/Inter-Medium.ttf', prefer_horizontal=1,  max_words=300, background_color=None, width=700, height=700, mode='RGBA').generate_from_frequencies(keyword_dict)
 
