@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import datetime
+from datetime import timedelta
 import logging
 import os
 #for text cleanup:
@@ -152,8 +153,8 @@ def sort_dictionary_by_values_desc(unsorted_dict):
 ########################### Sorting completed ##########################################################
 ########################### Count technology keywords from DB: ##################
 def count_keywords_from_db(file_with_keywords):
-    # Fetch records not older than (currently we have a dummy old date here to fetch all historical records):
-    ref_date = datetime.datetime(2010, 11, 1)
+    # Fetch records not older than 90 days, i.e. approx. 3 months:
+    ref_date = datetime.datetime.today() - datetime.timedelta(days=90)
     # Obtain total number of ads in the database, by only looking at date when an ad was posted:
     total_ads_per_period = ads.find({"job_post_date":{"$gt": ref_date} }).count()
 
@@ -556,19 +557,8 @@ def get_keyword_and_count(nested_dict):
 ############################ End of extract only technology name and count from nested dict ###################
 
 ########################### Produce a keyword cloud ##########################################################
-def produce_keyword_cloud(keyword_dict, img_file_to_save, jpg_quality):
-    #dict = {'Linux': 109, 'Docker': 106, 'Windows': 66, 'AWS': 62, 'Kubernetes': 54, 'iOS': 48, 'Android': 43, 'Azure': 42, 'Terraform': 14, 'S3': 9, 'Google Cloud': 9, 'Microsoft Azure': 8, 'EC2': 7, 'Amazon Web Services': 6, 'MacOS': 5, 'Raspberry Pi': 4, 'Google Cloud Platform': 2, 'CloudFormation': 1, 'Slack': 1, 'WordPress': 1, 'Heroku': 1, 'IBM Cloud': 1, 'Oracle': 65, 'MySQL': 54, 'PostgreSQL': 31, 'Redis': 22, 'Elasticsearch': 21, 'MongoDB': 20, 'Microsoft SQL Server': 10, 'Cassandra': 9, 'MariaDB': 6, 'Firebase': 4, 'Java': 148, 'JavaScript': 128, 'PHP': 104, 'Python': 95, 'CSS': 74, 'HTML': 71, 'C#': 65, 'Go': 43, 'C++': 31, 'Bash': 24, 'PowerShell': 21, 'TypeScript': 21, 'Scala': 18, 'Ruby': 16, 'Swift': 13, 'Kotlin': 9, 'VBA': 7, 'Shell': 6, 'Objective-C': 3, 'Assembly': 2, 'Rust': 2, 'Clojure': 1, 'Spring': 61, 'Angular': 37, 'Laravel': 32, 'jQuery': 23, 'ASP.NET': 12, 'React.js': 10, 'Vue.js': 10, 'Drupal': 9, 'Express': 8, 'Django': 2, '.NET': 76, 'Ansible': 26, 'Node.js': 19, 'Hadoop': 18, 'Puppet': 17, 'Chef': 17, 'React Native': 16, '.NET Core': 10, 'Cordova': 1, 'Xamarin': 1}
-    # Since the text is small collocations are turned off and text is lower-cased
-    #wc = WordCloud(min_font_size=14, max_font_size=100, background_color='white',width=800, height=400, mode='RGB').generate_from_frequencies(keyword_dict)
-    #wc = WordCloud(font_path='/home/fogelis/.local/share/fonts/Classic Robot.otf', prefer_horizontal=1,  max_words=300, background_color='white',width=700, height=700, mode='RGB').generate_from_frequencies(keyword_dict)
-    wc = WordCloud(font_path='fonts/Inter-Medium.ttf', prefer_horizontal=1,  max_words=300, background_color='white',width=700, height=700, mode='RGB').generate_from_frequencies(keyword_dict)
-    # for transparent background:
-    #wc = WordCloud(font_path='/home/fogelis/.local/share/fonts/Inter-Medium.ttf', prefer_horizontal=1,  max_words=300, background_color=None, width=700, height=700, mode='RGBA').generate_from_frequencies(keyword_dict)
-
-    #wc = WordCloud(font_path='unispace.ttf',prefer_horizontal=1, min_font_size=14, max_font_size=100, background_color='white',width=800, height=400, mode='RGB').generate_from_frequencies(keyword_dict)
-    #wc = WordCloud(font_path='RationalInteger.ttf',prefer_horizontal=1, min_font_size=14, max_font_size=100, background_color='white',width=800, height=400, mode='RGB').generate_from_frequencies(keyword_dict)
-    
-   
+def produce_keyword_cloud(keyword_dict, img_file_to_save, jpg_quality, bigger=False):
+    # assign colors to categories:   
     color2words = {
         'magenta': list(buzzwords_kwds.keys()),
         'mediumvioletred': list(databases_kwds.keys()),
@@ -583,22 +573,38 @@ def produce_keyword_cloud(keyword_dict, img_file_to_save, jpg_quality):
         
     }
     
-    #print(color2words)
-    # Words that are not in any of the color_to_words values
-    # will be colored with a grey single color function
     default_color = 'grey'
-    # Create a color function with single tone
-    # grouped_color_func = SimpleGroupedColorFunc(color_to_words, default_color)
     grouped_color_func = SimpleGroupedColorFunc(color2words, default_color)
+
+    #original was this:
+    #wc = WordCloud(font_path='fonts/Inter-Medium.ttf', prefer_horizontal=1,  max_words=300, background_color='white',width=700, height=700, mode='RGB').generate_from_frequencies(keyword_dict)
+    
+    # for all_kwds we will make wordcloud image of bigger height:
+    if bigger == True:
+        wc = WordCloud(font_path='fonts/Inter-Medium.ttf', prefer_horizontal=1,  max_words=300, background_color='white',width=700, height=1000, mode='RGB').generate_from_frequencies(keyword_dict)
+        plt.figure( figsize=(8,11), facecolor='k')
+         # define pixel size of resized image:
+        x = 600
+        y = 900
+    else:
+        wc = WordCloud(font_path='fonts/Inter-Medium.ttf', prefer_horizontal=1,  max_words=300, background_color='white',width=700, height=900, mode='RGB').generate_from_frequencies(keyword_dict)
+        plt.figure( figsize=(8,10), facecolor='k')
+        # define pixel size of resized image:
+        x = 600
+        y = 800
+
+
 
     # Apply our color function
     wc.recolor(color_func=grouped_color_func)
-    #wc.to_file('debesiukas.png')
+    
 
     # Plot
     #plt.figure()
     # resize image plotted: figsize=(8,8)  means 800x800 pixels
-    plt.figure( figsize=(8,8), facecolor='k')
+    #plt.figure( figsize=(8,8), facecolor='k')
+
+    #plt.figure( figsize=(8,10), facecolor='k')
     plt.imshow(wc, interpolation="bilinear")
     plt.axis("off")
     # reducing padding of the image to minimum - more effective use of space:
@@ -610,9 +616,7 @@ def produce_keyword_cloud(keyword_dict, img_file_to_save, jpg_quality):
     base_image = Image.open(img_file_to_save+'_tmp.jpg')
     base_image.show()
     base_image.save(img_file_to_save+'@2x.jpg', 'jpeg', quality=jpg_quality)
-    # define pixels of smaller image:
-    x = 600
-    y = 600
+    
     base_image = base_image.resize((x, y), Image.ANTIALIAS)
     base_image.save(img_file_to_save+'.jpg', 'jpeg', quality=jpg_quality)
     
@@ -818,7 +822,7 @@ path_to_kwd_images = 'keyword_cloud/'
 
 # Generate keyword cloud images for all keyword groups:
 # Format: dictionary with keyword:count pairs, path and file name, jpg image quality
-produce_keyword_cloud(get_keyword_and_count(all_kwds), path_to_kwd_images+'all_kwds', 95)
+produce_keyword_cloud(get_keyword_and_count(all_kwds), path_to_kwd_images+'all_kwds', 95, True)
 produce_keyword_cloud(get_keyword_and_count(buzzwords_kwds), path_to_kwd_images+'buzzwords_kwds', 85)
 produce_keyword_cloud(get_keyword_and_count(databases_kwds), path_to_kwd_images+'databases_kwds', 85)
 produce_keyword_cloud(get_keyword_and_count(infosec_kwds), path_to_kwd_images+'infosec_kwds', 85)

@@ -15,15 +15,7 @@ TLS
 OpenSSL
 nmap
 Bitdefender
-ESET
-F-Secure
-Symantec
-Kaspersky
-Trend Micro
 Webroot
-Avast
-McAfee
-Panda
 AttackIQ FireDrill
 Aqua
 Avanan
@@ -73,7 +65,7 @@ Threat Stack
 Vectra Cognito
 Acalvio ShadowPlex
 Attivo
-Barracuda Web Application Firewall
+Web Application Firewall
 Bay Dynamics Risk Fabric
 Bitdefender HVI
 CAWS 
@@ -93,86 +85,23 @@ ThreatConnect
 vArmour
 Waratek
 XebiaLabs
-OWASP TOP 10
-SANS TOP 25
-CWE TOP 25
 windbg
 x64dbg
 Burp
 OWASP ZAP
-GIAC
-GSEC
-GCFW
-GISO
-CISA
-CISSP
-CSSLP
-ISSAP
-ISSEP
-ISSMP
-SSCP
-CCSP
-CAP
-CIPP
-CIPM
-CIPT
-GSEC
-GCIH
-GCFA
-GPEN
-GCIA
-GWAPT
-GCFE
-GSLC
-GREM
-GISF
-GCED
-GICSP
-GSNA
-GMON
-GCWN
-GNFA
-GXPN
-GICSP
-GPPA
-GCCC
-GMOB
-GAWN
-GCUX
-GCTI
-GPYC
-GWEB
-GSSP-JAVA
-GSTRT
-GLEG
-GASF
-GCDA
-GDAT
-GCPM
-GSSP-.NET
-GDSA
-GSE
-GCIP
-GEVA
-GCSA
-GOSI
 SAMLv2
 OpenID Connect
 PKI
-PWK
-Penetration Testing with Kali Linux
-OSCP
 Offensive Security Certified Professional
 CEH
+CISSP
 Certified Ethical Hacker
 Fortify
 Checkmarx
 Qualys
 Core Impact
 PTES
-Penetration Testing Execution Standard
 OSSTMM
-Open Source Security Testing Methodology Manual
 CREST
 Cloud Security
 PCI DSS
