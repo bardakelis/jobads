@@ -156,7 +156,9 @@ def count_keywords_from_db(file_with_keywords):
     # Fetch records not older than 90 days, i.e. approx. 3 months:
     ref_date = datetime.datetime.today() - datetime.timedelta(days=90)
     # Obtain total number of ads in the database, by only looking at date when an ad was posted:
-    total_ads_per_period = ads.find({"job_post_date":{"$gt": ref_date} }).count()
+    total_ads_per_period = ads.count_documents({"job_post_date":{"$gt": ref_date} })
+    #total_ads_per_period = ads.find({"job_post_date":{"$gt": ref_date} }).estimated_document_count()
+
 
     with open(file_with_keywords) as file:
         # Create emtpy dictionary to store stats:
@@ -171,7 +173,7 @@ def count_keywords_from_db(file_with_keywords):
                 technology = keyword.rstrip()
                 
                 # Send a query to MongoDB:
-                adsWithKwd = ads.find({"$text": {"$search": f'""\"{technology}\"""' }, "job_post_date":{"$gt": ref_date} }).count()
+                adsWithKwd = ads.count_documents({"$text": {"$search": f'""\"{technology}\"""' }, "job_post_date":{"$gt": ref_date} })
                 # declare temporary storage dictinary for count matches, we will add it to a larger dictionary for each technology individually
                 documents_matched = {}
                 documents_matched['adsWithKwd'] = adsWithKwd # this is a count of docs with keywords we are looking for
