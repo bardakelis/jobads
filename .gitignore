@@ -2,7 +2,7 @@
 *.yml
 !.gitignore
 !script.py
-!browsing.py
+browsing.py
 !keywordcloud.py
 !categories/*
 !webdriver/*
