@@ -636,7 +636,7 @@ user_agent = {'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.
 # 7 days: "7d"
 # 14 days: "14d"
 # 28 days: "28d"
-timespan = '1d'
+timespan = '3d'
 
 # job_area
 # IT: "informacines-technologijos"
