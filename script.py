@@ -69,7 +69,7 @@ print("Will use lang '%s'" % (lang))
 
 ######################### Define logging format: #####################################
 #logging.basicConfig(level=logging.DEBUG, format='%(asctime)s -%(levelname)s - %(message)s')
-logging.basicConfig(level=logging.DEBUG, filename='./logs/application.log', filemode='w', format='%(asctime)s -%(levelname)s - %(message)s')
+logging.basicConfig(level=logging.DEBUG, filename='logs/application.log', filemode='w', format='%(asctime)s -%(levelname)s - %(message)s')
 ######################################################################################
 
 ######### Check if ad text extracted can be considered as valid ###############
@@ -793,11 +793,12 @@ all_kwds = sort_dictionary_by_values_desc(all_kwds)
 #dict_for_yaml = make_top_list_dict(all_kwds, 5)
 # create dictionary holding today's date:
 timestamp = {}
-timestamp['date'] = todays_timestamp
+todays_timestamp_with_hours = datetime.datetime.today().strftime('%Y-%m-%d, %H:%M:%S')
+timestamp['date'] = todays_timestamp_with_hours
 
 # write YAML file to disk:
 # opening for writing, truncating old file if exists:
-with open('./output/yaml/toptech.yaml', 'w') as yaml_file:
+with open('../hugo/data/toptech.yaml', 'w') as yaml_file:
     yaml.dump(timestamp, yaml_file, default_flow_style=False, sort_keys=False)
     yaml.dump(make_top_list_dict(all_kwds, 'allTopKwds', 10), yaml_file, default_flow_style=False, sort_keys=False)
     yaml.dump(make_top_list_dict(platforms_kwds, 'Platforms', 10), yaml_file, default_flow_style=False, sort_keys=False)
@@ -818,7 +819,7 @@ with open('./output/yaml/toptech.yaml', 'w') as yaml_file:
 
 
 
-path_to_kwd_images = './output/keyword_cloud/'
+path_to_kwd_images = '../hugo/static/img/keyword_cloud/'
 
 # Generate keyword cloud images for all keyword groups:
 # Format: dictionary with keyword:count pairs, path and file name, jpg image quality
