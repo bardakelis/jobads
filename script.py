@@ -557,7 +557,6 @@ def get_keyword_and_count(nested_dict):
         kwds_with_count[k] = v['adsWithKwd']
     return kwds_with_count
 ############################ End of extract only technology name and count from nested dict ###################
-
 ########################### Produce a keyword cloud ##########################################################
 def produce_keyword_cloud(keyword_dict, img_file_to_save, jpg_quality, bigger=False):
     # assign colors to categories:   
@@ -613,7 +612,6 @@ def produce_keyword_cloud(keyword_dict, img_file_to_save, jpg_quality, bigger=Fa
     plt.tight_layout(pad=2)
     # saving large image:
     plt.savefig(img_file_to_save+'_tmp.jpg', quality=100)
-    
 
     base_image = Image.open(img_file_to_save+'_tmp.jpg')
     base_image.show()
