@@ -69,7 +69,7 @@ print("Will use lang '%s'" % (lang))
 
 ######################### Define logging format: #####################################
 #logging.basicConfig(level=logging.DEBUG, format='%(asctime)s -%(levelname)s - %(message)s')
-logging.basicConfig(level=logging.DEBUG, filename='ads.txt', filemode='w', format='%(asctime)s -%(levelname)s - %(message)s')
+logging.basicConfig(level=logging.DEBUG, filename='./logs/application.log', filemode='w', format='%(asctime)s -%(levelname)s - %(message)s')
 ######################################################################################
 
 ######### Check if ad text extracted can be considered as valid ###############
