@@ -5,6 +5,7 @@
 !browsing.py
 !keywordcloud.py
 !categories/*
+!webdriver/*
 !fonts/*
 !./keyword_cloud/
 !logs/
