@@ -797,7 +797,7 @@ timestamp['date'] = todays_timestamp
 
 # write YAML file to disk:
 # opening for writing, truncating old file if exists:
-with open('toptech.yaml', 'w') as yaml_file:
+with open('./output/yaml/toptech.yaml', 'w') as yaml_file:
     yaml.dump(timestamp, yaml_file, default_flow_style=False, sort_keys=False)
     yaml.dump(make_top_list_dict(all_kwds, 'allTopKwds', 10), yaml_file, default_flow_style=False, sort_keys=False)
     yaml.dump(make_top_list_dict(platforms_kwds, 'Platforms', 10), yaml_file, default_flow_style=False, sort_keys=False)
@@ -818,7 +818,7 @@ with open('toptech.yaml', 'w') as yaml_file:
 
 
 
-path_to_kwd_images = 'keyword_cloud/'
+path_to_kwd_images = './output/keyword_cloud/'
 
 # Generate keyword cloud images for all keyword groups:
 # Format: dictionary with keyword:count pairs, path and file name, jpg image quality
