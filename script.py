@@ -107,7 +107,7 @@ def selenium_browser(url):
     options = Options()
     options.headless = True
     options.add_argument('user-agent=Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36')
-    browser = webdriver.Chrome("./webdriver/chromedriver", chrome_options=options)
+    browser = webdriver.Chrome("./webdriver/chromedriver", options=options)
   
     try:
         browser.set_page_load_timeout(30)
@@ -435,7 +435,7 @@ def job_ads_crawler(url_to_crawl):
         extracted_job_ad_text = ad_with_spaces_removed
 
         if ad_extraction_ok(extracted_job_ad_text) is False:
-            logging.warn('URL: %s | Ad length too short (%d bytes) | Extractor is: %s', job_ad_url, len(extracted_job_ad_text), extractor)
+            logging.warning('URL: %s | Ad length too short (%d bytes) | Extractor is: %s', job_ad_url, len(extracted_job_ad_text), extractor)
         else:
             logging.info('URL: %s | Ad length OK (%d bytes) | Extractor is: %s', job_ad_url, len(extracted_job_ad_text), extractor)
                     
