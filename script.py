@@ -815,7 +815,8 @@ all_kwds = sort_dictionary_by_values_desc(all_kwds)
 # create dictionary holding today's date:
 timestamp = {}
 todays_timestamp_with_hours = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
-timestamp['date'] = todays_timestamp_with_hours
+timestamp['date'] = todays_timestamp
+timestamp['timestamp'] = todays_timestamp_with_hours
 
 # write YAML file to disk:
 # opening for writing, truncating old file if exists:
