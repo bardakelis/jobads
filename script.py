@@ -235,8 +235,14 @@ def count_keywords_from_db(file_with_keywords):
 
 ########### Define main crawler function - all crawling happens here: #################
 def job_ads_crawler(url_to_crawl):
+    try:
+        res = requests.get(url_to_crawl, headers=user_agent)
+    except requests.exceptions.RequestException as err:
+        logging.error('Error: %s', err)
+        print('Error: ', err)
+        feedback = (0, 0, 0)
+        return feedback
 
-    res = requests.get(url_to_crawl, headers=user_agent)
     ads_inserted_total = 0
     
     whole_page = BeautifulSoup(res.text, 'html.parser')
@@ -318,17 +324,22 @@ def job_ads_crawler(url_to_crawl):
         # Crawler is pretending to be Chrome browser on Windows:
         
         # Crawler is pretending to be Chrome browser on Windows:
-        job_ad_page_content = requests.get(job_ad_url, headers=user_agent)
-    
-        ##################### Start reading the ad page and extract its contents if it is in page-main-content div, i.e.
-        ##################### plain text, "non-js", "non-iframe", "non-image" ad #############
-        # parse detailed job ad text
-        job_ad_html = BeautifulSoup(job_ad_page_content.text, 'html.parser')
-        # Assuming that a standard cvonline.lt page formatting is used with page-main-content div (otherwise detailed ad text won't be available for extraction)
-        job_ad_details = job_ad_html.select('div#page-main-content') 
-        extracted_job_ad_text = BeautifulSoup(str(job_ad_details), 'html.parser').get_text()
-        extractor = 'BS4:div#page-main-content'
-        ########## End of plain text, "non-js", "non-iframe", "non-image" ad extraction ######
+        try:
+            job_ad_page_content = requests.get(job_ad_url, headers=user_agent)
+        
+            ##################### Start reading the ad page and extract its contents if it is in page-main-content div, i.e.
+            ##################### plain text, "non-js", "non-iframe", "non-image" ad #############
+            # parse detailed job ad text
+            job_ad_html = BeautifulSoup(job_ad_page_content.text, 'html.parser')
+            # Assuming that a standard cvonline.lt page formatting is used with page-main-content div (otherwise detailed ad text won't be available for extraction)
+            job_ad_details = job_ad_html.select('div#page-main-content') 
+            extracted_job_ad_text = BeautifulSoup(str(job_ad_details), 'html.parser').get_text()
+            extractor = 'BS4:div#page-main-content'
+            ########## End of plain text, "non-js", "non-iframe", "non-image" ad extraction ######
+        except requests.exceptions.RequestException as err:
+            logging.error('Error: %s', err)
+            print('Error: ', err)
+
         # At this point we have extracted text from the ad image, unless there was an embedded image or iframe.
         # Since we are not sure if we got all we needed, we will check for embedded job ad images with id=JobAdImage and extract text from them if they exist:
         # If we find iFrame with id "JobAdFrame",then we extract ad text from it as iframe must be in the page for a reason:
@@ -341,29 +352,35 @@ def job_ads_crawler(url_to_crawl):
             # combine domain name with url path to get full URL:
             job_ad_frame_link = root_url + job_ad_frame_tag['src']
             # retrieve the image contents from the link:
-            job_ad_frame = requests.get(job_ad_frame_link)
-            #print('Job ad frame contains:',str(job_ad_frame))
-            job_ad_from_frame = BeautifulSoup(job_ad_frame.text, 'html.parser')
-            # remove <script> tags from results
-            js_junk = job_ad_from_frame.find_all('script')
-            for match in js_junk:
-                match.decompose()
-            # remove <style> tags from results
-            css_junk = job_ad_from_frame.find_all('style')
-            for match in css_junk:
-                match.decompose()
-            job_ad_frame_page = job_ad_from_frame.find('body')
-            # do some checks to avoid errors when extracted_job_ad_text is NoneType, i.e. job ad empty as this one: 
-            # https://www.cvonline.lt/darbo-skelbimas/alisa-management-laboratory-uab/java-programuotojas-a-f4068182.html
-            #Exception has occurred: AttributeError
-            #'NoneType' object has no attribute 'get_text'
+
             try:
-                extracted_job_ad_text = job_ad_frame_page.get_text()
-            except AttributeError:
-                logging.error('This ad is empty, sorry!')
-                extracted_job_ad_text = 'Sorry - empty!'
-            
-            extractor = 'BS4:iFrame'
+                job_ad_frame = requests.get(job_ad_frame_link)
+
+                #print('Job ad frame contains:',str(job_ad_frame))
+                job_ad_from_frame = BeautifulSoup(job_ad_frame.text, 'html.parser')
+                # remove <script> tags from results
+                js_junk = job_ad_from_frame.find_all('script')
+                for match in js_junk:
+                    match.decompose()
+                # remove <style> tags from results
+                css_junk = job_ad_from_frame.find_all('style')
+                for match in css_junk:
+                    match.decompose()
+                job_ad_frame_page = job_ad_from_frame.find('body')
+                # do some checks to avoid errors when extracted_job_ad_text is NoneType, i.e. job ad empty as this one: 
+                # https://www.cvonline.lt/darbo-skelbimas/alisa-management-laboratory-uab/java-programuotojas-a-f4068182.html
+                #Exception has occurred: AttributeError
+                #'NoneType' object has no attribute 'get_text'
+                try:
+                    extracted_job_ad_text = job_ad_frame_page.get_text()
+                except AttributeError:
+                    logging.error('This ad is empty, sorry!')
+                    extracted_job_ad_text = 'Sorry - empty!'
+
+                extractor = 'BS4:iFrame'
+            except requests.exceptions.RequestException as err:
+                logging.debug('Error: %s', err)
+                print('Error: ', err)
         # ************** END OF AD AS IFRAME ************************************************
                         
         # Check if we have enough content to assume we retrieved a full ad, if not, fall back to Selenium which can deal with iFrame and JS:
@@ -387,25 +404,29 @@ def job_ads_crawler(url_to_crawl):
             # combine domain name with url path to get full URL:
             job_ad_img_link = root_url + job_ad_image_tag['src']
             # retrieve the image contents from the link:
-            job_ad_image = requests.get(job_ad_img_link).content
-            # save retrieved image bytes into a RAM buffer:
-            image_in_buffer = BytesIO(job_ad_image)
-            # Identifying what OCR language to use depending on the text string found in the page:
-            if  'Job ad without a frame' in extracted_job_ad_text:
-                lang = 'eng'
-            elif 'Darbo skelbimas be rėmelio' in extracted_job_ad_text:
-                lang = 'lit'
-            # Use pyocr library that facilitates communication with tesseract library and convert image to text:
-            # https://gitlab.gnome.org/World/OpenPaperwork/pyocr
-            # selecing appropriate language for OCR by looking at expected text string in 2 langages (LT and EN):
+            try:
+                job_ad_image = requests.get(job_ad_img_link).content
+                # save retrieved image bytes into a RAM buffer:
+                image_in_buffer = BytesIO(job_ad_image)
+                # Identifying what OCR language to use depending on the text string found in the page:
+                if  'Job ad without a frame' in extracted_job_ad_text:
+                    lang = 'eng'
+                elif 'Darbo skelbimas be rėmelio' in extracted_job_ad_text:
+                    lang = 'lit'
+                # Use pyocr library that facilitates communication with tesseract library and convert image to text:
+                # https://gitlab.gnome.org/World/OpenPaperwork/pyocr
+                # selecing appropriate language for OCR by looking at expected text string in 2 langages (LT and EN):
             
-            extracted_job_ad_text = tool.image_to_string(
-                Image.open(image_in_buffer),
-                lang=lang,
-                builder=pyocr.builders.TextBuilder()
-            )
-            #extracted_job_ad_text = 'Extracted by OCR, language: '+lang+'\n'+extracted_job_ad_text
-            extractor = f'BS4:OCR({str(lang)})'
+                extracted_job_ad_text = tool.image_to_string(
+                    Image.open(image_in_buffer),
+                    lang=lang,
+                    builder=pyocr.builders.TextBuilder()
+                )
+                #extracted_job_ad_text = 'Extracted by OCR, language: '+lang+'\n'+extracted_job_ad_text
+                extractor = f'BS4:OCR({str(lang)})'
+            except requests.exceptions.RequestException as err:
+                logging.debug('Error: %s', err)
+                print('Error: ', err)
         # ************** END OF AD AS AN IMAGE SECTION *********************************************
 
         # Printing results obtained from page crawling by direct content crawl, iframe link or embedded image:
@@ -793,12 +814,12 @@ all_kwds = sort_dictionary_by_values_desc(all_kwds)
 #dict_for_yaml = make_top_list_dict(all_kwds, 5)
 # create dictionary holding today's date:
 timestamp = {}
-todays_timestamp_with_hours = datetime.datetime.today().strftime('%Y-%m-%d, %H:%M:%S')
+todays_timestamp_with_hours = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
 timestamp['date'] = todays_timestamp_with_hours
 
 # write YAML file to disk:
 # opening for writing, truncating old file if exists:
-with open('../hugo/data/toptech.yaml', 'w') as yaml_file:
+with open('./output/yaml/toptech.yaml', 'w') as yaml_file:
     yaml.dump(timestamp, yaml_file, default_flow_style=False, sort_keys=False)
     yaml.dump(make_top_list_dict(all_kwds, 'allTopKwds', 10), yaml_file, default_flow_style=False, sort_keys=False)
     yaml.dump(make_top_list_dict(platforms_kwds, 'Platforms', 10), yaml_file, default_flow_style=False, sort_keys=False)
@@ -819,7 +840,7 @@ with open('../hugo/data/toptech.yaml', 'w') as yaml_file:
 
 
 
-path_to_kwd_images = '../hugo/static/img/keyword_cloud/'
+path_to_kwd_images = './output/keyword_cloud/'
 
 # Generate keyword cloud images for all keyword groups:
 # Format: dictionary with keyword:count pairs, path and file name, jpg image quality
