@@ -520,6 +520,9 @@ def nested_bson_2_nested_dict(bson_from_mongo):
     # convert "__" back to "." (as MongoDB id not like dots in key names hence dots were replaced with double undersconre when writing to DB:
     for tech_grp, nested_dict in bson_from_mongo.items():   
         # now go through nested dict values and replace double underscore with a dot as originally was intended (MongoDB restriction to store keys containing dots): 
+        # using list(nested_dict) instead of "key" here because we want to copy original key list and iterate through it instead of through changing keys as they are created and deleted in the loop
+        # which can cause key skipping and thus proper dot replacement sometimes:
+
         for i in list(nested_dict):
             if "__" in i:
                 new_key = i.replace('__','.')
