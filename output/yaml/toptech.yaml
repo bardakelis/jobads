@@ -1,5 +1,5 @@
 date: '2020-03-03'
-timestamp: '2020-03-03 21:33:06'
+timestamp: '2020-03-03 21:41:42'
 allTopKwds:
   top1:
     name: Java
@@ -439,7 +439,7 @@ OtherFrameworksTools:
     adsWithKwd: 56
     adsInDBforPeriod: 2123
   top5:
-    name: __NET Core
+    name: .NET Core
     avgSalaryLow: 2921.3571428571427
     avgSalaryHigh: 4793.44
     adsWithKwdSalary: 42

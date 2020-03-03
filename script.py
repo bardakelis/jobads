@@ -520,11 +520,11 @@ def nested_bson_2_nested_dict(bson_from_mongo):
     # convert "__" back to "." (as MongoDB id not like dots in key names hence dots were replaced with double undersconre when writing to DB:
     for tech_grp, nested_dict in bson_from_mongo.items():   
         # now go through nested dict values and replace double underscore with a dot as originally was intended (MongoDB restriction to store keys containing dots): 
-        for key in nested_dict:
-            if "__" in key:
-                new_key = key.replace('__','.')
-                nested_dict[new_key] = nested_dict[key]
-                del nested_dict[key]
+        for i in list(nested_dict):
+            if "__" in i:
+                new_key = i.replace('__','.')
+                nested_dict[new_key] = nested_dict[i]
+                del nested_dict[i]
         # sort nested dictionary by count so that biggest count gets higher position in the dict:
         nested_dict = sort_dictionary_by_values_desc(nested_dict)
         bson_from_mongo[tech_grp] = nested_dict
