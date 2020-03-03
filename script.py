@@ -731,13 +731,9 @@ for entry in os.listdir(basepath):
         #        print('old key: ', key, 'new key: ', new_key)
 
         # dot replaced
-        print('------------------_DICTIONARY BEFORE MODIFICATION:----------------------')
-        print(top_tech)
-        print('------------------MODIFYING DOT IF NEEDED NOW---------------------------')
         dots_to_underscore_in_keys(top_tech)
-    #    dots_to_underscore_in_keys(top_tech)
-        print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-        print(top_tech)
+       # print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+       # print(top_tech)
         # create a nested dictionary containing all technology groups with nested technology keyword counts to represent most popular keywords:
         container_with_stats[technology] = top_tech
 
