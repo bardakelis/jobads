@@ -501,12 +501,13 @@ def job_ads_crawler(url_to_crawl):
 ########################### Sanitize non-nested dictionary-keys for MongoDB ############################
 # Function replaces "." characters found in keys with double undescore"__" so that MongoDB/PyMongo does not complain
 def dots_to_underscore_in_keys(dict):
-    for key in dict:
-            if "." in key:
-                new_key = key.replace('.','__')
-                dict[new_key]=dict[key]
-                del dict[key]
-
+# using list(dict) instead of "key" here because we want to copy original key list and iterate through it instead of through changing keys as they are created and deleted in the loop
+# which can cause key skipping and thus proper dot replacement sometimes:
+    for i in list(dict):
+            if "." in i:
+                new_key = i.replace('.','__')
+                dict[new_key]=dict[i]
+                del dict[i]
 ########################### End of sanitize non-nested dictionary-keys for MongoDB #####################
 ########################### Convert nested BSON from MongoDB to nested dict: ############################
 # Function removes _id as an item and replaces __ to . in key names 
@@ -723,16 +724,20 @@ for entry in os.listdir(basepath):
         # replace dot (.) if found in a technology name with and double underscore (__) to satisfy MongoDB requirement not to create key names containing a dot:
         #for key in top_tech:
         #    if "." in key:
-        #       print('Value with dot: ', key)
+        #        print('Value with dot: ', key)
         #        new_key = key.replace('.','__')
         #        top_tech[new_key]=top_tech[key]
         #        del top_tech[key]
         #        print('old key: ', key, 'new key: ', new_key)
 
         # dot replaced
+        print('------------------_DICTIONARY BEFORE MODIFICATION:----------------------')
+        print(top_tech)
+        print('------------------MODIFYING DOT IF NEEDED NOW---------------------------')
         dots_to_underscore_in_keys(top_tech)
-        #print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-        #print(top_tech)
+    #    dots_to_underscore_in_keys(top_tech)
+        print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+        print(top_tech)
         # create a nested dictionary containing all technology groups with nested technology keyword counts to represent most popular keywords:
         container_with_stats[technology] = top_tech
 
@@ -769,8 +774,8 @@ dictionarized_keyword_stats = nested_bson_2_nested_dict(taken_from_db)
 
 # list dictionary contents:
 for key in dictionarized_keyword_stats:
-    print('Key :', key)
-    print('value: ', dictionarized_keyword_stats[key])
+    #print('Key :', key)
+    #print('value: ', dictionarized_keyword_stats[key])
     if key == 'Buzzwords':
         buzzwords_kwds = dictionarized_keyword_stats[key]
     if key == 'Databases':
