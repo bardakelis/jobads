@@ -21,8 +21,6 @@ IPv4
 IPv6
 SNMP
 UDP
-CCIE
-CCNP
 IPSec
 VPN
 VLAN
@@ -62,5 +60,18 @@ LTE
 4G
 5G
 Software Defined Network
-
-
+OSPF
+JNCIP
+JNCIE
+ISIS
+LDP
+RSVP
+QoS
+CCNA
+CCNP
+HCNP
+CCIE
+HCIE
+NetScaler
+AVI
+WiFi
