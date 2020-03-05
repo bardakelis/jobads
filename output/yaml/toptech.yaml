@@ -1,5 +1,5 @@
 date: '2020-03-05'
-timestamp: '2020-03-05 22:00:28'
+timestamp: '2020-03-05 22:37:56'
 allTopKwds:
   top1:
     name: Java
@@ -394,7 +394,7 @@ WebFrameworks:
     avgSalaryLow: 1813.888888888889
     avgSalaryHigh: 3430.0
     adsWithKwdSalary: 9
-    avgTxtScoreKwdSalary: 0.7536359851996497
+    avgTxtScoreKwdSalary: 0.7536359851996496
     adsWithKwd: 20
     adsInDBforPeriod: 2167
   top10:
