@@ -648,14 +648,14 @@ def produce_keyword_cloud(keyword_dict, img_file_to_save, jpg_quality, bigger=Fa
     #base_image = base_image.quantize()
     #base_image.putalpha(0)
     base_image = base_image.convert('RGB')
-    base_image_2x = ImageOps.posterize(base_image,5)
+    base_image_2x = ImageOps.posterize(base_image,8)
     base_image_2x.save(img_file_to_save+'@2x.png', 'png')
     
     
 
     base_image = base_image.resize((x, y), Image.ANTIALIAS)
     #base_image.save(img_file_to_save+'.png', 'png', optimize=True, quality=jpg_quality)
-    base_image = ImageOps.posterize(base_image,5)
+    base_image = ImageOps.posterize(base_image,8)
     base_image.save(img_file_to_save+'.png', 'png')
     
 ########################### End fo keyword cloud production ##################################################
@@ -689,7 +689,7 @@ job_area = 'informacines-technologijos'
 # If multiple pages of job ads are returned, this value is set to 1 and only if 
 # last page of multiple pages is returned (or there was a single page in total)
 # it is set to 0 to exit crawling loop:
-crawling_ongoing = 0
+crawling_ongoing = 1
 #crawling_ongoing = 0
 # page_no is page number to request 1st and subsequent pages of job ads in the web site
 page_no = 0
