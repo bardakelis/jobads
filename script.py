@@ -648,14 +648,14 @@ def produce_keyword_cloud(keyword_dict, img_file_to_save, jpg_quality, bigger=Fa
     #base_image = base_image.quantize()
     #base_image.putalpha(0)
     base_image = base_image.convert('RGB')
-    base_image_2x = ImageOps.posterize(base_image,8)
+    base_image_2x = ImageOps.posterize(base_image,6)
     base_image_2x.save(img_file_to_save+'@2x.png', 'png')
     
     
 
     base_image = base_image.resize((x, y), Image.ANTIALIAS)
     #base_image.save(img_file_to_save+'.png', 'png', optimize=True, quality=jpg_quality)
-    base_image = ImageOps.posterize(base_image,8)
+    base_image = ImageOps.posterize(base_image,6)
     base_image.save(img_file_to_save+'.png', 'png')
     
 ########################### End fo keyword cloud production ##################################################
