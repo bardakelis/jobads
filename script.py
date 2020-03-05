@@ -33,7 +33,7 @@ import collections
 from bson.objectid import ObjectId
 # below 2 needed for watermarked text on image:
 # packages needed for image to text conversions:
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageOps
 # selenium
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
@@ -614,7 +614,10 @@ def produce_keyword_cloud(keyword_dict, img_file_to_save, jpg_quality, bigger=Fa
         y = 900
     else:
         wc = WordCloud(font_path='fonts/Inter-Medium.ttf', prefer_horizontal=1,  max_words=300, background_color='white',width=700, height=900, mode='RGB').generate_from_frequencies(keyword_dict)
+        #wc = WordCloud(font_path='fonts/Inter-Medium.ttf', prefer_horizontal=1,  max_words=300, background_color=None,width=700, height=900, mode='RGBA').generate_from_frequencies(keyword_dict)
         plt.figure( figsize=(8,10), facecolor='k')
+       # plt.figure( figsize=(11.11111111,13.88888889), facecolor='k', dpi=72)
+        #plt.figure( figsize=(16,20), facecolor='k', dpi=300)
         # define pixel size of resized image:
         x = 600
         y = 800
@@ -636,14 +639,24 @@ def produce_keyword_cloud(keyword_dict, img_file_to_save, jpg_quality, bigger=Fa
     # reducing padding of the image to minimum - more effective use of space:
     plt.tight_layout(pad=2)
     # saving large image:
-    plt.savefig(img_file_to_save+'_tmp.jpg', quality=100)
+    #plt.savefig(img_file_to_save+'_tmp.jpg', quality=100)
+    plt.savefig(img_file_to_save+'_tmp.png')
+    plt.close()
 
-    base_image = Image.open(img_file_to_save+'_tmp.jpg')
-    base_image.show()
-    base_image.save(img_file_to_save+'@2x.jpg', 'jpeg', quality=jpg_quality)
+    base_image = Image.open(img_file_to_save+'_tmp.png')
+    #base_image.show()
+    #base_image = base_image.quantize()
+    #base_image.putalpha(0)
+    base_image = base_image.convert('RGB')
+    base_image_2x = ImageOps.posterize(base_image,5)
+    base_image_2x.save(img_file_to_save+'@2x.png', 'png')
     
+    
+
     base_image = base_image.resize((x, y), Image.ANTIALIAS)
-    base_image.save(img_file_to_save+'.jpg', 'jpeg', quality=jpg_quality)
+    #base_image.save(img_file_to_save+'.png', 'png', optimize=True, quality=jpg_quality)
+    base_image = ImageOps.posterize(base_image,5)
+    base_image.save(img_file_to_save+'.png', 'png')
     
 ########################### End fo keyword cloud production ##################################################
    
@@ -676,7 +689,7 @@ job_area = 'informacines-technologijos'
 # If multiple pages of job ads are returned, this value is set to 1 and only if 
 # last page of multiple pages is returned (or there was a single page in total)
 # it is set to 0 to exit crawling loop:
-crawling_ongoing = 1
+crawling_ongoing = 0
 #crawling_ongoing = 0
 # page_no is page number to request 1st and subsequent pages of job ads in the web site
 page_no = 0
