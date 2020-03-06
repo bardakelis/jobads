@@ -639,20 +639,20 @@ def produce_keyword_cloud(keyword_dict, img_file_to_save, jpg_quality, bigger=Fa
     # reducing padding of the image to minimum - more effective use of space:
     plt.tight_layout(pad=2)
     # saving large image:
-    #plt.savefig(img_file_to_save+'_tmp.jpg', quality=100)
     plt.savefig(img_file_to_save+'_tmp.png')
     plt.close()
 
     base_image = Image.open(img_file_to_save+'_tmp.png')
     #base_image.show()
-    #base_image = base_image.quantize()
-    #base_image.putalpha(0)
     base_image = base_image.convert('RGB')
+    # Performing posterization that reduces number of color bits per RGB channel from 8 down to 5
+    # This helps reduce file size. Negative outcome is that pure white color is lost from the background
     base_image_2x = ImageOps.posterize(base_image,5)
     base_image_2x.save(img_file_to_save+'@2x.png', 'png')
 
     base_image = base_image.resize((x, y), Image.ANTIALIAS)
-    #base_image.save(img_file_to_save+'.png', 'png', optimize=True, quality=jpg_quality)
+    # Performing posterization that reduces number of color bits per RGB channel from 8 down to 5
+    # This helps reduce file size. Negative outcome is that pure white color is lost from the background
     base_image = ImageOps.posterize(base_image,5)
     base_image.save(img_file_to_save+'.png', 'png')
     
