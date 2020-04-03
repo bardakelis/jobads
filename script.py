@@ -410,10 +410,14 @@ def job_ads_crawler(url_to_crawl):
                 # save retrieved image bytes into a RAM buffer:
                 image_in_buffer = BytesIO(job_ad_image)
                 # Identifying what OCR language to use depending on the text string found in the page:
-                if  'Job ad without a frame' in extracted_job_ad_text:
-                    lang = 'eng'
-                elif 'Darbo skelbimas be rėmelio' in extracted_job_ad_text:
+		if 'Darbo skelbimas be rėmelio' in extracted_job_ad_text:
                     lang = 'lit'
+                elseif  'Job ad without a frame' in extracted_job_ad_text:
+                    lang = 'eng'
+		# If there is another language, still treat it as english (I saw ads in Russian, in this case string
+                # will look like 'Объявление без рамки', but we won't bother extracting kirilica:
+		else:
+		    lang = 'eng'
                 # Use pyocr library that facilitates communication with tesseract library and convert image to text:
                 # https://gitlab.gnome.org/World/OpenPaperwork/pyocr
                 # selecing appropriate language for OCR by looking at expected text string in 2 langages (LT and EN):

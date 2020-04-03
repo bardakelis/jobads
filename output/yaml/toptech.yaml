@@ -1,812 +1,812 @@
-date: '2020-03-19'
-timestamp: '2020-03-19 06:16:03'
+date: '2020-04-02'
+timestamp: '2020-04-02 06:17:59'
 allTopKwds:
   top1:
     name: Java
-    avgSalaryLow: 2392.7038327526134
-    avgSalaryHigh: 4419.25327510917
-    adsWithKwdSalary: 287
-    avgTxtScoreKwdSalary: 1.0186055096579665
-    adsWithKwd: 323
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2455.041533546326
+    avgSalaryHigh: 4430.865612648221
+    adsWithKwdSalary: 315
+    avgTxtScoreKwdSalary: 1.0183289767124102
+    adsWithKwd: 350
+    adsInDBforPeriod: 2261
   top2:
-    name: JavaScript
-    avgSalaryLow: 2398.6428571428573
-    avgSalaryHigh: 4149.238410596026
-    adsWithKwdSalary: 240
-    avgTxtScoreKwdSalary: 0.612060324080742
-    adsWithKwd: 267
-    adsInDBforPeriod: 2107
-  top3:
     name: Linux
-    avgSalaryLow: 2331.10101010101
-    avgSalaryHigh: 3774.2589928057555
-    adsWithKwdSalary: 200
-    avgTxtScoreKwdSalary: 0.5831895462409294
-    adsWithKwd: 258
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2380.6053811659194
+    avgSalaryHigh: 3769.3518518518517
+    adsWithKwdSalary: 225
+    avgTxtScoreKwdSalary: 0.5788633639971033
+    adsWithKwd: 285
+    adsInDBforPeriod: 2261
+  top3:
+    name: JavaScript
+    avgSalaryLow: 2434.90873015873
+    avgSalaryHigh: 4174.3125
+    adsWithKwdSalary: 254
+    avgTxtScoreKwdSalary: 0.6170806235857788
+    adsWithKwd: 281
+    adsInDBforPeriod: 2261
   top4:
     name: Git
-    avgSalaryLow: 2539.228723404255
-    avgSalaryHigh: 3945.0091743119265
-    adsWithKwdSalary: 191
-    avgTxtScoreKwdSalary: 0.5096156233733422
-    adsWithKwd: 240
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2547.4460784313724
+    avgSalaryHigh: 3967.162393162393
+    adsWithKwdSalary: 207
+    avgTxtScoreKwdSalary: 0.5089864841978249
+    adsWithKwd: 254
+    adsInDBforPeriod: 2261
   top5:
     name: PHP
-    avgSalaryLow: 2567.0732984293195
-    avgSalaryHigh: 4101.124087591241
-    adsWithKwdSalary: 194
-    avgTxtScoreKwdSalary: 1.152091411125292
-    adsWithKwd: 214
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2563.841346153846
+    avgSalaryHigh: 4106.510204081633
+    adsWithKwdSalary: 211
+    avgTxtScoreKwdSalary: 1.1426084131073166
+    adsWithKwd: 230
+    adsInDBforPeriod: 2261
   top6:
     name: Python
-    avgSalaryLow: 2518.521212121212
-    avgSalaryHigh: 4117.5
-    adsWithKwdSalary: 167
-    avgTxtScoreKwdSalary: 0.5983424800639621
-    adsWithKwd: 181
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2553.3956043956046
+    avgSalaryHigh: 4034.3032786885246
+    adsWithKwdSalary: 184
+    avgTxtScoreKwdSalary: 0.5959893957487172
+    adsWithKwd: 203
+    adsInDBforPeriod: 2261
   top7:
     name: Docker
-    avgSalaryLow: 2557.8481012658226
-    avgSalaryHigh: 4568.8130081300815
-    adsWithKwdSalary: 160
-    avgTxtScoreKwdSalary: 0.5109818359706075
-    adsWithKwd: 179
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2568.3333333333335
+    avgSalaryHigh: 4529.328671328672
+    adsWithKwdSalary: 182
+    avgTxtScoreKwdSalary: 0.514046526069694
+    adsWithKwd: 202
+    adsInDBforPeriod: 2261
   top8:
     name: React
-    avgSalaryLow: 2567.8086419753085
-    avgSalaryHigh: 4600.981818181818
-    adsWithKwdSalary: 162
-    avgTxtScoreKwdSalary: 0.6459067001901391
-    adsWithKwd: 172
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2560.5337078651687
+    avgSalaryHigh: 4547.951219512195
+    adsWithKwdSalary: 178
+    avgTxtScoreKwdSalary: 0.6399109354926397
+    adsWithKwd: 189
+    adsInDBforPeriod: 2261
   top9:
     name: .NET
-    avgSalaryLow: 2602.1582733812947
-    avgSalaryHigh: 4309.271604938272
-    adsWithKwdSalary: 139
-    avgTxtScoreKwdSalary: 1.0858493662214748
-    adsWithKwd: 158
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2622.377358490566
+    avgSalaryHigh: 4293.135416666667
+    adsWithKwdSalary: 159
+    avgTxtScoreKwdSalary: 1.0783826629470916
+    adsWithKwd: 181
+    adsInDBforPeriod: 2261
   top10:
-    name: CSS
-    avgSalaryLow: 2100.736434108527
-    avgSalaryHigh: 3839.1075268817203
-    adsWithKwdSalary: 130
-    avgTxtScoreKwdSalary: 0.5360044704046301
-    adsWithKwd: 153
-    adsInDBforPeriod: 2107
+    name: Windows
+    avgSalaryLow: 2117.719696969697
+    avgSalaryHigh: 3266.9555555555557
+    adsWithKwdSalary: 132
+    avgTxtScoreKwdSalary: 0.6101078047365541
+    adsWithKwd: 159
+    adsInDBforPeriod: 2261
 Platforms:
   top1:
     name: Linux
-    avgSalaryLow: 2331.10101010101
-    avgSalaryHigh: 3774.2589928057555
-    adsWithKwdSalary: 200
-    avgTxtScoreKwdSalary: 0.5831895462409294
-    adsWithKwd: 258
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2380.6053811659194
+    avgSalaryHigh: 3769.3518518518517
+    adsWithKwdSalary: 225
+    avgTxtScoreKwdSalary: 0.5788633639971033
+    adsWithKwd: 285
+    adsInDBforPeriod: 2261
   top2:
     name: Docker
-    avgSalaryLow: 2557.8481012658226
-    avgSalaryHigh: 4568.8130081300815
-    adsWithKwdSalary: 160
-    avgTxtScoreKwdSalary: 0.5109818359706075
-    adsWithKwd: 179
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2568.3333333333335
+    avgSalaryHigh: 4529.328671328672
+    adsWithKwdSalary: 182
+    avgTxtScoreKwdSalary: 0.514046526069694
+    adsWithKwd: 202
+    adsInDBforPeriod: 2261
   top3:
-    name: AWS
-    avgSalaryLow: 2683.109375
-    avgSalaryHigh: 4474.358024691358
-    adsWithKwdSalary: 129
-    avgTxtScoreKwdSalary: 0.5443807399795061
-    adsWithKwd: 150
-    adsInDBforPeriod: 2107
-  top4:
     name: Windows
-    avgSalaryLow: 2069.3700787401576
-    avgSalaryHigh: 3278.7906976744184
-    adsWithKwdSalary: 127
-    avgTxtScoreKwdSalary: 0.6153799037435785
-    adsWithKwd: 149
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2117.719696969697
+    avgSalaryHigh: 3266.9555555555557
+    adsWithKwdSalary: 132
+    avgTxtScoreKwdSalary: 0.6101078047365541
+    adsWithKwd: 159
+    adsInDBforPeriod: 2261
+  top4:
+    name: AWS
+    avgSalaryLow: 2761.4736842105262
+    avgSalaryHigh: 4434.426829268293
+    adsWithKwdSalary: 134
+    avgTxtScoreKwdSalary: 0.544779409688503
+    adsWithKwd: 157
+    adsInDBforPeriod: 2261
   top5:
     name: Azure
-    avgSalaryLow: 2786.896907216495
-    avgSalaryHigh: 4079.85
-    adsWithKwdSalary: 98
-    avgTxtScoreKwdSalary: 0.6169625229970098
-    adsWithKwd: 111
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2796.0363636363636
+    avgSalaryHigh: 3947.6444444444446
+    adsWithKwdSalary: 111
+    avgTxtScoreKwdSalary: 0.6275987333187217
+    adsWithKwd: 125
+    adsInDBforPeriod: 2261
   top6:
     name: Kubernetes
-    avgSalaryLow: 2528.8928571428573
-    avgSalaryHigh: 4644.5
-    adsWithKwdSalary: 84
-    avgTxtScoreKwdSalary: 0.5284516804605557
-    adsWithKwd: 97
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2553.625
+    avgSalaryHigh: 4581.908045977011
+    adsWithKwdSalary: 104
+    avgTxtScoreKwdSalary: 0.5260005460969913
+    adsWithKwd: 122
+    adsInDBforPeriod: 2261
   top7:
     name: iOS
-    avgSalaryLow: 2287.3809523809523
-    avgSalaryHigh: 4588.333333333333
-    adsWithKwdSalary: 63
-    avgTxtScoreKwdSalary: 0.9826225549793642
-    adsWithKwd: 66
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2343.359375
+    avgSalaryHigh: 4613.555555555556
+    adsWithKwdSalary: 64
+    avgTxtScoreKwdSalary: 0.9770649092144035
+    adsWithKwd: 68
+    adsInDBforPeriod: 2261
   top8:
     name: Android
-    avgSalaryLow: 2350.1509433962265
-    avgSalaryHigh: 4735.866666666667
-    adsWithKwdSalary: 53
-    avgTxtScoreKwdSalary: 1.0569370225182224
-    adsWithKwd: 53
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2433.36
+    avgSalaryHigh: 4691.227272727273
+    adsWithKwdSalary: 50
+    avgTxtScoreKwdSalary: 1.0450988950580855
+    adsWithKwd: 51
+    adsInDBforPeriod: 2261
   top9:
     name: Google Cloud
-    avgSalaryLow: 3153.936170212766
-    avgSalaryHigh: 5243.25
-    adsWithKwdSalary: 47
-    avgTxtScoreKwdSalary: 1.4607972704540346
-    adsWithKwd: 47
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 3170.6
+    avgSalaryHigh: 5263.863636363636
+    adsWithKwdSalary: 50
+    avgTxtScoreKwdSalary: 1.467314299090798
+    adsWithKwd: 50
+    adsInDBforPeriod: 2261
   top10:
     name: Windows Server
-    avgSalaryLow: 1949.404761904762
-    avgSalaryHigh: 2855.133333333333
-    adsWithKwdSalary: 42
-    avgTxtScoreKwdSalary: 1.3952635362230612
-    adsWithKwd: 46
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 1966.9268292682927
+    avgSalaryHigh: 2824.2758620689656
+    adsWithKwdSalary: 41
+    avgTxtScoreKwdSalary: 1.3955621232247315
+    adsWithKwd: 45
+    adsInDBforPeriod: 2261
 ProgrammingScriptingLanguages:
   top1:
     name: Java
-    avgSalaryLow: 2392.7038327526134
-    avgSalaryHigh: 4419.25327510917
-    adsWithKwdSalary: 287
-    avgTxtScoreKwdSalary: 1.0186055096579665
-    adsWithKwd: 323
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2455.041533546326
+    avgSalaryHigh: 4430.865612648221
+    adsWithKwdSalary: 315
+    avgTxtScoreKwdSalary: 1.0183289767124102
+    adsWithKwd: 350
+    adsInDBforPeriod: 2261
   top2:
     name: JavaScript
-    avgSalaryLow: 2398.6428571428573
-    avgSalaryHigh: 4149.238410596026
-    adsWithKwdSalary: 240
-    avgTxtScoreKwdSalary: 0.612060324080742
-    adsWithKwd: 267
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2434.90873015873
+    avgSalaryHigh: 4174.3125
+    adsWithKwdSalary: 254
+    avgTxtScoreKwdSalary: 0.6170806235857788
+    adsWithKwd: 281
+    adsInDBforPeriod: 2261
   top3:
     name: PHP
-    avgSalaryLow: 2567.0732984293195
-    avgSalaryHigh: 4101.124087591241
-    adsWithKwdSalary: 194
-    avgTxtScoreKwdSalary: 1.152091411125292
-    adsWithKwd: 214
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2563.841346153846
+    avgSalaryHigh: 4106.510204081633
+    adsWithKwdSalary: 211
+    avgTxtScoreKwdSalary: 1.1426084131073166
+    adsWithKwd: 230
+    adsInDBforPeriod: 2261
   top4:
     name: Python
-    avgSalaryLow: 2518.521212121212
-    avgSalaryHigh: 4117.5
-    adsWithKwdSalary: 167
-    avgTxtScoreKwdSalary: 0.5983424800639621
-    adsWithKwd: 181
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2553.3956043956046
+    avgSalaryHigh: 4034.3032786885246
+    adsWithKwdSalary: 184
+    avgTxtScoreKwdSalary: 0.5959893957487172
+    adsWithKwd: 203
+    adsInDBforPeriod: 2261
   top5:
     name: CSS
-    avgSalaryLow: 2100.736434108527
-    avgSalaryHigh: 3839.1075268817203
-    adsWithKwdSalary: 130
-    avgTxtScoreKwdSalary: 0.5360044704046301
-    adsWithKwd: 153
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2126.3779527559054
+    avgSalaryHigh: 3697.8241758241757
+    adsWithKwdSalary: 128
+    avgTxtScoreKwdSalary: 0.5363392958984919
+    adsWithKwd: 151
+    adsInDBforPeriod: 2261
   top6:
     name: HTML
-    avgSalaryLow: 2152.7909090909093
-    avgSalaryHigh: 3587.4938271604938
-    adsWithKwdSalary: 112
-    avgTxtScoreKwdSalary: 0.5254479604717348
-    adsWithKwd: 138
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2228.3504273504273
+    avgSalaryHigh: 3509.5476190476193
+    adsWithKwdSalary: 119
+    avgTxtScoreKwdSalary: 0.532597845853056
+    adsWithKwd: 144
+    adsInDBforPeriod: 2261
   top7:
     name: C#
-    avgSalaryLow: 2403.2631578947367
-    avgSalaryHigh: 4066.2714285714287
-    adsWithKwdSalary: 95
-    avgTxtScoreKwdSalary: 0.5960969823728551
-    adsWithKwd: 100
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2385.814814814815
+    avgSalaryHigh: 3961.7951807228915
+    adsWithKwdSalary: 108
+    avgTxtScoreKwdSalary: 0.6063730263065258
+    adsWithKwd: 113
+    adsInDBforPeriod: 2261
   top8:
     name: C++
-    avgSalaryLow: 2337.375
-    avgSalaryHigh: 3274.8636363636365
-    adsWithKwdSalary: 34
-    avgTxtScoreKwdSalary: 0.7304445562271793
-    adsWithKwd: 54
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2385.4210526315787
+    avgSalaryHigh: 3333.88
+    adsWithKwdSalary: 40
+    avgTxtScoreKwdSalary: 0.7109649573457146
+    adsWithKwd: 61
+    adsInDBforPeriod: 2261
   top9:
     name: Bash
-    avgSalaryLow: 2283.4054054054054
-    avgSalaryHigh: 3877.32
-    adsWithKwdSalary: 38
-    avgTxtScoreKwdSalary: 0.5014518143351104
-    adsWithKwd: 47
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2411.315789473684
+    avgSalaryHigh: 3647.423076923077
+    adsWithKwdSalary: 39
+    avgTxtScoreKwdSalary: 0.5014718852494441
+    adsWithKwd: 52
+    adsInDBforPeriod: 2261
   top10:
     name: PowerShell
-    avgSalaryLow: 2378.6666666666665
-    avgSalaryHigh: 3636.086956521739
-    adsWithKwdSalary: 30
-    avgTxtScoreKwdSalary: 0.5162607830217003
-    adsWithKwd: 41
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2376.0
+    avgSalaryHigh: 3588.5714285714284
+    adsWithKwdSalary: 35
+    avgTxtScoreKwdSalary: 0.514134982598342
+    adsWithKwd: 49
+    adsInDBforPeriod: 2261
 Databases:
   top1:
-    name: MySQL
-    avgSalaryLow: 2358.409090909091
-    avgSalaryHigh: 4233.329113924051
-    adsWithKwdSalary: 111
-    avgTxtScoreKwdSalary: 0.5421349849386874
-    adsWithKwd: 128
-    adsInDBforPeriod: 2107
-  top2:
     name: Oracle
-    avgSalaryLow: 2315.8125
-    avgSalaryHigh: 3956.311475409836
-    adsWithKwdSalary: 96
-    avgTxtScoreKwdSalary: 0.6390545774222816
-    adsWithKwd: 116
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2343.962962962963
+    avgSalaryHigh: 3933.0985915492956
+    adsWithKwdSalary: 108
+    avgTxtScoreKwdSalary: 0.6469655538613295
+    adsWithKwd: 127
+    adsInDBforPeriod: 2261
+  top2:
+    name: MySQL
+    avgSalaryLow: 2445.588785046729
+    avgSalaryHigh: 4197.078947368421
+    adsWithKwdSalary: 108
+    avgTxtScoreKwdSalary: 0.5257758971858023
+    adsWithKwd: 124
+    adsInDBforPeriod: 2261
   top3:
     name: PostgreSQL
-    avgSalaryLow: 2518.5662650602408
-    avgSalaryHigh: 4848.108695652174
-    adsWithKwdSalary: 83
-    avgTxtScoreKwdSalary: 0.510421014340862
-    adsWithKwd: 90
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2682.7283950617284
+    avgSalaryHigh: 4795.844444444445
+    adsWithKwdSalary: 81
+    avgTxtScoreKwdSalary: 0.5106265672942921
+    adsWithKwd: 88
+    adsInDBforPeriod: 2261
   top4:
     name: Elasticsearch
-    avgSalaryLow: 2880.3255813953488
-    avgSalaryHigh: 4642.818181818182
-    adsWithKwdSalary: 43
-    avgTxtScoreKwdSalary: 0.5013876399908554
-    adsWithKwd: 52
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2936.816326530612
+    avgSalaryHigh: 4808.0
+    adsWithKwdSalary: 49
+    avgTxtScoreKwdSalary: 0.5014905741219057
+    adsWithKwd: 58
+    adsInDBforPeriod: 2261
   top5:
     name: Redis
-    avgSalaryLow: 3135.7368421052633
-    avgSalaryHigh: 5337.136363636364
-    adsWithKwdSalary: 38
-    avgTxtScoreKwdSalary: 0.5082111565019484
-    adsWithKwd: 46
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 3137.095238095238
+    avgSalaryHigh: 5352.68
+    adsWithKwdSalary: 42
+    avgTxtScoreKwdSalary: 0.5075916001010798
+    adsWithKwd: 50
+    adsInDBforPeriod: 2261
   top6:
     name: MongoDB
-    avgSalaryLow: 2837.8837209302324
-    avgSalaryHigh: 4346.1578947368425
-    adsWithKwdSalary: 43
-    avgTxtScoreKwdSalary: 0.5016161662521846
-    adsWithKwd: 45
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2909.127659574468
+    avgSalaryHigh: 4693.85
+    adsWithKwdSalary: 47
+    avgTxtScoreKwdSalary: 0.5017200613739873
+    adsWithKwd: 49
+    adsInDBforPeriod: 2261
   top7:
     name: Microsoft SQL Server
-    avgSalaryLow: 2301.4285714285716
-    avgSalaryHigh: 4002.1428571428573
-    adsWithKwdSalary: 28
-    avgTxtScoreKwdSalary: 1.9281252552218398
-    adsWithKwd: 28
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2393.6363636363635
+    avgSalaryHigh: 4043.684210526316
+    adsWithKwdSalary: 33
+    avgTxtScoreKwdSalary: 1.8792703846392156
+    adsWithKwd: 33
+    adsInDBforPeriod: 2261
   top8:
     name: Cassandra
-    avgSalaryLow: 3109.157894736842
-    avgSalaryHigh: 6020.444444444444
-    adsWithKwdSalary: 19
-    avgTxtScoreKwdSalary: 0.5452249014672335
-    adsWithKwd: 19
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 3026.090909090909
+    avgSalaryHigh: 5888.952380952381
+    adsWithKwdSalary: 22
+    avgTxtScoreKwdSalary: 0.576783191670974
+    adsWithKwd: 22
+    adsInDBforPeriod: 2261
   top9:
     name: Firebase
-    avgSalaryLow: 1725.8181818181818
-    avgSalaryHigh: 4746.636363636364
-    adsWithKwdSalary: 11
-    avgTxtScoreKwdSalary: 0.5015918860022999
-    adsWithKwd: 11
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 1542.4285714285713
+    avgSalaryHigh: 4972.357142857143
+    adsWithKwdSalary: 14
+    avgTxtScoreKwdSalary: 0.5017987609871254
+    adsWithKwd: 14
+    adsInDBforPeriod: 2261
   top10:
     name: MariaDB
-    avgSalaryLow: 1463.125
-    avgSalaryHigh: 2311.6666666666665
-    adsWithKwdSalary: 8
-    avgTxtScoreKwdSalary: 0.5330257164774516
-    adsWithKwd: 10
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 1640.5
+    avgSalaryHigh: 2683.75
+    adsWithKwdSalary: 10
+    avgTxtScoreKwdSalary: 0.5267795572131444
+    adsWithKwd: 12
+    adsInDBforPeriod: 2261
 WebFrameworks:
   top1:
     name: React
-    avgSalaryLow: 2567.8086419753085
-    avgSalaryHigh: 4600.981818181818
-    adsWithKwdSalary: 162
-    avgTxtScoreKwdSalary: 0.6459067001901391
-    adsWithKwd: 172
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2560.5337078651687
+    avgSalaryHigh: 4547.951219512195
+    adsWithKwdSalary: 178
+    avgTxtScoreKwdSalary: 0.6399109354926397
+    adsWithKwd: 189
+    adsInDBforPeriod: 2261
   top2:
     name: Spring
-    avgSalaryLow: 2494.8524590163934
-    avgSalaryHigh: 4514.940594059406
-    adsWithKwdSalary: 122
-    avgTxtScoreKwdSalary: 0.5670312723638534
-    adsWithKwd: 126
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2530.090909090909
+    avgSalaryHigh: 4528.522935779816
+    adsWithKwdSalary: 132
+    avgTxtScoreKwdSalary: 0.5639880285401998
+    adsWithKwd: 136
+    adsInDBforPeriod: 2261
   top3:
     name: Angular
-    avgSalaryLow: 2557.2743362831857
-    avgSalaryHigh: 4088.339285714286
-    adsWithKwdSalary: 113
-    avgTxtScoreKwdSalary: 0.5783224689827365
-    adsWithKwd: 116
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2589.7846153846153
+    avgSalaryHigh: 4130.421875
+    adsWithKwdSalary: 130
+    avgTxtScoreKwdSalary: 0.5702483943481946
+    adsWithKwd: 134
+    adsInDBforPeriod: 2261
   top4:
     name: jQuery
-    avgSalaryLow: 2268.5348837209303
-    avgSalaryHigh: 3914.657142857143
-    adsWithKwdSalary: 43
-    avgTxtScoreKwdSalary: 0.5307093110614013
-    adsWithKwd: 49
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2251.2127659574467
+    avgSalaryHigh: 3899.4210526315787
+    adsWithKwdSalary: 47
+    avgTxtScoreKwdSalary: 0.5336030898892554
+    adsWithKwd: 52
+    adsInDBforPeriod: 2261
   top5:
     name: Laravel
-    avgSalaryLow: 2741.85
-    avgSalaryHigh: 4022.294117647059
-    adsWithKwdSalary: 40
-    avgTxtScoreKwdSalary: 0.5329579547796041
-    adsWithKwd: 47
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2727.8333333333335
+    avgSalaryHigh: 4074.9444444444443
+    adsWithKwdSalary: 42
+    avgTxtScoreKwdSalary: 0.5314507465526823
+    adsWithKwd: 49
+    adsInDBforPeriod: 2261
   top6:
     name: Vue.js
-    avgSalaryLow: 2699.358974358974
-    avgSalaryHigh: 4377.068965517241
-    adsWithKwdSalary: 39
-    avgTxtScoreKwdSalary: 1.1646949544344447
-    adsWithKwd: 41
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2726.7045454545455
+    avgSalaryHigh: 4470.757575757576
+    adsWithKwdSalary: 44
+    avgTxtScoreKwdSalary: 1.172434017605892
+    adsWithKwd: 46
+    adsInDBforPeriod: 2261
   top7:
     name: ASP.NET
-    avgSalaryLow: 2317.181818181818
-    avgSalaryHigh: 4158.304347826087
-    adsWithKwdSalary: 33
-    avgTxtScoreKwdSalary: 1.738475872194997
-    adsWithKwd: 37
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2431.0
+    avgSalaryHigh: 4269.04
+    adsWithKwdSalary: 37
+    avgTxtScoreKwdSalary: 1.7315653650224276
+    adsWithKwd: 41
+    adsInDBforPeriod: 2261
   top8:
     name: React.js
-    avgSalaryLow: 2998.0
-    avgSalaryHigh: 4240.611111111111
-    adsWithKwdSalary: 21
-    avgTxtScoreKwdSalary: 1.6800295393733693
-    adsWithKwd: 22
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 3181.5833333333335
+    avgSalaryHigh: 4233.210526315789
+    adsWithKwdSalary: 24
+    avgTxtScoreKwdSalary: 1.6058985017920209
+    adsWithKwd: 25
+    adsInDBforPeriod: 2261
   top9:
     name: Drupal
-    avgSalaryLow: 1905.0
-    avgSalaryHigh: 3658.125
-    adsWithKwdSalary: 8
-    avgTxtScoreKwdSalary: 0.7850456720288512
+    avgSalaryLow: 1817.7777777777778
+    avgSalaryHigh: 3547.777777777778
+    adsWithKwdSalary: 9
+    avgTxtScoreKwdSalary: 0.8750727414473816
     adsWithKwd: 17
-    adsInDBforPeriod: 2107
+    adsInDBforPeriod: 2261
   top10:
     name: Express
-    avgSalaryLow: 2308.3333333333335
-    avgSalaryHigh: 3533.3
-    adsWithKwdSalary: 15
-    avgTxtScoreKwdSalary: 0.517994382590249
-    adsWithKwd: 15
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2316.0714285714284
+    avgSalaryHigh: 3481.4444444444443
+    adsWithKwdSalary: 14
+    avgTxtScoreKwdSalary: 0.5191897352149933
+    adsWithKwd: 14
+    adsInDBforPeriod: 2261
 OtherFrameworksTools:
   top1:
     name: .NET
-    avgSalaryLow: 2602.1582733812947
-    avgSalaryHigh: 4309.271604938272
-    adsWithKwdSalary: 139
-    avgTxtScoreKwdSalary: 1.0858493662214748
-    adsWithKwd: 158
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2622.377358490566
+    avgSalaryHigh: 4293.135416666667
+    adsWithKwdSalary: 159
+    avgTxtScoreKwdSalary: 1.0783826629470916
+    adsWithKwd: 181
+    adsInDBforPeriod: 2261
   top2:
     name: REST API
-    avgSalaryLow: 2692.426470588235
-    avgSalaryHigh: 4124.431372549019
-    adsWithKwdSalary: 69
-    avgTxtScoreKwdSalary: 1.0461138186611225
-    adsWithKwd: 71
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2528.1875
+    avgSalaryHigh: 4230.0952380952385
+    adsWithKwdSalary: 81
+    avgTxtScoreKwdSalary: 1.0368698080733147
+    adsWithKwd: 83
+    adsInDBforPeriod: 2261
   top3:
-    name: AD
-    avgSalaryLow: 1852.1951219512196
-    avgSalaryHigh: 3743.153846153846
-    adsWithKwdSalary: 43
-    avgTxtScoreKwdSalary: 0.535389046444634
-    adsWithKwd: 61
-    adsInDBforPeriod: 2107
-  top4:
     name: Node.js
-    avgSalaryLow: 3115.978260869565
-    avgSalaryHigh: 4885.774193548387
-    adsWithKwdSalary: 47
-    avgTxtScoreKwdSalary: 1.2464951769126584
-    adsWithKwd: 51
-    adsInDBforPeriod: 2107
-  top5:
-    name: Active Directory
-    avgSalaryLow: 2123.5666666666666
-    avgSalaryHigh: 2930.0
-    adsWithKwdSalary: 32
-    avgTxtScoreKwdSalary: 1.0727280412742624
-    adsWithKwd: 44
-    adsInDBforPeriod: 2107
-  top6:
-    name: Hadoop
-    avgSalaryLow: 2962.2820512820513
-    avgSalaryHigh: 5134.771428571428
-    adsWithKwdSalary: 39
-    avgTxtScoreKwdSalary: 0.5644237582982119
-    adsWithKwd: 43
-    adsInDBforPeriod: 2107
-  top7:
-    name: React Native
-    avgSalaryLow: 2787.25
-    avgSalaryHigh: 4518.5
+    avgSalaryLow: 3120.7272727272725
+    avgSalaryHigh: 4884.243243243243
+    adsWithKwdSalary: 56
+    avgTxtScoreKwdSalary: 1.2371403511930306
+    adsWithKwd: 59
+    adsInDBforPeriod: 2261
+  top4:
+    name: AD
+    avgSalaryLow: 1952.1081081081081
+    avgSalaryHigh: 3955.5454545454545
     adsWithKwdSalary: 40
-    avgTxtScoreKwdSalary: 1.425131895359857
-    adsWithKwd: 41
-    adsInDBforPeriod: 2107
-  top8:
+    avgTxtScoreKwdSalary: 0.5379874888339267
+    adsWithKwd: 58
+    adsInDBforPeriod: 2261
+  top5:
+    name: Hadoop
+    avgSalaryLow: 2949.0652173913045
+    avgSalaryHigh: 5124.804878048781
+    adsWithKwdSalary: 46
+    avgTxtScoreKwdSalary: 0.568868481232516
+    adsWithKwd: 50
+    adsInDBforPeriod: 2261
+  top6:
+    name: Active Directory
+    avgSalaryLow: 2158.451612903226
+    avgSalaryHigh: 2676.777777777778
+    adsWithKwdSalary: 34
+    avgTxtScoreKwdSalary: 1.003292752063503
+    adsWithKwd: 47
+    adsInDBforPeriod: 2261
+  top7:
     name: .NET Core
-    avgSalaryLow: 2789.8888888888887
-    avgSalaryHigh: 4594.55
-    adsWithKwdSalary: 36
-    avgTxtScoreKwdSalary: 1.846937773738843
-    adsWithKwd: 38
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2800.3720930232557
+    avgSalaryHigh: 4565.666666666667
+    adsWithKwdSalary: 43
+    avgTxtScoreKwdSalary: 1.918465908828441
+    adsWithKwd: 45
+    adsInDBforPeriod: 2261
+  top8:
+    name: React Native
+    avgSalaryLow: 2784.1666666666665
+    avgSalaryHigh: 4522.461538461538
+    adsWithKwdSalary: 42
+    avgTxtScoreKwdSalary: 1.4086089124913068
+    adsWithKwd: 43
+    adsInDBforPeriod: 2261
   top9:
     name: Jest
-    avgSalaryLow: 2064.6470588235293
-    avgSalaryHigh: 5097.083333333333
-    adsWithKwdSalary: 17
-    avgTxtScoreKwdSalary: 0.5023479363231627
-    adsWithKwd: 19
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2026.2631578947369
+    avgSalaryHigh: 4890.357142857143
+    adsWithKwdSalary: 19
+    avgTxtScoreKwdSalary: 0.5023663106845739
+    adsWithKwd: 20
+    adsInDBforPeriod: 2261
   top10:
     name: JUnit
-    avgSalaryLow: 2882.4444444444443
+    avgSalaryLow: 2994.2
     avgSalaryHigh: 4712.142857142857
-    adsWithKwdSalary: 9
-    avgTxtScoreKwdSalary: 0.5014528669681044
-    adsWithKwd: 11
-    adsInDBforPeriod: 2107
+    adsWithKwdSalary: 10
+    avgTxtScoreKwdSalary: 0.5013832232364981
+    adsWithKwd: 12
+    adsInDBforPeriod: 2261
 Tools:
   top1:
     name: Git
-    avgSalaryLow: 2539.228723404255
-    avgSalaryHigh: 3945.0091743119265
-    adsWithKwdSalary: 191
-    avgTxtScoreKwdSalary: 0.5096156233733422
-    adsWithKwd: 240
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2547.4460784313724
+    avgSalaryHigh: 3967.162393162393
+    adsWithKwdSalary: 207
+    avgTxtScoreKwdSalary: 0.5089864841978249
+    adsWithKwd: 254
+    adsInDBforPeriod: 2261
   top2:
     name: JIRA
-    avgSalaryLow: 2463.5943396226417
-    avgSalaryHigh: 3871.1184210526317
-    adsWithKwdSalary: 107
-    avgTxtScoreKwdSalary: 0.5013295808994652
-    adsWithKwd: 125
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2534.918181818182
+    avgSalaryHigh: 3937.215189873418
+    adsWithKwdSalary: 111
+    avgTxtScoreKwdSalary: 0.5013118227966834
+    adsWithKwd: 131
+    adsInDBforPeriod: 2261
   top3:
     name: Jenkins
-    avgSalaryLow: 2579.0117647058823
-    avgSalaryHigh: 4200.31914893617
-    adsWithKwdSalary: 86
-    avgTxtScoreKwdSalary: 0.5012603440841849
-    adsWithKwd: 92
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2554.7096774193546
+    avgSalaryHigh: 4178.877551020408
+    adsWithKwdSalary: 94
+    avgTxtScoreKwdSalary: 0.5012883149164811
+    adsWithKwd: 102
+    adsInDBforPeriod: 2261
   top4:
     name: Selenium
-    avgSalaryLow: 2026.6349206349207
-    avgSalaryHigh: 4141.884615384615
-    adsWithKwdSalary: 63
-    avgTxtScoreKwdSalary: 0.5336844981848228
-    adsWithKwd: 71
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2113.6666666666665
+    avgSalaryHigh: 4223.327586206897
+    adsWithKwdSalary: 72
+    avgTxtScoreKwdSalary: 0.5262006010756138
+    adsWithKwd: 80
+    adsInDBforPeriod: 2261
   top5:
     name: Ansible
-    avgSalaryLow: 2489.7045454545455
-    avgSalaryHigh: 4700.090909090909
-    adsWithKwdSalary: 44
-    avgTxtScoreKwdSalary: 0.5075051993278709
-    adsWithKwd: 53
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2551.94
+    avgSalaryHigh: 4483.864864864865
+    adsWithKwdSalary: 50
+    avgTxtScoreKwdSalary: 0.506883151328135
+    adsWithKwd: 62
+    adsInDBforPeriod: 2261
   top6:
     name: Maven
-    avgSalaryLow: 2518.55
-    avgSalaryHigh: 4165.387096774193
-    adsWithKwdSalary: 40
-    avgTxtScoreKwdSalary: 0.5013756327458992
-    adsWithKwd: 40
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2607.4347826086955
+    avgSalaryHigh: 4280.771428571428
+    adsWithKwdSalary: 46
+    avgTxtScoreKwdSalary: 0.50130302588671
+    adsWithKwd: 46
+    adsInDBforPeriod: 2261
   top7:
     name: Grafana
-    avgSalaryLow: 2784.2
-    avgSalaryHigh: 4360.227272727273
-    adsWithKwdSalary: 25
-    avgTxtScoreKwdSalary: 0.501801295299792
-    adsWithKwd: 31
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2802.1153846153848
+    avgSalaryHigh: 4364.130434782609
+    adsWithKwdSalary: 26
+    avgTxtScoreKwdSalary: 0.5018269449929752
+    adsWithKwd: 35
+    adsInDBforPeriod: 2261
   top8:
     name: Puppet
-    avgSalaryLow: 2434.8333333333335
-    avgSalaryHigh: 4739.0
-    adsWithKwdSalary: 24
-    avgTxtScoreKwdSalary: 0.5120352607122536
-    adsWithKwd: 31
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2613.2
+    avgSalaryHigh: 4370.357142857143
+    adsWithKwdSalary: 25
+    avgTxtScoreKwdSalary: 0.5117069417729044
+    adsWithKwd: 32
+    adsInDBforPeriod: 2261
   top9:
     name: Chef
-    avgSalaryLow: 2250.4615384615386
-    avgSalaryHigh: 4298.15
-    adsWithKwdSalary: 26
-    avgTxtScoreKwdSalary: 0.5881108415938825
-    adsWithKwd: 30
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2448.3703703703704
+    avgSalaryHigh: 4055.9473684210525
+    adsWithKwdSalary: 27
+    avgTxtScoreKwdSalary: 0.603498492124415
+    adsWithKwd: 31
+    adsInDBforPeriod: 2261
   top10:
-    name: Bitbucket
-    avgSalaryLow: 2745.75
-    avgSalaryHigh: 4397.272727272727
-    adsWithKwdSalary: 24
-    avgTxtScoreKwdSalary: 0.5012118410140793
+    name: TeamCity
+    avgSalaryLow: 2664.076923076923
+    avgSalaryHigh: 4228.133333333333
+    adsWithKwdSalary: 26
+    avgTxtScoreKwdSalary: 0.5011635212608321
     adsWithKwd: 26
-    adsInDBforPeriod: 2107
+    adsInDBforPeriod: 2261
 InfoSec:
   top1:
     name: Checkmarx
-    avgSalaryLow: 2597.1428571428573
+    avgSalaryLow: 2564.0
     avgSalaryHigh: 3766.6666666666665
-    adsWithKwdSalary: 14
-    avgTxtScoreKwdSalary: 0.5010088517266248
-    adsWithKwd: 14
-    adsInDBforPeriod: 2107
+    adsWithKwdSalary: 15
+    avgTxtScoreKwdSalary: 0.5010099009557788
+    adsWithKwd: 15
+    adsInDBforPeriod: 2261
   top2:
     name: SIEM
-    avgSalaryLow: 2512.5
-    avgSalaryHigh: 4316.666666666667
-    adsWithKwdSalary: 8
-    avgTxtScoreKwdSalary: 0.848989933300587
-    adsWithKwd: 10
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2520.0
+    avgSalaryHigh: 4128.571428571428
+    adsWithKwdSalary: 10
+    avgTxtScoreKwdSalary: 0.8310223249396728
+    adsWithKwd: 12
+    adsInDBforPeriod: 2261
   top3:
+    name: CISSP
+    avgSalaryLow: 2513.75
+    avgSalaryHigh: 2900.0
+    adsWithKwdSalary: 8
+    avgTxtScoreKwdSalary: 0.5011773430062405
+    adsWithKwd: 8
+    adsInDBforPeriod: 2261
+  top4:
+    name: PKI
+    avgSalaryLow: 2100.0
+    avgSalaryHigh: 3460.0
+    adsWithKwdSalary: 7
+    avgTxtScoreKwdSalary: 0.502144718008077
+    adsWithKwd: 7
+    adsInDBforPeriod: 2261
+  top5:
+    name: SSL
+    avgSalaryLow: 2901.6666666666665
+    avgSalaryHigh: null
+    adsWithKwdSalary: 6
+    avgTxtScoreKwdSalary: 0.502927559912854
+    adsWithKwd: 6
+    adsInDBforPeriod: 2261
+  top6:
     name: Burp
     avgSalaryLow: 1850.0
     avgSalaryHigh: 3853.0
     adsWithKwdSalary: 5
     avgTxtScoreKwdSalary: 0.5019105087461424
     adsWithKwd: 6
-    adsInDBforPeriod: 2107
-  top4:
-    name: PKI
-    avgSalaryLow: 2080.0
-    avgSalaryHigh: 3500.0
-    adsWithKwdSalary: 5
-    avgTxtScoreKwdSalary: 0.5017094758983764
-    adsWithKwd: 5
-    adsInDBforPeriod: 2107
-  top5:
-    name: Encryption
-    avgSalaryLow: 2901.25
-    avgSalaryHigh: 3939.5
-    adsWithKwdSalary: 4
-    avgTxtScoreKwdSalary: 0.5010889045154561
-    adsWithKwd: 4
-    adsInDBforPeriod: 2107
-  top6:
-    name: Data Security
-    avgSalaryLow: 2533.3333333333335
-    avgSalaryHigh: 3850.0
-    adsWithKwdSalary: 3
-    avgTxtScoreKwdSalary: 2.0531054920079996
-    adsWithKwd: 4
-    adsInDBforPeriod: 2107
+    adsInDBforPeriod: 2261
   top7:
-    name: Incident Response
-    avgSalaryLow: 2343.3333333333335
-    avgSalaryHigh: 3523.3333333333335
-    adsWithKwdSalary: 3
-    avgTxtScoreKwdSalary: 2.6134687949984197
-    adsWithKwd: 4
-    adsInDBforPeriod: 2107
+    name: CEH
+    avgSalaryLow: 2533.3333333333335
+    avgSalaryHigh: 3875.0
+    adsWithKwdSalary: 6
+    avgTxtScoreKwdSalary: 0.5008541095228151
+    adsWithKwd: 6
+    adsInDBforPeriod: 2261
   top8:
-    name: IPS
-    avgSalaryLow: 1516.6666666666667
-    avgSalaryHigh: 2206.6666666666665
-    adsWithKwdSalary: 3
-    avgTxtScoreKwdSalary: 0.584974629005781
-    adsWithKwd: 4
-    adsInDBforPeriod: 2107
+    name: Encryption
+    avgSalaryLow: 2781.0
+    avgSalaryHigh: 3711.6
+    adsWithKwdSalary: 5
+    avgTxtScoreKwdSalary: 0.5011741539153951
+    adsWithKwd: 5
+    adsInDBforPeriod: 2261
   top9:
-    name: Splunk
-    avgSalaryLow: 2850.0
-    avgSalaryHigh: 4400.0
+    name: IPS
+    avgSalaryLow: 1537.5
+    avgSalaryHigh: 2405.0
     adsWithKwdSalary: 4
-    avgTxtScoreKwdSalary: 0.500935586243805
-    adsWithKwd: 4
-    adsInDBforPeriod: 2107
+    avgTxtScoreKwdSalary: 0.6269305986200073
+    adsWithKwd: 5
+    adsInDBforPeriod: 2261
   top10:
-    name: SSL
-    avgSalaryLow: 2877.5
-    avgSalaryHigh: 4200.0
-    adsWithKwdSalary: 4
-    avgTxtScoreKwdSalary: 0.5036135835913312
-    adsWithKwd: 4
-    adsInDBforPeriod: 2107
+    name: Splunk
+    avgSalaryLow: 2600.0
+    avgSalaryHigh: 4120.0
+    adsWithKwdSalary: 5
+    avgTxtScoreKwdSalary: 0.5009350361592231
+    adsWithKwd: 5
+    adsInDBforPeriod: 2261
 Networking:
   top1:
     name: IP
-    avgSalaryLow: 1963.5806451612902
-    avgSalaryHigh: 2850.5
-    adsWithKwdSalary: 31
-    avgTxtScoreKwdSalary: 0.548690253316744
-    adsWithKwd: 34
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2005.657894736842
+    avgSalaryHigh: 2796.4
+    adsWithKwdSalary: 38
+    avgTxtScoreKwdSalary: 0.5534047178280989
+    adsWithKwd: 41
+    adsInDBforPeriod: 2261
   top2:
     name: TCP
-    avgSalaryLow: 2074.185185185185
-    avgSalaryHigh: 3164.4117647058824
-    adsWithKwdSalary: 27
-    avgTxtScoreKwdSalary: 0.501873396074974
-    adsWithKwd: 30
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2098.34375
+    avgSalaryHigh: 2954.75
+    adsWithKwdSalary: 32
+    avgTxtScoreKwdSalary: 0.5018763621969244
+    adsWithKwd: 35
+    adsInDBforPeriod: 2261
   top3:
     name: Routing
-    avgSalaryLow: 2572.85
-    avgSalaryHigh: 3515.3846153846152
-    adsWithKwdSalary: 20
-    avgTxtScoreKwdSalary: 0.5144351913585754
-    adsWithKwd: 21
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2508.1304347826085
+    avgSalaryHigh: 3214.75
+    adsWithKwdSalary: 23
+    avgTxtScoreKwdSalary: 0.5128530910099053
+    adsWithKwd: 25
+    adsInDBforPeriod: 2261
   top4:
-    name: VPN
-    avgSalaryLow: 1819.142857142857
-    avgSalaryHigh: 3963.8333333333335
-    adsWithKwdSalary: 16
-    avgTxtScoreKwdSalary: 0.533168010967995
-    adsWithKwd: 17
-    adsInDBforPeriod: 2107
-  top5:
-    name: DHCP
-    avgSalaryLow: 2006.7333333333333
-    avgSalaryHigh: 2791.25
-    adsWithKwdSalary: 15
-    avgTxtScoreKwdSalary: 0.5017433127657247
-    adsWithKwd: 17
-    adsInDBforPeriod: 2107
-  top6:
     name: Firewall
-    avgSalaryLow: 2223.866666666667
-    avgSalaryHigh: 3003.5714285714284
-    adsWithKwdSalary: 15
-    avgTxtScoreKwdSalary: 0.5188641337025051
-    adsWithKwd: 16
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2232.823529411765
+    avgSalaryHigh: 3053.125
+    adsWithKwdSalary: 17
+    avgTxtScoreKwdSalary: 0.5169464829803401
+    adsWithKwd: 19
+    adsInDBforPeriod: 2261
+  top5:
+    name: VPN
+    avgSalaryLow: 2026.2857142857142
+    avgSalaryHigh: 3680.5
+    adsWithKwdSalary: 17
+    avgTxtScoreKwdSalary: 0.5313688639684608
+    adsWithKwd: 18
+    adsInDBforPeriod: 2261
+  top6:
+    name: DHCP
+    avgSalaryLow: 2062.5625
+    avgSalaryHigh: 2791.25
+    adsWithKwdSalary: 16
+    avgTxtScoreKwdSalary: 0.5017492454237492
+    adsWithKwd: 18
+    adsInDBforPeriod: 2261
   top7:
     name: NAT
-    avgSalaryLow: 2390.909090909091
-    avgSalaryHigh: 3481.818181818182
-    adsWithKwdSalary: 11
-    avgTxtScoreKwdSalary: 0.5023654956691607
-    adsWithKwd: 11
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2400.0
+    avgSalaryHigh: 3507.1428571428573
+    adsWithKwdSalary: 14
+    avgTxtScoreKwdSalary: 0.5023655115304272
+    adsWithKwd: 14
+    adsInDBforPeriod: 2261
   top8:
-    name: Proxy
-    avgSalaryLow: 2752.5
-    avgSalaryHigh: 4154.0
-    adsWithKwdSalary: 4
-    avgTxtScoreKwdSalary: 0.5012104884570248
-    adsWithKwd: 10
-    adsInDBforPeriod: 2107
+    name: Cisco
+    avgSalaryLow: 1664.8333333333333
+    avgSalaryHigh: 2566.181818181818
+    adsWithKwdSalary: 12
+    avgTxtScoreKwdSalary: 0.543685781310567
+    adsWithKwd: 13
+    adsInDBforPeriod: 2261
   top9:
     name: WiFi
-    avgSalaryLow: 1720.5
-    avgSalaryHigh: 2116.6666666666665
-    adsWithKwdSalary: 8
-    avgTxtScoreKwdSalary: 0.502853871885893
-    adsWithKwd: 10
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 1751.5555555555557
+    avgSalaryHigh: 2587.5
+    adsWithKwdSalary: 9
+    avgTxtScoreKwdSalary: 0.5027380632544493
+    adsWithKwd: 11
+    adsInDBforPeriod: 2261
   top10:
-    name: Cisco
-    avgSalaryLow: 1706.25
-    avgSalaryHigh: 2403.5714285714284
-    adsWithKwdSalary: 8
-    avgTxtScoreKwdSalary: 0.5649144246946258
-    adsWithKwd: 9
-    adsInDBforPeriod: 2107
+    name: Load balancing
+    avgSalaryLow: 2991.6666666666665
+    avgSalaryHigh: 3457.0
+    adsWithKwdSalary: 3
+    avgTxtScoreKwdSalary: 1.1703112919783942
+    adsWithKwd: 10
+    adsInDBforPeriod: 2261
 Buzzwords:
   top1:
     name: Agile
-    avgSalaryLow: 2473.2064965197214
-    avgSalaryHigh: 4344.907216494846
-    adsWithKwdSalary: 433
-    avgTxtScoreKwdSalary: 0.5874721174643004
-    adsWithKwd: 504
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2496.1305263157897
+    avgSalaryHigh: 4363.858044164038
+    adsWithKwdSalary: 477
+    avgTxtScoreKwdSalary: 0.5865445096421579
+    adsWithKwd: 557
+    adsInDBforPeriod: 2261
   top2:
     name: Automation
-    avgSalaryLow: 2207.7627906976745
-    avgSalaryHigh: 3776.9620253164558
-    adsWithKwdSalary: 217
-    avgTxtScoreKwdSalary: 0.7688895809050825
-    adsWithKwd: 240
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2260.060606060606
+    avgSalaryHigh: 3715.012195121951
+    adsWithKwdSalary: 233
+    avgTxtScoreKwdSalary: 0.7898080221176489
+    adsWithKwd: 262
+    adsInDBforPeriod: 2261
   top3:
     name: Cloud
-    avgSalaryLow: 2717.259067357513
-    avgSalaryHigh: 4439.017094017094
-    adsWithKwdSalary: 195
-    avgTxtScoreKwdSalary: 0.6766682941886157
-    adsWithKwd: 224
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2854.473933649289
+    avgSalaryHigh: 4468.671875
+    adsWithKwdSalary: 213
+    avgTxtScoreKwdSalary: 0.6935347783441971
+    adsWithKwd: 241
+    adsInDBforPeriod: 2261
   top4:
     name: Security
-    avgSalaryLow: 2585.08125
-    avgSalaryHigh: 4138.226804123711
-    adsWithKwdSalary: 164
-    avgTxtScoreKwdSalary: 0.7820332156027536
-    adsWithKwd: 201
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2568.7228260869565
+    avgSalaryHigh: 4080.8660714285716
+    adsWithKwdSalary: 188
+    avgTxtScoreKwdSalary: 0.7875121745692706
+    adsWithKwd: 227
+    adsInDBforPeriod: 2261
   top5:
     name: Scrum
-    avgSalaryLow: 2467.6962025316457
-    avgSalaryHigh: 4164.917525773196
-    adsWithKwdSalary: 158
-    avgTxtScoreKwdSalary: 0.6054554718931058
-    adsWithKwd: 201
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2489.453038674033
+    avgSalaryHigh: 4144.0
+    adsWithKwdSalary: 181
+    avgTxtScoreKwdSalary: 0.5960818650692351
+    adsWithKwd: 225
+    adsInDBforPeriod: 2261
   top6:
     name: Analytics
-    avgSalaryLow: 2365.984
-    avgSalaryHigh: 3822.315789473684
+    avgSalaryLow: 2440.768
+    avgSalaryHigh: 3830.2833333333333
     adsWithKwdSalary: 126
-    avgTxtScoreKwdSalary: 0.6216186673363301
-    adsWithKwd: 169
-    adsInDBforPeriod: 2107
+    avgTxtScoreKwdSalary: 0.6176535582904871
+    adsWithKwd: 173
+    adsInDBforPeriod: 2261
   top7:
     name: DevOps
-    avgSalaryLow: 2824.1132075471696
-    avgSalaryHigh: 4648.985507246377
-    adsWithKwdSalary: 107
-    avgTxtScoreKwdSalary: 0.8702572558570405
-    adsWithKwd: 134
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2845.7709923664124
+    avgSalaryHigh: 4606.436781609195
+    adsWithKwdSalary: 132
+    avgTxtScoreKwdSalary: 0.8554657516717501
+    adsWithKwd: 165
+    adsInDBforPeriod: 2261
   top8:
     name: IoT
-    avgSalaryLow: 1318.340425531915
-    avgSalaryHigh: 2605.720930232558
-    adsWithKwdSalary: 48
-    avgTxtScoreKwdSalary: 0.7555364331953899
-    adsWithKwd: 113
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 1375.3061224489795
+    avgSalaryHigh: 2692.2444444444445
+    adsWithKwdSalary: 50
+    avgTxtScoreKwdSalary: 0.745366913830563
+    adsWithKwd: 118
+    adsInDBforPeriod: 2261
   top9:
     name: CI/CD
-    avgSalaryLow: 2902.2388059701493
-    avgSalaryHigh: 4584.361111111111
-    adsWithKwdSalary: 69
-    avgTxtScoreKwdSalary: 1.0391067145072859
-    adsWithKwd: 86
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2917.3076923076924
+    avgSalaryHigh: 4556.522727272727
+    adsWithKwdSalary: 80
+    avgTxtScoreKwdSalary: 1.0340881664920305
+    adsWithKwd: 97
+    adsInDBforPeriod: 2261
   top10:
     name: Continuous Integration
-    avgSalaryLow: 2443.9620253164558
-    avgSalaryHigh: 5002.9047619047615
-    adsWithKwdSalary: 79
-    avgTxtScoreKwdSalary: 1.081709356757367
-    adsWithKwd: 86
-    adsInDBforPeriod: 2107
+    avgSalaryLow: 2490.912087912088
+    avgSalaryHigh: 5063.140845070423
+    adsWithKwdSalary: 91
+    avgTxtScoreKwdSalary: 1.0769594568447747
+    adsWithKwd: 97
+    adsInDBforPeriod: 2261
