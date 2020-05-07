@@ -297,6 +297,12 @@ def job_ads_crawler(url_to_crawl):
             if "Prašymus siųskite iki" in item.text: 
                 # Extract timestamp from string such as "Prasymus siuskite iki 2019.11.30" and then replace dots with dashes to match job post date format:
                 valid_till = item.text.split()[-1].replace('.','-')
+                try:
+                    datetime.datetime.strptime(valid_till, '%Y-%m-%d')
+                except ValueError:
+                   # raise ValueError("Incorrect valid_till date format, should be YYYY-MM-DD")
+                    logging.warning('Incorrect valid-till date format, should be YYYY-MM-DD')
+                    valid_till = '2111-11-11'
             else:
                 valid_till = ''
         # fetching href uri location for the full job ad
