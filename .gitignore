@@ -7,6 +7,6 @@ browsing.py
 !categories/*
 !webdriver/*
 !fonts/*
-#!./keyword_cloud/
+!./keyword_cloud/
 !logs/
-#!./output/*
+!./output/*
