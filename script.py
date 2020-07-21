@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+from git import Repo
+import git
+import shutil
 import datetime
 from datetime import timedelta
 import logging
@@ -886,5 +889,79 @@ produce_keyword_cloud(get_keyword_and_count(web_frameworks_kwds), path_to_kwd_im
 # Now we are going to produce some keyword clouds here:
 #produce_keyword_cloud(dictionarized_keyword_stats[key])
 
+############################################################################################
+# Let's copy produced images to Hugo's GIT repository. We will first pull it from Github,
+# then will add img files (png) and yaml file and then push back into Github. This will 
+# ensure that Hugo repo is ready for compiling right away
+############################################################################################
+
+# Define hugo GIT directory here:
+repo_dir = '/opt/itdarborinka_app/hugo'
+repo = Repo(repo_dir)
+origin = repo.remote('origin')
+g = git.cmd.Git(repo_dir)
+# pull HUGO repository locally so that it can be updated with latest img files afterwards:
+pull_result = g.pull()
+print(f'pull result: {pull_result}')
+
+# We'll take files produced by application in this dir:
+app_out_dir = '/opt/itdarborinka_app/application/output/keyword_cloud/'
+yaml_out_file = '/opt/itdarborinka_app/application/output/yaml/toptech.yaml'
+# and copy to hugo images directory to store them there till they are compiled for a new web site version:
+hugo_imgs_location = '/opt/itdarborinka_app/hugo/static/img/keyword_cloud'
+hugo_yaml_location = '/opt/itdarborinka_app/hugo/data/'
+# these files are of intered for us:
+kwd_cloud_files = [
+    'all_kwds@2x.png',
+    'all_kwds.png',
+    'buzzwords_kwds@2x.png',
+    'buzzwords_kwds.png',
+    'databases_kwds@2x.png',
+    'databases_kwds.png',
+    'infosec_kwds@2x.png',
+    'infosec_kwds.png',
+    'networking_kwds@2x.png',
+    'networking_kwds.png',
+    'other_frameworks_tools_kwds@2x.png',
+    'other_frameworks_tools_kwds.png',
+    'platforms_kwds@2x.png',
+    'platforms_kwds.png',
+    'programming_scripting_languages_kwds@2x.png',
+    'programming_scripting_languages_kwds.png',
+    'tools_kwds@2x.png',
+    'tools_kwds.png',
+    'web_frameworks_kwds@2x.png',
+    'web_frameworks_kwds.png'
+]
+
+# Let's copy img files from app out directory into hugo directory now:
+for file_to_copy in kwd_cloud_files:
+    kwd_cloud_file_in_output = app_out_dir+file_to_copy
+    print(f'file with path: {kwd_cloud_file_in_output}')
+    shutil.copy2(kwd_cloud_file_in_output, hugo_imgs_location )
+# Let's copy yaml file too:
+shutil.copy2(yaml_out_file, hugo_yaml_location )
+
+# prepare list of files that would be git commit-friendly, i.e. with proper file path:
+list_of_git_files = []
+git_img_path = 'static/img/keyword_cloud/'
+git_yaml_file_with_path = 'data/toptech.yaml'
+
+for git_file_to_push in kwd_cloud_files:
+    list_of_git_files.append(git_img_path+git_file_to_push)
+
+# We also need to add YAML file toptech.yaml from generated output and place in hugo/data/ directory:
+list_of_git_files.append(git_yaml_file_with_path)
+
+print(f'List of GIT files to push: {list_of_git_files}')
+
+timestamp = datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+commit_message = f'Python commiting to github at {timestamp}'
+# Commint updated HUGO repository to GitHub, so that it can be picked up by HUGO compiler already with up-to-date image files
+
+repo.index.add(list_of_git_files)
+repo.index.commit(commit_message)
+push_result = origin.push()
+print(f'Push result: {push_result}')
 
 ######################### Main code end #################################
