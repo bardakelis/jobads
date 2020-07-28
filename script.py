@@ -896,20 +896,29 @@ produce_keyword_cloud(get_keyword_and_count(web_frameworks_kwds), path_to_kwd_im
 ############################################################################################
 
 # Define hugo GIT directory here:
-repo_dir = '/opt/itdarborinka_app/hugo'
-repo = Repo(repo_dir)
-origin = repo.remote('origin')
-g = git.cmd.Git(repo_dir)
-# pull HUGO repository locally so that it can be updated with latest img files afterwards:
-pull_result = g.pull()
-print(f'pull result: {pull_result}')
+repo_dir = '/opt/itdarborinka_app/hugo_tmp'
+
+if os.path.isdir(f'{repo_dir}/.git'):
+    # .git dir already exists, so just pull HUGO repository locally so that it can be updated with latest img files afterwards:
+    repo = Repo(repo_dir)
+    origin = repo.remote('origin')
+    g = git.cmd.Git(repo_dir)
+    pull_result = g.pull()
+    print(f'pull result: {pull_result}')
+else:
+    # .git directory not found, so must be empty then. Let's clone repo:
+    Repo.clone_from('git@github.com:bardakelis/hugo.git', repo_dir)
+
+    repo = Repo(repo_dir)
+    origin = repo.remote('origin')
+    g = git.cmd.Git(repo_dir)
 
 # We'll take files produced by application in this dir:
 app_out_dir = '/opt/itdarborinka_app/application/output/keyword_cloud/'
 yaml_out_file = '/opt/itdarborinka_app/application/output/yaml/toptech.yaml'
 # and copy to hugo images directory to store them there till they are compiled for a new web site version:
-hugo_imgs_location = '/opt/itdarborinka_app/hugo/static/img/keyword_cloud'
-hugo_yaml_location = '/opt/itdarborinka_app/hugo/data/'
+hugo_imgs_location = '/opt/itdarborinka_app/hugo_tmp/static/img/keyword_cloud'
+hugo_yaml_location = '/opt/itdarborinka_app/hugo_tmp/data/'
 # these files are of intered for us:
 kwd_cloud_files = [
     'all_kwds@2x.png',
