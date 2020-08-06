@@ -111,6 +111,8 @@ def selenium_browser(url):
     options.headless = True
     options.add_argument('user-agent=Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36')
     options.add_argument('--no-sandbox')
+    # workaround for Selenium error "unknown error: session deleted because of page crash"
+    options.add_argument('--disable-dev-shm-usage')
     browser = webdriver.Chrome("./webdriver/chromedriver", options=options)
   
     try:
