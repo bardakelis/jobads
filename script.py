@@ -159,12 +159,32 @@ def sort_dictionary_by_values_desc(unsorted_dict):
 ########################### Sorting completed ##########################################################
 ########################### Count technology keywords from DB: ##################
 def count_keywords_from_db(file_with_keywords):
+    
+    ########### Fetching current records ######################
     # Fetch records not older than 90 days, i.e. approx. 3 months:
     ref_date = datetime.datetime.today() - datetime.timedelta(days=90)
     # Obtain total number of ads in the database, by only looking at date when an ad was posted:
     total_ads_per_period = ads.count_documents({"job_post_date":{"$gt": ref_date} })
-    #total_ads_per_period = ads.find({"job_post_date":{"$gt": ref_date} }).estimated_document_count()
+       
+    # Obtain total number of ads in the database, by only looking at date when an ad was posted:
+    total_ads_per_period = ads.count_documents({"job_post_date":{"$gt": ref_date} })
 
+    #####################################################################
+    ########### Fetching previous period's records ######################
+    #####################################################################
+    
+    #ref_date_end1 - is 6 months (180 days) from today
+    #ref_date_start1 - is 3 months (90 days) + 6 months (180 days), i.e. taking 3 months period from 6 months ago:
+    ref_date_end1 = datetime.datetime.today() - datetime.timedelta(days=180)
+    ref_date_start1 = ref_date_end1 - datetime.timedelta(days=90)
+    print(f'ref_date: {ref_date} ref_date_start1: {ref_date_start1} ref_date_end1: {ref_date_end1}')
+    
+    # Obtain total number of ads in the database, by only looking at date when an ad was posted:
+    total_ads_per_period_prev1 = ads.count_documents({"job_post_date":{"$gte": ref_date_start1, "$lte": ref_date_end1} })
+    print(f'total_ads_per_period_prev1: {total_ads_per_period_prev1} total_ads_per_period: {total_ads_per_period}')
+    #####################################################################
+    ########### Fetched previous period's records here, more will follow#
+    #####################################################################
 
     with open(file_with_keywords) as file:
         # Create emtpy dictionary to store stats:
@@ -184,6 +204,8 @@ def count_keywords_from_db(file_with_keywords):
                 documents_matched = {}
                 documents_matched['adsWithKwd'] = adsWithKwd # this is a count of docs with keywords we are looking for
                 documents_matched['adsInDBforPeriod'] = total_ads_per_period # this is a count of all docs/ads per the same period, so that it helps calculate percentage if we want later                
+                
+               
                 # constucting a query to MongoDB that retrieves all statistics such as salary, keyword count etc:               
                 pipeline = [
                     { "$match": 
@@ -228,8 +250,65 @@ def count_keywords_from_db(file_with_keywords):
                 for data in cursor:
                     scores = data
             
-                # joining 2 dictionaries into one single one:
-                keyword_stats[technology] = {**scores, **documents_matched}
+
+                ########################################################
+                # Same for previous period Prev1:
+                ########################################################
+                adsWithKwd_prev1 = ads.count_documents({"$text": {"$search": f'""\"{technology}\"""' }, "job_post_date":{"$gte": ref_date_start1, "$lte": ref_date_end1} })
+                # declare temporary storage dictinary for count matches, we will add it to a larger dictionary for each technology individually
+                documents_matched_prev1 = {}
+                documents_matched_prev1['adsWithKwd_prev1'] = adsWithKwd_prev1 # this is a count of docs with keywords we are looking for
+                documents_matched_prev1['adsInDBforPeriod_prev1'] = total_ads_per_period_prev1 # this is a count of all docs/ads per the same period, so that it helps calculate percentage if we want later                
+
+                # constucting a query to MongoDB that retrieves all statistics such as salary, keyword count etc:               
+                pipeline_prev1 = [
+                    { "$match": 
+                        {
+                            "$and": 
+                            [
+                                {"$text" : { "$search": f'""\"{technology}\"""' }  },
+                                {"pay_interval" : { "$eq": 'monthly' }},
+                                {"salary_amount_type" : { "$eq": 'gross' }},
+                                {"job_post_date": {"$gte": ref_date_start1, "$lte": ref_date_end1}}
+                            ] 
+                        }
+                    },
+                    { 
+                        "$group": 
+                        {
+                            "_id": "null", 
+                            "avgSalaryLow_prev1": { "$avg": "$salary_from"},
+                            "avgSalaryHigh_prev1": { "$avg": "$salary_to"}, 
+                            "adsWithKwdSalary_prev1": {"$sum":1}, 
+                            "avgTxtScoreKwdSalary_prev1": {"$avg": {"$meta": "textScore"}}
+                        },
+                    },
+                    { 
+                        "$project": 
+                        { 
+                            "_id": 0, 
+                            'avgSalaryLow_prev1':1,
+                            'avgSalaryHigh_prev1':1,
+                            'adsWithKwdSalary_prev1':1,
+                            'avgTxtScoreKwdSalary_prev1':1
+                        }
+                    }
+                    ]
+
+                
+                # lets define a dictionary to hold output from db, later we will merge it with documents_matched dict and produce final keyword_stats dict:
+                scores_prev1 = {}
+                # getting a cursor from MongoDB
+                cursor_prev1 = ads.aggregate(pipeline_prev1)
+                # to get actual data from the cursor we have to iterate thru items in the cursor (one item, that will come out as a dictionary):
+                for data_prev1 in cursor_prev1:
+                    scores_prev1 = data_prev1
+            ######################################################################################
+
+
+
+                # joining THREE dictionaries into one single one:
+                keyword_stats[technology] = {**scores, **scores_prev1, **documents_matched, **documents_matched_prev1}
 
        
         #sorted_keywords_dict = collections.orderedDict()
