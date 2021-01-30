@@ -174,8 +174,8 @@ def count_keywords_from_db(file_with_keywords):
     #####################################################################
     
     #ref_date_end1 - is 6 months (180 days) from today
-    #ref_date_start1 - is 3 months (90 days) + 6 months (180 days), i.e. taking 3 months period from 6 months ago:
-    ref_date_end1 = datetime.datetime.today() - datetime.timedelta(days=180)
+    #ref_date_start1 - is 3 months (90 days) + 6 months (180 days)->270 days, i.e. taking 3 months period from 6+ months ago:
+    ref_date_end1 = datetime.datetime.today() - datetime.timedelta(days=270)
     ref_date_start1 = ref_date_end1 - datetime.timedelta(days=90)
     print(f'ref_date: {ref_date} ref_date_start1: {ref_date_start1} ref_date_end1: {ref_date_end1}')
     
