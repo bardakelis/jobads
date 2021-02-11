@@ -1,14 +1,44 @@
-MySQL
-PostgreSQL
-Postgres
-Microsoft SQL Server
-SQLite
-MongoDB
-Redis
-MariaDB
-Oracle
-Elasticsearch
-Firebase
-DynamoDB
+Aurora
 Cassandra
+Cosmos DB
 Couchbase
+CouchDB
+DatabasePresto
+DynamoDB
+Elasticsearch
+FileMaker
+Firebase
+Firebird
+Google BigQuery
+HBase
+HBase
+Hive
+IBM Cloudant
+IBM DB2
+Impala
+InfluxDB
+Informix
+MariaDB
+Memcached
+Microsoft Access
+Microsoft Azure SQL Database
+Microsoft Azure Synapse Analytics
+Microsoft SQL Server
+MongoDB
+MySQL
+Neo4j
+Oracle
+Panoply
+Postgres
+PostgreSQL
+RavenDB
+Redis
+Redshift
+Riak
+SAP HANA
+Snowflake
+Solr
+Spark SQL
+SQLite
+Teradata
+Vertica

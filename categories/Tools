@@ -1,55 +1,69 @@
-Prometheus
-Grafana
-Graphite
-Git
-Jenkins
-JIRA
-Slack
-Zoom
-Clarizen
+Amazon Cognito
+Ansible
+Ant
+AppDynamics
+ArchiMate
 Asana
-SVN
-Git
+Atom
+Azure DevOps
+Bamboo
 Bitbucket
+BrowserStack
+Chef
+CircleCI
+Clarizen
+CloudFormation
+Codeship
+curl
+CyberArk
+Datadog
+Dynatrace
+ELK
+Git
 GitHub
 GitLab
-Ant
-Maven
-Grunt
-Puppet
-Chef
-Ansible
-SaltStack
-Terraform
-CloudFormation
-Vagrant
-Jenkins
-Travis CI
-Bamboo
-Hudson
-TeamCity
-CircleCI
-Snyk
-Netsparker
-Selenium
-Nagios
+Gradle
 Grafana
-Sensu
-New Relic
-Datadog
-ELK
-Logstash
+Graphite
+Gremlin
+Grunt
+Hudson
+Jenkins
+JIRA
+JRebel
 Kibana
+Logstash
+Maven
+Nagios
+Netsparker
+New Relic
 Office 365
-Wireshark
-tcpdump
-Visual Studio Code
-PyCharm
-Atom
-Visual Studio
-curl
-sublime
-ssh
 PHPMyAdmin
+Prometheus
+Puppet
+PyCharm
+SaltStack
+Selenium
+Sensu
+Sentry
+Slack
+Snyk
+SoapUI
+Splunk
+ssh
+sublime
+SVN
+tcpdump
+TeamCity
+Terraform
+ThousandEyes
 TOGAF
-ArchiMate
+Travis CI
+Trello
+Vagrant
+VictorOps
+Visual Studio
+Visual Studio Code
+Wireshark
+Zabbix
+Zoom

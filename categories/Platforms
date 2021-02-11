@@ -1,33 +1,34 @@
-Linux
-Windows
-Docker
-Android
-Solaris
-Windows Server
-AWS
 Amazon Web Services
-EC2
-S3
-MacOS
-Raspberry Pi
-iOS
-Google Cloud
-GCP
-Azure
+Android
 Arduino
-Heroku
-Kubernetes
-Openshift
-IBM Cloud
-Watson
-VMWare
+AWS
+Azure
+Citrix
+Docker
+EC2
 ESXi
-KVM
+GCP
+Google Cloud
+Heroku
 Hyper-V
-VirtualBox
-Proxmox
+IBM Cloud
+iOS
+Kubernetes
+KVM
+Linux
+MacOS
 Nutanix
+Openshift
+PowerVM
+Proxmox
+Raspberry Pi
+S3
+Solaris
+VirtualBox
+VMWare
+vSphere
+Watson
+Windows
+Windows Server
 XEN
 XenServer
-Citrix
-vSphere
