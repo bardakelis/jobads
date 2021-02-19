@@ -221,6 +221,16 @@ def count_keywords_from_db(file_with_keywords):
                     print(f'keyword_syn: {keyword_syn}, count: {adsWithKwd_this_syn}')
                 print('*********************************************************************************')
                 print(f'Main Keyword: {technology}, total count including synonims: {adsWithKwd}')
+                
+                # Special workaround to exclude too wide matches being included into results, e.g if searching for ".NET", it will match both ".NET" and ".NET Core" which are not the same:
+                # Excluding matches of ".NET Core" from matches of ".NET"
+                if technology == ".NET":
+                    keyword_to_exclude = ".NET Core"
+                    count_to_exclude_from_wider_match = ads.count_documents({"$text": {"$search": f'""\"{keyword_to_exclude}\"""' }, "job_post_date":{"$gt": ref_date} })
+                    adsWithKwd -= count_to_exclude_from_wider_match
+                    print(f'Main Keyword: {technology}, total count excluding ".NET Core": {adsWithKwd}')
+
+
 
                 # END OF NEW SECTION               
 
@@ -306,6 +316,14 @@ def count_keywords_from_db(file_with_keywords):
                     print(f'Previous period: keyword_syn: {keyword_syn}, count: {adsWithKwd_prev1_this_syn}')
                 print('*********************************************************************************')
                 print(f'Main Keyword for previous period: {technology}, total count previous period including synonims: {adsWithKwd_prev1}')
+
+                # Special workaround to exclude too wide matches being included into results, e.g if searching for ".NET", it will match both ".NET" and ".NET Core" which are not the same:
+                # Excluding matches of ".NET Core" from matches of ".NET"
+                if technology == ".NET":
+                    keyword_to_exclude = ".NET Core"
+                    count_to_exclude_from_wider_match = ads.count_documents({"$text": {"$search": f'""\"{keyword_to_exclude}\"""' }, "job_post_date":{"$gte": ref_date_start1, "$lte": ref_date_end1} })
+                    adsWithKwd_prev1 -= count_to_exclude_from_wider_match
+                    print(f'Main Keyword: {technology}, total count excluding ".NET Core": {adsWithKwd}')
           
                 # declare temporary storage dictinary for count matches, we will add it to a larger dictionary for each technology individually
                 documents_matched_prev1 = {}
