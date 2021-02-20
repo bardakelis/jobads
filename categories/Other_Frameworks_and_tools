@@ -1,5 +1,4 @@
 Active Directory
-AD
 Android Studio
 Apache Spark
 AWS IoT Core
@@ -21,7 +20,7 @@ LDAP
 Mockito
 .NET
 .NET Core
-Node.js
+Node|Node.js|NodeJS
 NUnit
 Pandas
 Pytest

@@ -192,17 +192,61 @@ def count_keywords_from_db(file_with_keywords):
         categories = file.readlines()
         # e.g. for 'Linux' in Platforms or for 'C++' in Programming_languages:
         for keyword in categories:
+            print(f'Keyword in category is: {keyword}')
             # if keyword is not an empty line 
             if keyword.strip():
                 
-                # Strip spaces from the end of the keyword:                
-                technology = keyword.rstrip()
+
+                # NEW SECTION:
+                tech_synonims = keyword.split("|")
+                # Explicitly trimming white spaces from tech_synonims[0] which holds technology keyword name e.g. "Linux", "AWS" etc. 
+                tech_synonims[0] =  tech_synonims[0].lstrip().rstrip()
+                # First keyword in the synonims list will be the main one and will be used for calculating avg low/high salaries etc. Other synonims won't be included into salary avg calculation
+                technology = tech_synonims[0]
+                adsWithKwd = 0
+                adsWithKwd_prev1 = 0
+                # Here wer will query MongoDB for each of keyword+synonims and count how many matches were found in total in the end.
+                # Matches will be summed, but salary information for synonims won't be included into main statistics when running pipeline query.
+                
+                for keyword_syn in tech_synonims:
+                    keyword_syn = keyword_syn.lstrip().rstrip()
+
+
+                    # Send a query to MongoDB:
+                    adsWithKwd_this_syn = ads.count_documents({"$text": {"$search": f'""\"{keyword_syn}\"""' }, "job_post_date":{"$gt": ref_date} })
+                    print(f'Keyword was: {keyword_syn}.')
+                    print(f'count: {adsWithKwd_this_syn}.')
+                    # Here we are summing count of matched keyword and its synonims if any:
+                    adsWithKwd += adsWithKwd_this_syn
+                    print(f'keyword_syn: {keyword_syn}, count: {adsWithKwd_this_syn}')
+                print('*********************************************************************************')
+                print(f'Main Keyword: {technology}, total count including synonims: {adsWithKwd}')
+                
+                # Special workaround to exclude too wide matches being included into results, e.g if searching for ".NET", it will match both ".NET" and ".NET Core" which are not the same:
+                # Excluding matches of ".NET Core" from matches of ".NET"
+                if technology == ".NET":
+                    keyword_to_exclude = ".NET Core"
+                    count_to_exclude_from_wider_match = ads.count_documents({"$text": {"$search": f'""\"{keyword_to_exclude}\"""' }, "job_post_date":{"$gt": ref_date} })
+                    adsWithKwd -= count_to_exclude_from_wider_match
+                    print(f'Main Keyword: {technology}, total count excluding ".NET Core": {adsWithKwd}')
+
+
+
+                # END OF NEW SECTION               
+
+
+                print('++++++++++++++++++++++++++++++++++++++++++++++')
+                print(type(technology))
+                print('refdate:')
+                print(ref_date)
                 
                 # Send a query to MongoDB:
-                adsWithKwd = ads.count_documents({"$text": {"$search": f'""\"{technology}\"""' }, "job_post_date":{"$gt": ref_date} })
+               # adsWithKwd = ads.count_documents({"$text": {"$search": f'""\"{technology}\"""' }, "job_post_date":{"$gt": ref_date} })
+                print('Latest period keyword count:')
+                print(adsWithKwd)
                 # declare temporary storage dictinary for count matches, we will add it to a larger dictionary for each technology individually
                 documents_matched = {}
-                documents_matched['adsWithKwd'] = adsWithKwd # this is a count of docs with keywords we are looking for
+                documents_matched['adsWithKwd'] = adsWithKwd # this is a count of docs with keywords+synonims (if any present) we are looking for
                 documents_matched['adsInDBforPeriod'] = total_ads_per_period # this is a count of all docs/ads per the same period, so that it helps calculate percentage if we want later                
                 
                
@@ -249,12 +293,38 @@ def count_keywords_from_db(file_with_keywords):
                 # to get actual data from the cursor we have to iterate thru items in the cursor (one item, that will come out as a dictionary):
                 for data in cursor:
                     scores = data
+                    print(technology)
+                    print(data)
             
 
                 ########################################################
                 # Same for previous period Prev1:
                 ########################################################
-                adsWithKwd_prev1 = ads.count_documents({"$text": {"$search": f'""\"{technology}\"""' }, "job_post_date":{"$gte": ref_date_start1, "$lte": ref_date_end1} })
+                
+                # Here wer will query MongoDB for each of keyword+synonims and count how many matches were found in total in the end.
+                # Matches will be summed, but salary information for synonims won't be included into main statistics when running pipeline query.
+
+                for keyword_syn in tech_synonims:
+                    keyword_syn = keyword_syn.lstrip().rstrip()
+
+                    # Send a query to MongoDB:
+                    adsWithKwd_prev1_this_syn = ads.count_documents({"$text": {"$search": f'""\"{keyword_syn}\"""' }, "job_post_date":{"$gte": ref_date_start1, "$lte": ref_date_end1} })
+                    print(f'Keyword was: {keyword_syn}.')
+                    print(f'previous period count: {adsWithKwd_prev1_this_syn}.')
+                    # Here we are summing count of matched keyword and its synonims if any:
+                    adsWithKwd_prev1 += adsWithKwd_prev1_this_syn
+                    print(f'Previous period: keyword_syn: {keyword_syn}, count: {adsWithKwd_prev1_this_syn}')
+                print('*********************************************************************************')
+                print(f'Main Keyword for previous period: {technology}, total count previous period including synonims: {adsWithKwd_prev1}')
+
+                # Special workaround to exclude too wide matches being included into results, e.g if searching for ".NET", it will match both ".NET" and ".NET Core" which are not the same:
+                # Excluding matches of ".NET Core" from matches of ".NET"
+                if technology == ".NET":
+                    keyword_to_exclude = ".NET Core"
+                    count_to_exclude_from_wider_match = ads.count_documents({"$text": {"$search": f'""\"{keyword_to_exclude}\"""' }, "job_post_date":{"$gte": ref_date_start1, "$lte": ref_date_end1} })
+                    adsWithKwd_prev1 -= count_to_exclude_from_wider_match
+                    print(f'Main Keyword: {technology}, total count excluding ".NET Core": {adsWithKwd}')
+          
                 # declare temporary storage dictinary for count matches, we will add it to a larger dictionary for each technology individually
                 documents_matched_prev1 = {}
                 documents_matched_prev1['adsWithKwd_prev1'] = adsWithKwd_prev1 # this is a count of docs with keywords we are looking for
