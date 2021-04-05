@@ -973,7 +973,7 @@ def produce_keyword_cloud(keyword_dict, img_file_to_save, jpg_quality, bigger=Fa
 ######################### Main code goes here: #################################
 root_url = 'https://www.cvonline.lt'
 # Crawler is pretending to be Chrome browser on Windows:
-user_agent = {'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36'}
+user_agent = {'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36'}
 
 # Options in the site:
 
