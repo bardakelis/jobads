@@ -43,12 +43,16 @@ from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
+
 # for wordcloud:
 from wordcloud import WordCloud, get_single_color_func
 
 # also need "pip install pillow" so that matplotlib can save files as jpg (https://stackoverflow.com/questions/8827016/matplotlib-savefig-in-jpeg-format)
 # Import classes from separate file
 from keywordcloud import GroupedColorFunc, SimpleGroupedColorFunc
+# for parsing json in html:
+import json
 
 ####################### init pyocr tools: ##################################
 tools = pyocr.get_available_tools()
@@ -78,7 +82,7 @@ logging.basicConfig(level=logging.DEBUG, filename='logs/application.log', filemo
 ######### Check if ad text extracted can be considered as valid ###############
 def ad_extraction_ok(ad_text):
     # If ad text is longer than "min_ad_length", assume it is OK:
-    min_ad_length = 100
+    min_ad_length = 250
     if len(ad_text) > min_ad_length:
         return True
     else:
@@ -109,7 +113,7 @@ def already_in_db(obj_id):
 def selenium_browser(url):
     options = Options()
     options.headless = True
-    options.add_argument('user-agent=Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36')
+    options.add_argument('user-agent=Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36')
     options.add_argument('--no-sandbox')
     # workaround for Selenium error "unknown error: session deleted because of page crash"
     options.add_argument('--disable-dev-shm-usage')
@@ -122,16 +126,19 @@ def selenium_browser(url):
         logging.error("A TimeOut Exception has been thrown: " + str(ex))
         browser.quit()
 
-    # Wait for iframe with id=JobAdFrame to load and switch to it:
-    try:
-        WebDriverWait(browser, 10).until(EC.frame_to_be_available_and_switch_to_it("JobAdFrame"))
-    except TimeoutException:
-        logging.warning("Selenium did not find a matching iFrame JobAdFrame. Will continue further...")
+        # Wait for iframe with class=vacancy-content__url to load and switch to it:
+    try: # If no timeout and iframe loads:
+        WebDriverWait(browser, 10).until(EC.frame_to_be_available_and_switch_to_it((By.CSS_SELECTOR,".vacancy-content__url")))
+    except TimeoutException: # when timeout and selenium did not get anything, log warning and just get contents of the URL requested.
+        logging.warning("Selenium did not find a matching iFrame with class vacancy-content__url. Will ignore iFrame and just go to requested URL")
+    except Exception as e:
+        logging.warning("Webdriver encountered an exception %s", e)
     
-    page_html = browser.page_source
-    # Stop web driver and cleanup:
-    browser.quit()
-
+    try:
+        page_html = browser.page_source
+    except Exception as e:
+        logging.warning("Webdriver encountered an exception while trying to get page html code %s", e)
+        page_html =''
     soup = BeautifulSoup(page_html, 'html.parser')
     ########################################################
     # Cleanup output:
@@ -144,7 +151,12 @@ def selenium_browser(url):
     for match in css_junk:
         match.decompose()
     job_ad_frame_page = soup.find('body')
-    job_ad_text = job_ad_frame_page.get_text()
+    if job_ad_frame_page is not None: # if we have retrieved any html, proceed with extraction to avoid NoneType excpetion in the next step.
+        job_ad_text = job_ad_frame_page.get_text(strip=True, separator=' ')
+    else:
+        job_ad_text = ''
+    # Stop web driver and cleanup:
+    browser.quit()
     return job_ad_text
 ########################### End of selenium browser function ##################
 ########################### Sort nested dictionary items by value in descending order: ######################
@@ -391,7 +403,7 @@ def count_keywords_from_db(file_with_keywords):
 ########### Define main crawler function - all crawling happens here: #################
 def job_ads_crawler(url_to_crawl):
     try:
-        res = requests.get(url_to_crawl, headers=user_agent)
+        res = requests.get(url_to_crawl, headers=user_agent, timeout=request_timeout)
     except requests.exceptions.RequestException as err:
         logging.error('Error: %s', err)
         print('Error: ', err)
@@ -401,73 +413,141 @@ def job_ads_crawler(url_to_crawl):
     ads_inserted_total = 0
     
     whole_page = BeautifulSoup(res.text, 'html.parser')
-    offer = whole_page.select('div.offer_primary')
-    count_of_offers_in_page = len(offer)
-    # looping through the list of jobs shown in a current page (subsequent pages need further code):
-    for x in range (count_of_offers_in_page):
-        print(x+1,'/',count_of_offers_in_page)
-        brief_offer = BeautifulSoup(str(offer[x]),'html.parser')
-        # fetching position name
-        job_ad_position_name = brief_offer.find('a').text   
-        # fetching company name
-        company_name = brief_offer.find(itemprop='name').get_text()    
-        job_location = brief_offer.find(itemprop='jobLocation').get_text()   
-        # fetching salary range string, which needs further parsing to extract numbers
-        salary_range = brief_offer.find('span').text    
-        # Extract minimum salary if string "Nuo" exists:
-        if salary_range.find('Nuo ') != -1:
-            salary_from = salary_range.split("Nuo ",1)[1].split(' ')[0]
-        else:
-            salary_from = ''
-        # Extract maximum salary if string "iki" exists
-        if salary_range.find('iki ') != -1:
-            salary_to = salary_range.split("iki ",1)[1].split(' ')[0]
-        else:
-            salary_to = ''
-        # Extract currency used if string "atlygis" exists (to avoid case when no salary info provided at all)
-        if salary_range.find('atlygis') != '':
-            salary_currency = salary_range.split(" ")[-1]
-        else:
-            salary_currency = 'N/A'
-        # Check if pay is monthly/hourly etc:
-        if 'Mėnesinis' in salary_range:
-            pay_interval = 'monthly'
-        elif 'Valandinis' in salary_range:
-            pay_interval = 'hourly'
-        else: 
-            pay_interval = 'unknown'
-        # Check if pay is bruto or netto:
-        if 'bruto' in salary_range:
-            salary_amount_type = 'gross'
-        elif 'neto' in salary_range:
-            salary_amount_type = 'net'
-        else:
-            salary_amount_type = 'unknown'
-        # fetch date when ad was posted, it is inside attribute's "content" value span itemprop="datePosted"
-        # e.g. <span itemprop="datePosted" content="2019-09-23">Prieš 19 val.</span>
-        date_posted = brief_offer.find('span', {'itemprop':'datePosted'})['content']
-        # Search for li element inside ul containing text "Prašymus siųskite iki"
-        for item in brief_offer.find('ul', class_='cvo_module_offer_meta offer_dates').find_all('li'):
-            if "Prašymus siųskite iki" in item.text: 
-                # Extract timestamp from string such as "Prasymus siuskite iki 2019.11.30" and then replace dots with dashes to match job post date format:
-                valid_till = item.text.split()[-1].replace('.','-')
-                try:
-                    datetime.datetime.strptime(valid_till, '%Y-%m-%d')
-                except ValueError:
-                   # raise ValueError("Incorrect valid_till date format, should be YYYY-MM-DD")
-                    logging.warning('Incorrect valid-till date format, should be YYYY-MM-DD')
-                    valid_till = '2111-11-11'
-            else:
-                valid_till = ''
+
+
+    # This code will find script tag with id=__NEXT_DATA__ which in fact contains application/json content type in the html 
+    # That json content contains a lot of valuable parameters like position name, salary, offer validity periods etc. This is very helpful as instead
+    # of having to extract those number from plain HTML we just can use that json as a dictionary, all we need is to match "id" value in that dictionary
+    #  with the same value found in job ad URL.
+    
+    json_from_webpage = whole_page.find('script', {"id": "__NEXT_DATA__"})
+    stringified_json = json.loads(json_from_webpage.string)
+    ad_details = stringified_json['props']['initialReduxState']['search']['vacancies']
+    print('-------------------ad_details from json:--------------')
+    print(ad_details)
+    print('-------------------------------------------------')
+
+    offers = whole_page.findAll("li", class_="vacancies-list__item")
+    #print(offer)
+    #print('*************************************************')
+    #print(offer.get_text)
+
+    # Looping through the brief job offers on the page:
+    for offer in offers:
+        count_of_offers_in_page = len(offers)
+        brief_offer = BeautifulSoup(str(offer),'html.parser')
         # fetching href uri location for the full job ad
         job_ad_href = brief_offer.find('a').get('href')
         # constructing a valid url for later retrieval of its contents
-        job_ad_url = 'https:'+job_ad_href
-        # Check if this ad is already in DB, if so, skip extracting data from it and move to the next one:
-        if already_in_db(job_ad_url):
-            logging.warning('This ad already in the DB. Will be skipped, URL: %s', job_ad_url)
-            print('Ad already in DB, skipping...')
-            continue
+        job_ad_url = root_url+job_ad_href
+        # Get rid of a span tag with class "hide-mobile" as it contains some junk we want to remove, i.e. double dash "--"
+        brief_offer.find('span', class_="hide-mobile").decompose()
+        job_location = brief_offer.find('div', class_="vacancy-item__info-main" ).find('span', class_="vacancy-item__locations").text    
+        try:
+            salary_range = brief_offer.find('div', class_="vacancy-item__info" ).find('span', class_="vacancy-item__salary-label").text
+        except:
+            salary_range = ''
+
+        # job_ad_href looks like:
+        # /lt/vacancy/508920/cv-online-recruitment-lithuania/programuotojas-a-dynamics-ax-dynamics-365-f-ir-o
+        # ID is the third field, i.e. 508920 in above example
+        job_ad_id = job_ad_href.split("/")[3]
+        # A couple of default assumptions here:
+        salary_currency = "EUR"
+        salary_amount_type = 'gross'
+        pay_interval = 'monthly'
+
+        # Retrieve ad details from crawled json code by ID:
+        # If no match by ID, then return False:
+        ad_as_dict = next((item for item in ad_details if item["id"] == int(job_ad_id)), False)
+        
+        print('-----------------------ad_as_dict is:-------------------------------------')
+        print(ad_as_dict)
+        # check that ad_as_dict did not return "False" and important fields are not of None type (positionContent may be empty sometimes though):
+        if ad_as_dict is not False and \
+           ad_as_dict['positionTitle'] is not None and \
+           ad_as_dict['employerName'] is not None and \
+           ad_as_dict['publishDate'] is not None and \
+           ad_as_dict['expirationDate'] is not None:
+
+            print('ad_as_dict is True!')
+            try: # try assigning all values from the JSON, if something fails, fallback to HTML crawling:
+                job_ad_id = ad_as_dict['id']
+                job_ad_position_name = ad_as_dict['positionTitle']
+                company_name = ad_as_dict['employerName']
+                salary_from = ad_as_dict['salaryFrom']
+                salary_to = ad_as_dict['salaryTo']
+                ad_hourly_salary = ad_as_dict['hourlySalary']
+                if 'False' in str(ad_hourly_salary):
+                    pay_interval = 'monthly' 
+                else:
+                    pay_interval = 'hourly'
+                date_posted = ad_as_dict['publishDate']
+                valid_till = ad_as_dict['expirationDate']
+                if ad_as_dict['positionContent'] is None:
+                    ad_position_content = ''
+                else:
+                    ad_position_content = ad_as_dict['positionContent']
+            except Exception:
+                pass  
+        else:
+            print('no ad_as_dict found, going to collect info from the html')
+            # Do our best to extract at least some ad details from html:
+            # fetching position name 
+            job_ad_position_name = brief_offer.find('span', class_="vacancy-item__title").text  
+            print(f'Job ad position name: {job_ad_position_name}')
+            # fetching company name 
+            company_name = brief_offer.find('div', class_="vacancy-item__info-main" ).find('a').text    
+            print(f'company: {company_name}')
+
+            # fetching salary range string, which needs further parsing to extract numbers. Some ads contain no salary, hence "try":
+            try:
+                salary_range = brief_offer.find('div', class_="vacancy-item__info" ).find('span', class_="vacancy-item__salary-label").text
+            except:
+                salary_range = ''
+
+            salary_split = salary_range.split(' ')
+            
+            # if min and max salary is available in html, expected like "€ 2000 – 3000", which makes 4 items:
+            if len(salary_split) == 4:
+                salary_from = salary_split[1]
+                salary_to = salary_split[3]
+            # if only one salary is available in html, expected like "€ 2563", which makes 2 items:
+            elif len(salary_split) == 2:
+                salary_from = salary_split[1]
+                salary_to = ''
+            else:
+                salary_from = salary_to = ''
+
+            # not fetching post date and validity date because dates are not nicely parsable, hence assuming it was from today/now:
+            date_posted = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+            # Trying to get ad validity date from HTML code:
+            try:
+                ad_validity = brief_offer.find('div', class_="vacancy-item__info-secondary").select_one('span:contains("Baigiasi")').text.split("Baigiasi: ")[1]
+                valid_till = str(datetime.datetime.strptime(ad_validity, '%Y-%m-%d'))
+
+            except:
+                # putting a dummy date if extraction did not succeed:
+                valid_till = '1970-01-01T12:00:00.000+00:00'
+
+            # ad text not available in brief job description's html, hence empty:
+            ad_position_content = ''
+
+        print(f'Position title: {job_ad_position_name}')    
+        print(f'Company name: {company_name}')
+        print(f'Job location: {job_location}')
+        print(f'Salary from: {salary_from}')
+        print(f'Salary to: {salary_to}')
+        print(f'Salary currency: {salary_currency}')
+        print(f'Pay interval: {pay_interval}')
+        print(f'Salary amount type: {salary_amount_type}')
+        print(f'Job ad URL: {job_ad_url}')
+        print(f'Job post date: {date_posted}')
+        print(f'Offer valid till: {valid_till}')
+        print(f'ID: {job_ad_id}')    
+        print(f'Skelbimo tekstas: {ad_position_content}')   
+
+        print('***********************************')
 
         logging.info('--------------------------------------------------------------')
         logging.debug('Position: %s', job_ad_position_name)
@@ -480,119 +560,170 @@ def job_ads_crawler(url_to_crawl):
         logging.debug('Salary amount type: %s', salary_amount_type)
         logging.debug('Job URL: %s', job_ad_url)
         logging.debug('Job post date: %s', date_posted)
-        logging.debug('Offer valid till: %s', valid_till)    
+        logging.debug('Offer valid till: %s', valid_till)   
 
-        # Crawler is pretending to be Chrome browser on Windows:
+        # Check if this ad is already in DB, if so, skip extracting data from it and move to the next one:
+        if already_in_db(job_ad_url):
+            logging.warning('This ad already in the DB. Will be skipped, URL: %s', job_ad_url)
+            print('Ad already in DB, skipping...')
+            continue
+
+        if ad_extraction_ok(ad_position_content) is True:
+            logging.info("Job description lengtht: %s bytes. Assuming that it is good enough...", len(ad_position_content))   
+            print("Assuming we have a good job description text from JSON. Job description length:", len(ad_position_content))
+            extracted_job_ad_text = ad_position_content
+            extractor = 'JSON_DATA'      
+        else:  
+            print('Clicking on link to read the ad content:', job_ad_url)
         
-        # Crawler is pretending to be Chrome browser on Windows:
-        try:
-            job_ad_page_content = requests.get(job_ad_url, headers=user_agent)
-        
-            ##################### Start reading the ad page and extract its contents if it is in page-main-content div, i.e.
-            ##################### plain text, "non-js", "non-iframe", "non-image" ad #############
-            # parse detailed job ad text
-            job_ad_html = BeautifulSoup(job_ad_page_content.text, 'html.parser')
-            # Assuming that a standard cvonline.lt page formatting is used with page-main-content div (otherwise detailed ad text won't be available for extraction)
-            job_ad_details = job_ad_html.select('div#page-main-content') 
-            extracted_job_ad_text = BeautifulSoup(str(job_ad_details), 'html.parser').get_text()
-            extractor = 'BS4:div#page-main-content'
-            ########## End of plain text, "non-js", "non-iframe", "non-image" ad extraction ######
-        except requests.exceptions.RequestException as err:
-            logging.error('Error: %s', err)
-            print('Error: ', err)
-
-        # At this point we have extracted text from the ad image, unless there was an embedded image or iframe.
-        # Since we are not sure if we got all we needed, we will check for embedded job ad images with id=JobAdImage and extract text from them if they exist:
-        # If we find iFrame with id "JobAdFrame",then we extract ad text from it as iframe must be in the page for a reason:
-        #
-        # ************** AD AS IFRAME *******************************************************
-        # Check if iframe with ID JobAdFrame exists in the page:
-        job_ad_frame_tag = job_ad_html.find('iframe', {'id':'JobAdFrame'})
-        # If iframe exists, a url address needs to be obtained from it:
-        if job_ad_frame_tag is not None:
-            # combine domain name with url path to get full URL:
-            job_ad_frame_link = root_url + job_ad_frame_tag['src']
-            # retrieve the image contents from the link:
-
+            # Crawler is pretending to be Chrome browser on Windows:
             try:
-                job_ad_frame = requests.get(job_ad_frame_link)
-
-                #print('Job ad frame contains:',str(job_ad_frame))
-                job_ad_from_frame = BeautifulSoup(job_ad_frame.text, 'html.parser')
-                # remove <script> tags from results
-                js_junk = job_ad_from_frame.find_all('script')
-                for match in js_junk:
-                    match.decompose()
-                # remove <style> tags from results
-                css_junk = job_ad_from_frame.find_all('style')
-                for match in css_junk:
-                    match.decompose()
-                job_ad_frame_page = job_ad_from_frame.find('body')
-                # do some checks to avoid errors when extracted_job_ad_text is NoneType, i.e. job ad empty as this one: 
-                # https://www.cvonline.lt/darbo-skelbimas/alisa-management-laboratory-uab/java-programuotojas-a-f4068182.html
-                #Exception has occurred: AttributeError
-                #'NoneType' object has no attribute 'get_text'
-                try:
-                    extracted_job_ad_text = job_ad_frame_page.get_text()
-                except AttributeError:
-                    logging.error('This ad is empty, sorry!')
-                    extracted_job_ad_text = 'Sorry - empty!'
-
-                extractor = 'BS4:iFrame'
-            except requests.exceptions.RequestException as err:
-                logging.debug('Error: %s', err)
-                print('Error: ', err)
-        # ************** END OF AD AS IFRAME ************************************************
-                        
-        # Check if we have enough content to assume we retrieved a full ad, if not, fall back to Selenium which can deal with iFrame and JS:
-        if ad_extraction_ok(extracted_job_ad_text) is False:
-            logging.warning("Extracted text is too short: %s bytes. Engaging Selenium...", len(extracted_job_ad_text))           
-            print('Selenium to look at URL: ', job_ad_url)
-
-            extracted_job_ad_text = selenium_browser(job_ad_url)
-            extractor = 'Selenium'
-
-        # At this point we have extracted text from an URL embedded into iframe also from  if it existed also if there was any text-based ad.
-
-        # If there was no iframe, we will check for embedded job ad images with id=JobAdImage 
-        # and extract text from them if they exist by leveraging OCR:
-
-        # ************** AD AS AN IMAGE *******************************************************
-        # Check if there is any image with ID=JobAdImage which means that job ad is embedded as a picture.
-        job_ad_image_tag = job_ad_html.find('img', {'id':'JobAdImage'})
-        # If job ad image exists, it has to be retrieved to do OCR:
-        if job_ad_image_tag is not None:
-            # combine domain name with url path to get full URL:
-            job_ad_img_link = root_url + job_ad_image_tag['src']
-            # retrieve the image contents from the link:
-            try:
-                job_ad_image = requests.get(job_ad_img_link).content
-                # save retrieved image bytes into a RAM buffer:
-                image_in_buffer = BytesIO(job_ad_image)
-                # Identifying what OCR language to use depending on the text string found in the page:
-                if 'Darbo skelbimas be rėmelio' in extracted_job_ad_text:
-                    lang = 'lit'
-                elif  'Job ad without a frame' in extracted_job_ad_text:
-                    lang = 'eng'
-		# If there is another language, still treat it as english (I saw ads in Russian, in this case string
-                # will look like 'Объявление без рамки', but we won't bother extracting kirilica:
-                else:
-                    lang = 'eng'
-                # Use pyocr library that facilitates communication with tesseract library and convert image to text:
-                # https://gitlab.gnome.org/World/OpenPaperwork/pyocr
-                # selecing appropriate language for OCR by looking at expected text string in 2 langages (LT and EN):
+                job_ad_page_content = requests.get(job_ad_url, headers=user_agent, timeout=request_timeout)
             
-                extracted_job_ad_text = tool.image_to_string(
-                    Image.open(image_in_buffer),
-                    lang=lang,
-                    builder=pyocr.builders.TextBuilder()
-                )
-                #extracted_job_ad_text = 'Extracted by OCR, language: '+lang+'\n'+extracted_job_ad_text
-                extractor = f'BS4:OCR({str(lang)})'
+                ##################### Start reading the ad page and extract its contents as ##########
+                ##################### plain text, "non-js", "non-iframe", "non-image" ad #############
+                # parse detailed job ad text
+                job_ad_html = BeautifulSoup(job_ad_page_content.text, 'html.parser')
+                # Assuming that a standard cvonline.lt page formatting is used with vacancy-details__section divs (may be more than one in the page, hence using findAll)       
+                job_ad_details = job_ad_html.findAll('div', class_="vacancy-details__section")
+                # we will concatenate sections of job_ad_details findAll results into "combined_sections" string in case there are more than 1 div with this class:
+                # If more than 1 div with class "vancancy-details__section" is found:
+                if len(job_ad_details) > 1:
+                    combined_sections = ''
+                    for section in job_ad_details:
+                        combined_sections +=str(section)
+                    job_ad_details = combined_sections
+                extracted_job_ad_text = BeautifulSoup(str(job_ad_details), 'html.parser').get_text(strip=True, separator=' ')
+                extractor = 'BS4:div.vacancy-details__section'
+                ########## End of plain text ad extraction ######
             except requests.exceptions.RequestException as err:
-                logging.debug('Error: %s', err)
+                logging.error('Error: %s', err)
                 print('Error: ', err)
-        # ************** END OF AD AS AN IMAGE SECTION *********************************************
+
+            # If extracted_job_ad_text is long enough, we're happy, otherwise we'll look for iframe:
+
+            if ad_extraction_ok(extracted_job_ad_text) is True:
+                logging.info("Job description lengtht: %s bytes. Assuming that it is good enough...", len(ad_position_content))   
+                print("Assuming we have a good job description text from vacancy-details__section. Job description length:", len(extracted_job_ad_text))
+            else: # so we are not happy with extracted text length, assuming it contains no valid ad, and will proceed to look for iFrame:
+                print(f'Data extracted by BS4:div.vacancy-details__section dont seem to be valid, num of bytes: {len(ad_position_content)}')
+            
+                # If we find iFrame with title="urlDetails" or "class = vacancy-content__url",then we extract ad text from it as iframe must be in the page for a reason:
+                #
+                # ************** AD AS IFRAME *******************************************************
+                # Check if iframe with class = vacancy-content__url exists in the page:
+                # company_name = brief_offer.find('div', class_="vacancy-item__info-main" ).find('a').text  
+                job_ad_frame_tag = job_ad_html.find('iframe', class_="vacancy-content__url")
+                # If iframe exists, a url address needs to be obtained from it:
+                if job_ad_frame_tag is not None:
+                    # combine domain name with url path to get full URL:
+                    job_ad_frame_link = job_ad_frame_tag['src']
+                    print(f'Found external link in iframe as {job_ad_frame_link}')
+   
+                    # retrieve the image contents from the link:
+                    try:
+                        job_ad_frame = requests.get(job_ad_frame_link, timeout=request_timeout)
+                        job_ad_from_frame = BeautifulSoup(job_ad_frame.text, 'html.parser')
+
+                        # remove <script> tags from results
+                        js_junk = job_ad_from_frame.find_all('script')
+                        for match in js_junk:
+                            match.decompose()
+                        # remove <style> tags from results
+                        css_junk = job_ad_from_frame.find_all('style')
+                        for match in css_junk:
+                            match.decompose()
+                        job_ad_frame_page = job_ad_from_frame.find('body')
+                        # do some checks to avoid errors when extracted_job_ad_text is NoneType, i.e. job ad empty as this one: 
+                        #Exception has occurred: AttributeError
+                        #'NoneType' object has no attribute 'get_text'
+                        try:
+                            extracted_job_ad_text = job_ad_frame_page.get_text(strip=True, separator=' ')
+                        except AttributeError:
+                            logging.error('This ad is empty, sorry!')
+                            extracted_job_ad_text = 'Sorry - empty!'
+
+                        extractor = 'BS4:iFrame'
+                    except requests.exceptions.RequestException as err:
+                        logging.debug('Error: %s', err)
+                        print('****************Error: ', err)
+
+                    # Check if we have enough content to assume we retrieved a full ad, if not, fall back to Selenium which can deal with iFrame and JS:
+                    if ad_extraction_ok(extracted_job_ad_text) is False:
+                        logging.warning("Extracted text is too short: %s bytes. Engaging Selenium...", len(extracted_job_ad_text))           
+                        print(f'Extracted text is too short {len(extracted_job_ad_text)}. Selenium to look at URL {job_ad_url}')
+
+                        extracted_job_ad_text = selenium_browser(job_ad_url)
+                        extractor = 'Selenium4iFrame'
+                        
+                # ************** END OF AD AS IFRAME ************************************************
+
+            # If extraction via iFrame not succeeded (most likely because it was not found), let's check if there is a <a href="external_url" link as an ad:
+            if ad_extraction_ok(extracted_job_ad_text) is False:
+                logging.warning("Extracted text is too short: %s bytes, will try to check if there is a simple a href link...", len(extracted_job_ad_text))     
+
+                # At this point we have extracted text from an URL embedded into iframe also from  if it existed also if there was any text-based ad.
+                # Now we will check whether ad was implemented as a simple "a href" link with the position name that is supposed to open a new window and load third-party site:
+
+                # ************** AD AS a href LINK OPENING IN A NEW WINDOW *******************************************************
+                # Check if there is a div with class "react-tabs__tab-panel--selected" which contains a href similar to:
+                # <a href="https://apply.workable.com/euromonitor/j/90197754B1/" rel="noopener noreferrer" target="_blank" class="jsx-1778450779">SENIOR SOFTWARE ENGINEER</a>
+
+                job_ad_href_link_tag = job_ad_html.find('div',class_='react-tabs__tab-panel--selected').find('a',href=True, target='_blank' )
+                if job_ad_href_link_tag is not None:
+                    external_url_to_crawl = job_ad_href_link_tag['href']
+                    print('External URL in href:')
+                    print(external_url_to_crawl)
+                    extracted_job_ad_text = selenium_browser(external_url_to_crawl)
+                    extractor = 'Selenium4href'
+                # ************** END OF AD AS a href LINK OPENING IN A NEW WINDOW ************************************************
+                
+            if ad_extraction_ok(extracted_job_ad_text) is False:
+                logging.warning("Extracted text is too short: %s bytes, will try to check if there is an image-based ad...", len(extracted_job_ad_text))     
+
+                # ************** AD AS AN IMAGE *******************************************************
+                # We will scan image only if there was no vacancy-details__class div in the page, otherwise image may be just an illustration 
+                # with no valid ad text next to text-based job ad.
+                text_based_ad = job_ad_html.find('div', class_="vacancy-details__section")
+                if text_based_ad is None: # seems there is no ad text in the page, so we will check if there is any image to scan:
+                    try: # using try for cases when method falls back to this due to connection errors to site, so image tag method is not valid:
+                        job_ad_image_tag = job_ad_html.find('div',class_='react-tabs__tab-panel--selected').find('div',class_='vacancy-details__image' ).find('img')
+                    except Exception:
+                        job_ad_image_tag = None
+                    # If job ad image exists, it has to be retrieved to do OCR:
+                    if job_ad_image_tag is not None:
+                        # combine domain name with url path to get full URL:
+                        job_ad_img_link = root_url + job_ad_image_tag['src']
+                        # retrieve the image contents from the link:
+                        try:
+                            job_ad_image = requests.get(job_ad_img_link, timeout=request_timeout).content
+                            # save retrieved image bytes into a RAM buffer:
+                            image_in_buffer = BytesIO(job_ad_image)
+                            # Identifying what OCR language to use depending on the text string found in the page:
+                            if 'Darbo skelbimas be rėmelio' in extracted_job_ad_text:
+                                lang = 'lit'
+                            elif  'Job ad without a frame' in extracted_job_ad_text:
+                                lang = 'eng'
+                    # If there is another language, still treat it as english (I saw ads in Russian, in this case string
+                            # will look like 'Объявление без рамки', but we won't bother extracting kirilica:
+                            else:
+                                #lang = 'eng'
+                                lang = 'lit'
+                            # Use pyocr library that facilitates communication with tesseract library and convert image to text:
+                            # https://gitlab.gnome.org/World/OpenPaperwork/pyocr
+                            # selecing appropriate language for OCR by looking at expected text string in 2 langages (LT and EN):
+                        
+                            extracted_job_ad_text = tool.image_to_string(
+                                Image.open(image_in_buffer),
+                                lang=lang,
+                                builder=pyocr.builders.TextBuilder()
+                            )
+                            #extracted_job_ad_text = 'Extracted by OCR, language: '+lang+'\n'+extracted_job_ad_text
+                            extractor = f'BS4:OCR({str(lang)})'
+                        except requests.exceptions.RequestException as err:
+                            logging.debug('Error: %s', err)
+                            print('Error: ', err)
+                # ************** END OF AD AS AN IMAGE SECTION *********************************************
 
         # Printing results obtained from page crawling by direct content crawl, iframe link or embedded image:
         extracted_job_ad_text = linesep.join([s for s in extracted_job_ad_text.splitlines() if s])
@@ -607,10 +738,18 @@ def job_ads_crawler(url_to_crawl):
         logging.debug('Job ad text: %s', repr(extracted_job_ad_text))
 
         #################################### Writing extracted data to database: ###################
-        if salary_from != '':
+        if salary_from != '' and salary_from is not None:
             salary_from = int(float(salary_from))
-        if salary_to != '':
+        else:
+            salary_from = ''
+        if salary_to != '' and salary_to is not None:
             salary_to = int(float(salary_to))
+        else:
+            salary_to = ''
+
+       # job_post_date = datetime.datetime.strptime(date_posted, '%Y-%m-%d')
+        job_post_date = datetime.datetime.fromisoformat(date_posted)
+        offer_valid_till = datetime.datetime.fromisoformat(valid_till)
 
         collected_info = {"_id": job_ad_url,
             "job_ad_url": job_ad_url,
@@ -623,24 +762,32 @@ def job_ads_crawler(url_to_crawl):
             "salary_currency": salary_currency,
             "pay_interval": pay_interval,
             "salary_amount_type": salary_amount_type,
-            "job_post_date": datetime.datetime.strptime(date_posted, '%Y-%m-%d'),
-            "offer_valid_till": datetime.datetime.strptime(valid_till, '%Y-%m-%d'),
+            "job_post_date": job_post_date,
+            "offer_valid_till": offer_valid_till,
             "ad_text": extracted_job_ad_text,
             "extracted_by": extractor,
             "inserted_at": datetime.datetime.utcnow()
             }
-        ads = db.job_ads
-        try:
-            result = ads.insert_one(collected_info)
-            if result.acknowledged is True:
-                ads_inserted_total += 1
-                logging.debug('Ad added into MongoDB. ID: %s', job_ad_url)
-            else:
-                logging.error('Failed to add an ad into MongoDB! ID: %s', job_ad_url)
-        except pymongo.errors.DuplicateKeyError:
-            print('This ad already in DB, skipping: ', job_ad_url)    
-            logging.warning('This ad already in the DB, URL: %s', job_ad_url)
-        #################################### End of writing to database ###############################
+        
+        # If ad text is sufficiently long, we will write it to the database, otherwise will skip it for retrying later as this could be a result of connection error
+        if ad_extraction_ok(extracted_job_ad_text) is True:
+            
+            ads = db.job_ads
+            try:
+                result = ads.insert_one(collected_info)
+                if result.acknowledged is True:
+                    ads_inserted_total += 1
+                    logging.debug('Ad added into MongoDB. ID: %s', job_ad_url)
+                else:
+                    logging.error('Failed to add an ad into MongoDB! ID: %s', job_ad_url)
+            except pymongo.errors.DuplicateKeyError:
+                print('This ad already in DB, skipping: ', job_ad_url)    
+                logging.warning('This ad already in the DB, URL: %s', job_ad_url)
+            #################################### End of writing to database ###############################
+        else:
+            # If extracted text was not long enough, we will just ignore the whole ad, perhaps we will be able to crawl it next time if that was due to connection errors.
+            logging.warning('This ad has got too short text upon crawling, hence will be ignored and not put into DB for now: %s', job_ad_url)
+            print(f'This ad is too short and will not be inserted into DB for now: {job_ad_url}')
 
     # Check if there are any further ads in the next page, or it is just a single page of results: 
     next_page_tag = whole_page.find('li', class_='page_next')
@@ -812,13 +959,13 @@ def produce_keyword_cloud(keyword_dict, img_file_to_save, jpg_quality, bigger=Fa
     base_image = base_image.convert('RGB')
     # Performing posterization that reduces number of color bits per RGB channel from 8 down to 5
     # This helps reduce file size. Negative outcome is that pure white color is lost from the background
-    base_image_2x = ImageOps.posterize(base_image,5)
+    base_image_2x = ImageOps.posterize(base_image,8)
     base_image_2x.save(img_file_to_save+'@2x.png', 'png')
 
     base_image = base_image.resize((x, y), Image.ANTIALIAS)
     # Performing posterization that reduces number of color bits per RGB channel from 8 down to 5
     # This helps reduce file size. Negative outcome is that pure white color is lost from the background
-    base_image = ImageOps.posterize(base_image,5)
+    base_image = ImageOps.posterize(base_image,8)
     base_image.save(img_file_to_save+'.png', 'png')
     
 ########################### End fo keyword cloud production ##################################################
@@ -829,24 +976,14 @@ root_url = 'https://www.cvonline.lt'
 user_agent = {'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36'}
 
 # Options in the site:
-    
-# timespan:
-# All time: ""
-# 1 day: "1d"
-# 3 days: "3d"
-# 7 days: "7d"
-# 14 days: "14d"
-# 28 days: "28d"
-timespan = '3d'
 
-# job_area
-# IT: "informacines-technologijos"
-job_area = 'informacines-technologijos'
-
-# region:
-# Vilnius: vilniaus
-#region = 'vilniaus'
-
+# How many ads to crawl:
+# This is a blind guess since we dont' have good way to tell how old ads are. If we crawl the same ad twice, it will be simply ignored, so we can crawl more than needed
+ad_limit = 400
+# what is offset of ads (i.e. how many ads to skip from top)
+ad_offset = 0
+# set urllib3 request timeout in seconds:
+request_timeout = 30
 
 # "crawling_ongoing" variable set to 1 to indicate that crawler is looping through pages 
 # If multiple pages of job ads are returned, this value is set to 1 and only if 
@@ -861,8 +998,7 @@ ads_in_current_page = 0
 ads_total = 0
 ads_inserted = 0
 while crawling_ongoing == 1:
- #   url = f"{root_url}/darbo-skelbimai/{timespan}/{job_area}/{region}?page={page_no}"
-    url = f"{root_url}/darbo-skelbimai/{timespan}/{job_area}?page={page_no}"
+    url = f'https://www.cvonline.lt/lt/search?limit={ad_limit}&offset=0&categories%5B0%5D=INFORMATION_TECHNOLOGY'
     feedback_from_crawler = job_ads_crawler(url)
     # If 1, crawling will go to the next page of results:
     crawling_ongoing = feedback_from_crawler[0]
@@ -871,8 +1007,6 @@ while crawling_ongoing == 1:
     ads_total += ads_in_current_page
     ads_inserted += feedback_from_crawler[2]
     page_no += 1
-#
-#
 logging.info('Number of ad pages: %d, number of ads: %s', page_no, str(ads_total))
 logging.info('Number of ads inserted: %s', str(ads_inserted))
 
