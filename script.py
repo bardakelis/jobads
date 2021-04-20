@@ -712,7 +712,9 @@ def job_ads_crawler(url_to_crawl):
                             # Use pyocr library that facilitates communication with tesseract library and convert image to text:
                             # https://gitlab.gnome.org/World/OpenPaperwork/pyocr
                             # selecing appropriate language for OCR by looking at expected text string in 2 langages (LT and EN):
-                        
+                            
+                            # to address issue described in https://github.com/Belval/pdf2image/issues/76
+                            Image.MAX_IMAGE_PIXELS = 1000000000 
                             extracted_job_ad_text = tool.image_to_string(
                                 Image.open(image_in_buffer),
                                 lang=lang,
