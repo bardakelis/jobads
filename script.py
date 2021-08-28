@@ -715,11 +715,15 @@ def job_ads_crawler(url_to_crawl):
                             
                             # to address issue described in https://github.com/Belval/pdf2image/issues/76
                             Image.MAX_IMAGE_PIXELS = 1000000000 
-                            extracted_job_ad_text = tool.image_to_string(
-                                Image.open(image_in_buffer),
-                                lang=lang,
-                                builder=pyocr.builders.TextBuilder()
-                            )
+                            try:
+                                extracted_job_ad_text = tool.image_to_string(
+                                    Image.open(image_in_buffer),
+                                    lang=lang,
+                                    builder=pyocr.builders.TextBuilder()
+                                )
+                            except Exception as e:
+                                logging.error(traceback.format_exc())
+                                
                             #extracted_job_ad_text = 'Extracted by OCR, language: '+lang+'\n'+extracted_job_ad_text
                             extractor = f'BS4:OCR({str(lang)})'
                         except requests.exceptions.RequestException as err:
