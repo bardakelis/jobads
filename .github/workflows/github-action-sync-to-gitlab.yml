@@ -24,4 +24,5 @@ jobs:
         target-token: ${{ secrets.TARGET_TOKEN }}
     - name: custom commands
       run: |
-        echo $TARGET_USERNAME
+        echo "input target url: $INPUT_TARGET_URL"
+        echo $INPUT_TARGET_USERNAME
