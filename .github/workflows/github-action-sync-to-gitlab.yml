@@ -13,10 +13,8 @@ jobs:
       uses: actions/checkout@v2
     - run: |
         echo "starting the work now!"
-        username=${{ secrets.TARGET_USERNAME }}
-        echo "Username: $username"
-        #git remote add target https://${{ secrets.TARGET_USERNAME }}:${{ secrets.TARGET_TOKEN }}@${{ secrets.TARGET_URL }}
-        git remote add target https://username:password@gitlab.com/bardakelis/jobads-project.git
+        git remote add target https://${{ secrets.TARGET_USERNAME }}:${{ secrets.TARGET_TOKEN }}@${{ secrets.TARGET_URL }}
+        #git remote add target https://username:password@gitlab.com/bardakelis/jobads-project.git
         git push -f --all target
         echo "Completed with code $?"
    
