@@ -9,17 +9,9 @@ jobs:
     runs-on: ubuntu-latest
     name: Git Repo Sync
     steps:
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
-
-        env:
-          target-username: ${{ secrets.TARGET_USERNAME }}
-          target-url: ${{ secrets.TARGET_URL }}
-          target-token: ${{ secrets.TARGET_TOKEN }}
-        run: |
-          echo "starting the work now!"
-          git remote add target https://${target-username}:${target-token}@${target-url}
-          git push -f --all target
+    - run: |
+        echo "starting the work now!"
+        git remote add target https:// ${{ secrets.TARGET_USERNAME }}:${{ secrets.TARGET_TOKEN }}@${{ secrets.TARGET_URL }}
+        git push -f --all target
    
      
