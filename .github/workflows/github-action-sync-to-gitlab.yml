@@ -11,6 +11,8 @@ jobs:
     steps:
     - name: Check out repository code
       uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
     - run: |
         echo "starting the work now!"
         git remote add target https://${{ secrets.TARGET_USERNAME }}:${{ secrets.TARGET_TOKEN }}@${{ secrets.TARGET_URL }}
