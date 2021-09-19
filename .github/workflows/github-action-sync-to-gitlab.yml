@@ -15,7 +15,7 @@ jobs:
         echo "starting the work now!"
         git remote add target https://${{ secrets.TARGET_USERNAME }}:${{ secrets.TARGET_TOKEN }}@${{ secrets.TARGET_URL }}
         #git remote add target https://username:password@gitlab.com/bardakelis/jobads-project.git
-        git push -f --all target
+        git push -f target
         echo "Completed with code $?"
    
      
