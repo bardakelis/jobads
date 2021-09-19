@@ -23,7 +23,4 @@ jobs:
         target-username: ${{ secrets.TARGET_USERNAME }}
           # You can store token in your project's 'Setting > Secrets' and reference the name here. Such as ${{ secrets.ACCESS\_TOKEN }}
         target-token: ${{ secrets.TARGET_TOKEN }}
-    - name: custom commands
-      run: |
-        echo "input target url: $INPUT_TARGET_URL"
-        echo $INPUT_TARGET_USERNAME
+
