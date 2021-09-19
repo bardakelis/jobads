@@ -16,7 +16,7 @@ jobs:
         username=${{ secrets.TARGET_USERNAME }}
         echo "Username: $username"
         #git remote add target https://${{ secrets.TARGET_USERNAME }}:${{ secrets.TARGET_TOKEN }}@${{ secrets.TARGET_URL }}
-        git remote add target https://gitlab.com/bardakelis/jobads-project.git
+        git remote add target https://username@gitlab.com/bardakelis/jobads-project.git
         git push -f --all target
         echo "Completed with code $?"
    
