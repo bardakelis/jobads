@@ -13,7 +13,7 @@ jobs:
       uses: actions/checkout@v2
     - run: |
         echo "starting the work now!"
-        #git remote add target https://${{ secrets.TARGET_USERNAME }}:${{ secrets.TARGET_TOKEN }}@${{ secrets.TARGET_URL }}
+        git remote add target https://${{ secrets.TARGET_USERNAME }}:${{ secrets.TARGET_TOKEN }}@${{ secrets.TARGET_URL }}
         #git push -f --all target
         echo "Completed with code $?"
    
