@@ -16,7 +16,7 @@ jobs:
       with:
         # Such as https://github.com/wangchucheng/git-repo-sync.git
         #target-url: ${{ secrets.TARGET_URL }}
-        target-url: gitlab.com/bardakelis/jobads-project.git
+        target-url: https://gitlab.com/bardakelis/jobads-project.git
         # Such as wangchucheng
         target-username: ${{ secrets.TARGET_USERNAME }}
           # You can store token in your project's 'Setting > Secrets' and reference the name here. Such as ${{ secrets.ACCESS\_TOKEN }}
