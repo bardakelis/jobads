@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     name: Git Repo Sync
     steps:
+    - name: Check out repository code
+      uses: actions/checkout@v2
     - run: |
         echo "starting the work now!"
         #git remote add target https://${{ secrets.TARGET_USERNAME }}:${{ secrets.TARGET_TOKEN }}@${{ secrets.TARGET_URL }}
