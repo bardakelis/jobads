@@ -10,3 +10,4 @@ browsing.py
 !./keyword_cloud/
 !logs/
 !./output/*
+!jobads/*
