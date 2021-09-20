@@ -1,4 +1,4 @@
-*
+!./jobads/*
 *.yml
 !.gitignore
 !script.py
@@ -10,4 +10,3 @@ browsing.py
 !./keyword_cloud/
 !logs/
 !./output/*
-!jobads/*
