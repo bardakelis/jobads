@@ -91,10 +91,9 @@ def ad_extraction_ok(ad_text):
 ##############################################################################
 # MongoDB config:
 #
-# Get username/password from external file:
-conf = yaml.load(open('credentials.yml'), Loader=yaml.FullLoader)
-username = conf['user']['username']
-password = conf['user']['password']
+# Get username/password:
+username = os.environ.get('MONGODB_USER')
+password = os.environ.get('MONGODB_PASSWD')
 client = pymongo.MongoClient("mongodb+srv://"+username+":"+password+"@cluster0-znit8.mongodb.net/test?retryWrites=true&w=majority")
 # Using DB "mydb"
 db = client.bigdb
