@@ -29,13 +29,7 @@ RUN apt-get update && apt-get install -f -y ./google-chrome-stable_current_amd64
     #temporary
     apt-get install -y vim
 
-ADD categories/ ./
-ADD fonts/ ./
-ADD logs/ ./
-ADD output/ ./
-ADD webdriver/ ./
-ADD keywordcloud.py ./
-ADD script.py ./
+COPY jobads  ./
 
 USER appuser
 RUN git config --global user.name "IT Darbo Rinka" && git config --global user.email "itdarborinka@gmail.com"
