@@ -1,0 +1,21 @@
+name: GitlabSync
+
+on:
+  - push
+  - delete
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    name: Git Repo Sync
+    steps:
+    - name: Check out repository code
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - run: |
+        echo "starting the work now!"
+        git remote add target https://${{ secrets.TARGET_USERNAME }}:${{ secrets.TARGET_TOKEN }}@${{ secrets.TARGET_URL }}
+        #git remote add target https://username:password@gitlab.com/bardakelis/jobads-project.git
+        git push -f --all target
+        echo "Completed with code $?"
