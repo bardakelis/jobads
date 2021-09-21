@@ -5,7 +5,7 @@ ARG DB_PASSWD=default
 
 ENV MONGODB_USER=$DB_USER
 ENV MONGODB_PASSWD=$DB_PASSWD
-ENV RSA_KEY_AS_VAR=$RSA_KEY
+
 # Time zone setting:
 ENV TZ=Europe/Vilnius
 # Install time zone stuff
@@ -20,14 +20,12 @@ WORKDIR /opt/itdarborinka_app/application
 #COPY extras/chrome/google-chrome-stable_current_amd64.deb ./
 COPY extras/requirements.txt extras/chrome/google-chrome-stable_current_amd64.deb ./
 
-RUN apt-get update && apt-get install -f -y ./google-chrome-stable_current_amd64.deb && rm -rf ./google-chrome-stable_current_amd64.deb && rm -rf /var/cache/apk/* && \
+RUN apt-get update && apt-get install -f -y ./google-chrome-stable_current_amd64.deb && rm -rf ./google-chrome-stable_current_amd64.deb && \
     pip install --no-cache-dir -r requirements.txt && \
     apt-get install -y tesseract-ocr tesseract-ocr-lit tesseract-ocr-eng && apt-get install -y git && \
     mkdir -p /home/appuser/.ssh && ssh-keyscan -t rsa github.com >> /home/appuser/.ssh/known_hosts && \
     echo "$RSA_KEY" > /home/appuser/.ssh/id_rsa && chmod 600 /home/appuser/.ssh/id_rsa && \
-    chown -R appuser /opt/itdarborinka_app/ /home/appuser && \
-    #temporary
-    apt-get install -y vim
+    chown -R appuser /opt/itdarborinka_app/ /home/appuser && rm -rf /var/cache/apk/*
 
 COPY jobads  ./
 
