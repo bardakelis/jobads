@@ -442,9 +442,11 @@ def job_ads_crawler(url_to_crawl):
         job_ad_url = root_url+job_ad_href
         # Get rid of a span tag with class "hide-mobile" as it contains some junk we want to remove, i.e. double dash "--"
         brief_offer.find('span', class_="hide-mobile").decompose()
-        job_location = brief_offer.find('div', class_="vacancy-item__info-main" ).find('span', class_="vacancy-item__locations").text    
+        #job_location = brief_offer.find('div', class_="vacancy-item__info-main" ).find('span', class_="vacancy-item__locations").text    
+        job_location = brief_offer.find('div', class_="vacancy-item__body" ).find('span', class_="vacancy-item__locations").text  
         try:
-            salary_range = brief_offer.find('div', class_="vacancy-item__info" ).find('span', class_="vacancy-item__salary-label").text
+            #salary_range = brief_offer.find('div', class_="vacancy-item__info" ).find('span', class_="vacancy-item__salary-label").text
+            salary_range = brief_offer.find('div', class_="vacancy-item__info-secondary" ).find('span', class_="vacancy-item__salary-label").text
         except:
             salary_range = ''
 
@@ -497,12 +499,14 @@ def job_ads_crawler(url_to_crawl):
             job_ad_position_name = brief_offer.find('span', class_="vacancy-item__title").text  
             print(f'Job ad position name: {job_ad_position_name}')
             # fetching company name 
-            company_name = brief_offer.find('div', class_="vacancy-item__info-main" ).find('a').text    
+            #company_name = brief_offer.find('div', class_="vacancy-item__info-main" ).find('a').text   
+            company_name = brief_offer.find('div', class_="vacancy-item__body" ).find('a').text  
             print(f'company: {company_name}')
 
             # fetching salary range string, which needs further parsing to extract numbers. Some ads contain no salary, hence "try":
             try:
-                salary_range = brief_offer.find('div', class_="vacancy-item__info" ).find('span', class_="vacancy-item__salary-label").text
+                #salary_range = brief_offer.find('div', class_="vacancy-item__info" ).find('span', class_="vacancy-item__salary-label").text
+                salary_range = brief_offer.find('div', class_="vacancy-item__info-secondary" ).find('span', class_="vacancy-item__salary-label").text
             except:
                 salary_range = ''
 
