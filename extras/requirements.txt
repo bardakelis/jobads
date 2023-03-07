@@ -4,7 +4,7 @@ GitPython==3.1.7
 matplotlib==3.0.2
 numpy==1.16.2
 Pillow==5.4.1
-pymongo==4.0.1
+pymongo==4.3.3
 pyocr==0.7.2
 python-dateutil==2.7.3
 PyYAML==5.3
